@@ -8,11 +8,9 @@ public class Flywheel extends SubsystemBase {
 
   public Flywheel(int flywheelMotorID) {
     flywheelMotor = new TalonFX(flywheelMotorID);
-
   }
 
   public void setFlywheelSpeed(double speed) {
     flywheelMotor.set(speed);
   }
-
 }
