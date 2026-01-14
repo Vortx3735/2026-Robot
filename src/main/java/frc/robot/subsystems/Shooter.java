@@ -6,7 +6,7 @@ import com.ctre.phoenix6.hardware.TalonFX;
 import edu.wpi.first.wpilibj2.command.SubsystemBase;
 
 public class Shooter extends SubsystemBase {
-  public final TalonFX flywheelShooterMotor;
+  public static TalonFX flywheelShooterMotor;
 
   public Shooter(int flywheelMotorID) {
     flywheelShooterMotor = new TalonFX(flywheelMotorID);
