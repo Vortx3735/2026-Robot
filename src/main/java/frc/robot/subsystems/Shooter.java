@@ -1,60 +1,38 @@
+//Have Aaron check this
 package frc.robot.subsystems;
 
 import edu.wpi.first.wpilibj2.command.Command;
 import edu.wpi.first.wpilibj2.command.SubsystemBase;
 
-// import stuff up here
-// for example:
-// import com.aaronsFavWebsite.motorLibrary.Motor;
+//My imports so far, apparently build.gradle hasn't been added yet
+import com.ctre.phoenix6.configs.TalonFXConfiguration;
+import com.ctre.phoenix6.hardware.TalonFX;
+import com.ctre.phoenix6.signals.FeedbackSensorSourceValue;
+import com.ctre.phoenix6.signals.NeutralModeValue;
+//Need to add constants? (saw import option)
 
 public class Shooter extends SubsystemBase {
-  /*define objects and variables here (e.g. motors, sensors, variables)
-   *for example:
-   *public final Motor motor1;
-   */
+    public static TalonFX flywheelShooterMotor;
+  
+  public Shooter(int flywheelMotorID) {
+    flywheelShooterMotor = new TalonFX(flywheelMotorID);
 
-  /*initialize subsystem objects in constructor
-   *for good practice, pass in any constants through the constructor
-   */
-  public Shooter(/*take in can ids here  (for example:int motorId)*/ ) {
-    /*initialize motors from port numbers etc.
-     *also send configurations to the motor
-     *for example:
-     *this.motor1 = new Motor(motorId);
-     *motor1.reverse(true)
-     */
+    /*Don't know if we need this yet, just put in cause saw in 2025 elevator code
+
+    configureTalonFX();
+
+    */
   }
 
-  public void exampleMethod() {
-    /*example method for the subsystem
-     *for example, set motor speed, read sensor value, etc.
-     *example:
-     *this.motor1.setSpeed(0.5);
-     */
+  /*This is also part of the stolen code that I have no clue about
+
+  public void configureTalonFX() {
+
   }
 
-  /*an example method that returns a very basic command
-   *only create commands in the subystem if they only utilize methods from the same subystem
-   */
-  public Command exampleMethodCommand() {
-    /*return an inline command
-     *this example uses runOnce, but you can also use run or startEnd depending on your needs
-     */
-    return this.runOnce(
-        () ->
-            // single method goes here
-            // for example:
-            this.exampleMethod());
-  }
+  */
 
-  // an example getter for the motors, sensors,variables, etc. of the subsystem
-  public boolean getSomeValue() {
-    /*return some value from the subsystem
-     *for example:
-     *return this.motor.getSpeed()
-     */
-    return false;
-  }
+  /*Also don't know if I need, saved for later use
 
   @Override
   public void periodic() {
@@ -65,4 +43,6 @@ public class Shooter extends SubsystemBase {
   public void simulationPeriodic() {
     // This method will be called once per scheduler run during simulation
   }
+
+  */
 }
