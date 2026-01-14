@@ -1,19 +1,13 @@
-//Have Aaron check this
+// Have Aaron check this
 package frc.robot.subsystems;
 
-import edu.wpi.first.wpilibj2.command.Command;
+import com.ctre.phoenix6.hardware.TalonFX;
+// Need to add constants? (saw import option)
 import edu.wpi.first.wpilibj2.command.SubsystemBase;
 
-//My imports so far, apparently build.gradle hasn't been added yet
-import com.ctre.phoenix6.configs.TalonFXConfiguration;
-import com.ctre.phoenix6.hardware.TalonFX;
-import com.ctre.phoenix6.signals.FeedbackSensorSourceValue;
-import com.ctre.phoenix6.signals.NeutralModeValue;
-//Need to add constants? (saw import option)
-
 public class Shooter extends SubsystemBase {
-    public static TalonFX flywheelShooterMotor;
-  
+  public static TalonFX flywheelShooterMotor;
+
   public Shooter(int flywheelMotorID) {
     flywheelShooterMotor = new TalonFX(flywheelMotorID);
 
