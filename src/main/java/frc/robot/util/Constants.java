@@ -5,7 +5,7 @@
 // license that can be found in the LICENSE file
 // at the root directory of this project.
 
-package frc.robot;
+package frc.robot.util;
 
 import edu.wpi.first.wpilibj.RobotBase;
 
@@ -28,4 +28,18 @@ public final class Constants {
     /** Replaying from a log file. */
     REPLAY
   }
+
+  public static class OperatorConstants {
+    public static final int kDriverControllerPort = 0;
+  }
+
+  public static class DriveConstants {}
+
+  public static class ShooterConstants {}
+
+  public static class IntakeConstants {}
+
+  public static class ClimberConstants {}
+
+  public static class IndexerConstants {}
 }
