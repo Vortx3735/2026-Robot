@@ -45,6 +45,7 @@ public class RobotContainer {
   // Subsystems
   private final Vision vision;
   private final Drive drive;
+  // private final Intake intake;
   private SwerveDriveSimulation driveSimulation = null;
 
   // Controller
@@ -152,6 +153,9 @@ public class RobotContainer {
             : () ->
                 drive.resetOdometry(new Pose2d(drive.getPose().getTranslation(), new Rotation2d()));
     controller.start().onTrue(Commands.runOnce(resetOdometry).ignoringDisable(true));
+
+    // controller.leftBumper().whileTrue(intake.intakeCommand(0.25)); "intake" object not intialized
+    // yet
   }
 
   /**
