@@ -4,9 +4,8 @@
 
 package frc.robot.subsystems;
 
+import com.ctre.phoenix6.controls.DutyCycleOut;
 import com.ctre.phoenix6.hardware.TalonFX;
-
-
 import edu.wpi.first.wpilibj2.command.SubsystemBase;
 
 // import stuff up here
@@ -18,20 +17,19 @@ public class Indexer extends SubsystemBase {
    *for example:
   public final Motor motor1;
    */
-   private final TalonFX motor;
-
-  
+  private final TalonFX motor;
+  private final DutyCycleOut dutyCycle = new DutyCycleOut(0);
 
   /*initialize subsystem objects in constructor
    *for good practice, pass in any constants through the constructor
    */
   public Indexer(int motorId) {
-    motor=new TalonFX(motorId);
-    
+    motor = new TalonFX(motorId);
   }
 
   public void setSpeed(double speed) {
-    this.motor.set(speed);
+    dutyCycle.Output = speed;
+    motor.setControl(dutyCycle);
     /*example method for the subsystem
      *for example, set motor speed, read sensor value, etc.
      *example:
@@ -39,14 +37,18 @@ public class Indexer extends SubsystemBase {
      */
   }
 
+  public void stop() {
+    dutyCycle.Output = 0;
+    motor.setControl(dutyCycle);
+  }
   /*an example method that returns a very basic command
    *only create commands in the subystem if they only utilize methods from the same subystem
    */
   /*public Command exampleMethodCommand() {
-    /*return an inline command
-     *this example uses runOnce, but you can also use run or startEnd depending on your needs
-     */
-    /*return this.runOnce(
+  /*return an inline command
+   *this example uses runOnce, but you can also use run or startEnd depending on your needs
+   */
+  /*return this.runOnce(
         () ->
             // single method goes here
             // for example:

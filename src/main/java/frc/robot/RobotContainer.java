@@ -15,6 +15,7 @@ import edu.wpi.first.wpilibj.XboxController;
 import edu.wpi.first.wpilibj2.command.Command;
 import edu.wpi.first.wpilibj2.command.Commands;
 import edu.wpi.first.wpilibj2.command.button.CommandGenericHID;
+import frc.robot.subsystems.Indexer;
 import frc.robot.subsystems.drive.DemoDrive;
 import frc.robot.subsystems.vision.Vision;
 import frc.robot.subsystems.vision.VisionIO;
@@ -32,7 +33,7 @@ public class RobotContainer {
 
   private final DemoDrive drive = new DemoDrive(); // Demo drive subsystem, sim only
   private final CommandGenericHID keyboard = new CommandGenericHID(0); // Keyboard 0 on port 0
-
+  private final Indexer indexer = new Indexer(15);
   /** The container for the robot. Contains subsystems, OI devices, and commands. */
   public RobotContainer() {
     switch (Constants.currentMode) {
@@ -100,6 +101,10 @@ public class RobotContainer {
                   drive.run(0.0, aimController.calculate(vision.getTargetX(0).getRadians()));
                 },
                 drive));
+    keyboard
+        .button(2)
+        .whileTrue(Commands.run(() -> indexer.setSpeed(0.6), indexer))
+        .onFalse(Commands.runOnce(indexer::stop, indexer));
   }
 
   /**
