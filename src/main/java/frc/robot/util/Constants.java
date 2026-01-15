@@ -30,4 +30,8 @@ public class Constants {
   public static class ClimberConstants {}
 
   public static class IndexerConstants {}
+
+  public static class TurretConstants {
+    public static final int turretId = 1;
+  }
 }

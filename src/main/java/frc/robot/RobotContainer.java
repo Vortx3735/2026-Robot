@@ -28,6 +28,7 @@ import edu.wpi.first.wpilibj2.command.button.CommandXboxController;
 import edu.wpi.first.wpilibj2.command.sysid.SysIdRoutine;
 import frc.robot.commands.*;
 import frc.robot.generated.TunerConstants;
+import frc.robot.subsystems.*;
 import frc.robot.subsystems.drive.*;
 import frc.robot.subsystems.vision.*;
 import frc.robot.util.*;
@@ -48,6 +49,7 @@ public class RobotContainer {
   // Subsystems
   private final Vision vision;
   private final Drive drive;
+  private final Turret turret = new Turret(Constants.TurretConstants.turretId);
   private SwerveDriveSimulation driveSimulation = null;
 
   // Controller
@@ -111,9 +113,6 @@ public class RobotContainer {
         break;
     }
 
-    public static final Turret turret = new Turret(1);
-    turret.setTurretSpeed(1);
-
     // Set up auto routines
     autoChooser = new LoggedDashboardChooser<>("Auto Choices", AutoBuilder.buildAutoChooser());
 
@@ -160,7 +159,7 @@ public class RobotContainer {
     // autoalign
     //                         .getClosestReefAprilTag()
     //                         .getRotation()));
-
+    controller.a().whileTrue(turret.moveTurretRight(1));
     // Reset gyro / odometry
     final Runnable resetOdometry =
         Constants.currentMode == Constants.Mode.SIM
