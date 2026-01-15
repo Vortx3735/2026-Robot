@@ -4,7 +4,9 @@
 
 package frc.robot.subsystems;
 
-import edu.wpi.first.wpilibj2.command.Command;
+import com.ctre.phoenix6.hardware.TalonFX;
+
+
 import edu.wpi.first.wpilibj2.command.SubsystemBase;
 
 // import stuff up here
@@ -14,42 +16,42 @@ import edu.wpi.first.wpilibj2.command.SubsystemBase;
 public class Indexer extends SubsystemBase {
   /*define objects and variables here (e.g. motors, sensors, variables)
    *for example:
-   *public final Motor motor1;
+  public final Motor motor1;
    */
+   private final TalonFX motor;
+
+  
 
   /*initialize subsystem objects in constructor
    *for good practice, pass in any constants through the constructor
    */
-  public Indexer(/*take in can ids here  (for example:int motorId)*/ ) {
-    /*initialize motors from port numbers etc.
-     *also send configurations to the motor
-     *for example:
-     *this.motor1 = new Motor(motorId);
-     *motor1.reverse(true)
-     */
+  public Indexer(int motorId) {
+    motor=new TalonFX(motorId);
+    
   }
 
-  public void exampleMethod() {
+  public void setSpeed(double speed) {
+    this.motor.set(speed);
     /*example method for the subsystem
      *for example, set motor speed, read sensor value, etc.
      *example:
-     *this.motor1.setSpeed(0.5);
+     *this.motor1.setSpeed(0.);
      */
   }
 
   /*an example method that returns a very basic command
    *only create commands in the subystem if they only utilize methods from the same subystem
    */
-  public Command exampleMethodCommand() {
+  /*public Command exampleMethodCommand() {
     /*return an inline command
      *this example uses runOnce, but you can also use run or startEnd depending on your needs
      */
-    return this.runOnce(
+    /*return this.runOnce(
         () ->
             // single method goes here
             // for example:
             this.exampleMethod());
-  }
+  }*/
 
   // an example getter for the motors, sensors,variables, etc. of the subsystem
   public boolean getSomeValue() {
