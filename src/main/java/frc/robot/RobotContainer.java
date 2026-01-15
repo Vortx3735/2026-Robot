@@ -28,6 +28,7 @@ import frc.robot.commands.*;
 import frc.robot.generated.TunerConstants;
 import frc.robot.subsystems.drive.*;
 import frc.robot.subsystems.vision.*;
+import frc.robot.subsystems.Intake;
 import frc.robot.util.*;
 import org.ironmaple.simulation.SimulatedArena;
 import org.ironmaple.simulation.drivesims.SwerveDriveSimulation;
@@ -154,8 +155,8 @@ public class RobotContainer {
                 drive.resetOdometry(new Pose2d(drive.getPose().getTranslation(), new Rotation2d()));
     controller.start().onTrue(Commands.runOnce(resetOdometry).ignoringDisable(true));
 
-    // controller.leftBumper().whileTrue(intake.intakeCommand(0.25)); "intake" object not intialized
-    // yet
+    // controller.leftBumper().whileTrue(intake.intakeCommand(0.25));
+    // controller.leftBumper().onFalse(intake.stopIntakeCommand());
   }
 
   /**
