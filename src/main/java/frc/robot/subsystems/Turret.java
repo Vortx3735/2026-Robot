@@ -5,9 +5,8 @@ import edu.wpi.first.wpilibj2.command.Command;
 import edu.wpi.first.wpilibj2.command.SubsystemBase;
 
 public class Turret extends SubsystemBase {
-  double turretPosition;
-
   public static TalonFX turretMotor;
+  private double turretPosition;
 
   public Turret(int turretMotorID) {
     turretMotor = new TalonFX(turretMotorID);
@@ -29,6 +28,14 @@ public class Turret extends SubsystemBase {
     } else {
       setTurretSpeed(0);
     }
+  }
+
+  public double getTurretPosition() {
+    return turretPosition;
+  }
+
+  public void stop() {
+    turretMotor.set(0);
   }
 
   @Override

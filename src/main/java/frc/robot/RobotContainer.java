@@ -50,10 +50,11 @@ public class RobotContainer {
   private final Vision vision;
   private final Drive drive;
   private final Turret turret = new Turret(Constants.TurretConstants.turretId);
+  private final Flywheel flywheel = new Flywheel(Constants.FlywheelConstants.flywheelId);
   private SwerveDriveSimulation driveSimulation = null;
 
   // Controller
-  private final CommandXboxController controller = new CommandXboxController(0);
+  private final VorTXControllerXbox controller = new VorTXControllerXbox(0);
 
   // Dashboard inputs
   private final LoggedDashboardChooser<Command> autoChooser;
@@ -159,7 +160,9 @@ public class RobotContainer {
     // autoalign
     //                         .getClosestReefAprilTag()
     //                         .getRotation()));
-    controller.a().whileTrue(turret.moveTurretRight(1));
+    controller.rt.whileTrue(flywheel.shootCommand());
+    controller.povRight.whileTrue(turret.moveTurretRight(1));
+    controller.povLeft.whileTrue(turret.moveTurretRight(-1));
     // Reset gyro / odometry
     final Runnable resetOdometry =
         Constants.currentMode == Constants.Mode.SIM

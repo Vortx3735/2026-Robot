@@ -23,7 +23,9 @@ public class Constants {
 
   public static class DriveConstants {}
 
-  public static class ShooterConstants {}
+  public static class FlywheelConstants {
+    public static final int flywheelId = 1;
+  }
 
   public static class IntakeConstants {}
 
