@@ -11,9 +11,18 @@ import edu.wpi.first.wpilibj2.command.SubsystemBase;
 public class Intake extends SubsystemBase {
 
   private final TalonFX motor;
+  private double speed = 0.25;
 
   public Intake(int motorId) {
     motor = new TalonFX(motorId);
+  }
+
+  public double getSpeed() {
+    return speed;
+  }
+
+  public void setSpeed(double speed) {
+    this.speed = speed;
   }
 
   public void stopIntake() {
@@ -21,16 +30,12 @@ public class Intake extends SubsystemBase {
     motor.set(0);
   }
 
-  public void intake(double speed) {
+  public void intake() {
     motor.set(speed);
   }
 
-  public Command intakeCommand(double speed) {
-    return this.run(() -> this.intake(speed));
-  }
-
-  public Command stopIntakeCommand() {
-    return this.runOnce(() -> this.stopIntake());
+  public Command intakeCommand() {
+    return this.run(() -> this.intake());
   }
 
   @Override
