@@ -38,13 +38,13 @@ public class Constants {
   }
 
   public static class OperatorConstants {
-    public static final int kDriverControllerPort = 0;
+    public static final int DRIVER_CONTROLLER_PORT = 0;
   }
 
   public static class DriveConstants {}
 
   public static class FlywheelConstants {
-    public static final int flywheelId = 1;
+    public static final int FLYWHEEL_MOTOR_ID = 1;
   }
 
   public static class IntakeConstants {
@@ -56,7 +56,7 @@ public class Constants {
   }
 
   public static class TurretConstants {
-    public static final int turretId = 1;
+    public static final int TURRET_MOTOR_ID = 1;
   }
 
   public static class IndexerConstants {

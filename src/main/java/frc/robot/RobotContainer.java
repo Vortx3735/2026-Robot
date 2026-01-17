@@ -47,8 +47,8 @@ public class RobotContainer {
   public final Vision vision;
   public final Drive drive;
   public final Climber climber = new Climber(Constants.ClimberConstants.CLIMBER_MOTOR_ID);
-  public final Turret turret = new Turret(Constants.TurretConstants.turretId);
-  public final Flywheel flywheel = new Flywheel(Constants.FlywheelConstants.flywheelId);
+  public final Turret turret = new Turret(Constants.TurretConstants.TURRET_MOTOR_ID);
+  public final Flywheel flywheel = new Flywheel(Constants.FlywheelConstants.FLYWHEEL_MOTOR_ID);
   public final Intake intake = new Intake(Constants.IntakeConstants.INTAKE_MOTOR_ID);
   public final Indexer indexer = new Indexer(Constants.IndexerConstants.INDEXER_MOTOR_ID);
 
@@ -169,11 +169,11 @@ public class RobotContainer {
     controller.rt.whileTrue(flywheel.shootCommand());
     controller.povRight.whileTrue(turret.moveTurretRight(1));
     controller.povLeft.whileTrue(turret.moveTurretRight(-1));
-    controller.leftTrigger().whileTrue(intake.intakeCommand());
+    controller.lt.whileTrue(intake.intakeCommand());
     controller.yButton.whileTrue(climber.upCommand());
     controller.bButton.whileTrue(climber.downCommand());
-    controller.rightTrigger().whileTrue(indexer.runCommand(0.6));
-    controller.a().whileTrue(indexer.runCommand(-0.6));
+    controller.rt.whileTrue(indexer.runCommand(0.6));
+    controller.aButton.whileTrue(indexer.runCommand(-0.6));
   }
 
   /**
