@@ -26,22 +26,10 @@ import edu.wpi.first.wpilibj2.command.sysid.SysIdRoutine;
 import frc.robot.commands.DefaultIntakeCommand;
 import frc.robot.commands.DriveCommands;
 import frc.robot.generated.TunerConstants;
-import frc.robot.subsystems.Indexer;
-import frc.robot.subsystems.Intake;
-import frc.robot.subsystems.drive.Drive;
-import frc.robot.subsystems.drive.GyroIO;
-import frc.robot.subsystems.drive.GyroIOPigeon2;
-import frc.robot.subsystems.drive.GyroIOSim;
-import frc.robot.subsystems.drive.ModuleIO;
-import frc.robot.subsystems.drive.ModuleIOSim;
-import frc.robot.subsystems.drive.ModuleIOTalonFX;
-import frc.robot.subsystems.vision.Vision;
-import frc.robot.subsystems.vision.VisionConstants;
-import frc.robot.subsystems.vision.VisionIO;
-import frc.robot.subsystems.vision.VisionIOPhotonVision;
-import frc.robot.subsystems.vision.VisionIOPhotonVisionSim;
-import frc.robot.util.Constants;
-import frc.robot.util.Constants.IntakeConstants;
+import frc.robot.subsystems.*;
+import frc.robot.subsystems.drive.*;
+import frc.robot.subsystems.vision.*;
+import frc.robot.util.*;
 import org.ironmaple.simulation.SimulatedArena;
 import org.ironmaple.simulation.drivesims.SwerveDriveSimulation;
 import org.littletonrobotics.junction.Logger;
@@ -58,7 +46,9 @@ public class RobotContainer {
   // Subsystems
   private final Vision vision;
   private final Drive drive;
-  public static final Intake intake = new Intake(IntakeConstants.INTAKE_MOTOR_ID);
+  private final Turret turret = new Turret(Constants.TurretConstants.turretId);
+  private final Flywheel flywheel = new Flywheel(Constants.FlywheelConstants.flywheelId);
+  public static final Intake intake = new Intake(Constants.IntakeConstants.INTAKE_MOTOR_ID);
   private final Indexer indexer = new Indexer(15);
 
   private SwerveDriveSimulation driveSimulation = null;
@@ -164,6 +154,7 @@ public class RobotContainer {
             () -> -controller.getLeftY(),
             () -> -controller.getLeftX(),
             () -> -controller.getRightX()));
+
     // Reset gyro / odometry
     final Runnable resetOdometry =
         Constants.currentMode == Constants.Mode.SIM
@@ -173,6 +164,9 @@ public class RobotContainer {
     controller.start().onTrue(Commands.runOnce(resetOdometry).ignoringDisable(true));
 
     // Set bindings
+    controller.rt.whileTrue(flywheel.shootCommand());
+    controller.povRight.whileTrue(turret.moveTurretRight(1));
+    controller.povLeft.whileTrue(turret.moveTurretRight(-1));
     controller.leftTrigger().whileTrue(intake.intakeCommand());
     controller.rightTrigger().whileTrue(indexer.runCommand(0.6));
     controller.a().whileTrue(indexer.runCommand(-0.6));
