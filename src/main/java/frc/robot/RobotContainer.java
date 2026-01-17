@@ -13,19 +13,18 @@
 
 package frc.robot;
 
-import static edu.wpi.first.units.Units.*;
 import static frc.robot.subsystems.vision.VisionConstants.*;
 
 import com.pathplanner.lib.auto.AutoBuilder;
 import edu.wpi.first.math.geometry.Pose2d;
 import edu.wpi.first.math.geometry.Rotation2d;
-import edu.wpi.first.math.geometry.Translation2d;
 import edu.wpi.first.wpilibj.GenericHID;
 import edu.wpi.first.wpilibj.XboxController;
 import edu.wpi.first.wpilibj2.command.Command;
 import edu.wpi.first.wpilibj2.command.Commands;
 import edu.wpi.first.wpilibj2.command.sysid.SysIdRoutine;
-import frc.robot.commands.*;
+import frc.robot.commands.DefaultIntakeCommand;
+import frc.robot.commands.DriveCommands;
 import frc.robot.generated.TunerConstants;
 import frc.robot.subsystems.*;
 import frc.robot.subsystems.drive.*;
@@ -33,7 +32,6 @@ import frc.robot.subsystems.vision.*;
 import frc.robot.util.*;
 import org.ironmaple.simulation.SimulatedArena;
 import org.ironmaple.simulation.drivesims.SwerveDriveSimulation;
-import org.ironmaple.simulation.seasonspecific.reefscape2025.ReefscapeCoralOnFly;
 import org.littletonrobotics.junction.Logger;
 import org.littletonrobotics.junction.networktables.LoggedDashboardChooser;
 
@@ -50,6 +48,9 @@ public class RobotContainer {
   private final Drive drive;
   private final Turret turret = new Turret(Constants.TurretConstants.turretId);
   private final Flywheel flywheel = new Flywheel(Constants.FlywheelConstants.flywheelId);
+  public static final Intake intake = new Intake(IntakeConstants.INTAKE_MOTOR_ID);
+  private final Indexer indexer = new Indexer(15);
+
   private SwerveDriveSimulation driveSimulation = null;
 
   // Controller
@@ -57,9 +58,12 @@ public class RobotContainer {
 
   // Dashboard inputs
   private final LoggedDashboardChooser<Command> autoChooser;
-
   /** The container for the robot. Contains subsystems, OI devices, and commands. */
   public RobotContainer() {
+    // Default Commands
+    intake.setDefaultCommand(new DefaultIntakeCommand(intake));
+    indexer.setDefaultCommand(indexer.stopCommand());
+
     switch (Constants.currentMode) {
       case REAL:
         // Real robot, instantiate hardware IO implementations
@@ -150,18 +154,8 @@ public class RobotContainer {
             () -> -controller.getLeftY(),
             () -> -controller.getLeftX(),
             () -> -controller.getRightX()));
-    // TODO: go to nearest apriltag when a is pressed
-    // snap to closest apriltag while holding x
-    // controller
-    //         .x()
-    //         .whileTrue(DriveCommands.joystickDriveAtAngle(
-    //                 drive, () -> -controller.getLeftY(), () -> -controller.getLeftX(), () ->
-    // autoalign
-    //                         .getClosestReefAprilTag()
-    //                         .getRotation()));
-    controller.rt.whileTrue(flywheel.shootCommand());
-    controller.povRight.whileTrue(turret.moveTurretRight(1));
-    controller.povLeft.whileTrue(turret.moveTurretRight(-1));
+
+    
     // Reset gyro / odometry
     final Runnable resetOdometry =
         Constants.currentMode == Constants.Mode.SIM
@@ -170,44 +164,13 @@ public class RobotContainer {
                 drive.resetOdometry(new Pose2d(drive.getPose().getTranslation(), new Rotation2d()));
     controller.start().onTrue(Commands.runOnce(resetOdometry).ignoringDisable(true));
 
-    // Example Coral Placement Code
-    // TODO: delete these code for your own project
-    if (Constants.currentMode == Constants.Mode.SIM) {
-      // L4 placement
-      controller
-          .y()
-          .onTrue(
-              Commands.runOnce(
-                  () ->
-                      SimulatedArena.getInstance()
-                          .addGamePieceProjectile(
-                              new ReefscapeCoralOnFly(
-                                  driveSimulation.getSimulatedDriveTrainPose().getTranslation(),
-                                  new Translation2d(0.4, 0),
-                                  driveSimulation
-                                      .getDriveTrainSimulatedChassisSpeedsFieldRelative(),
-                                  driveSimulation.getSimulatedDriveTrainPose().getRotation(),
-                                  Meters.of(2),
-                                  MetersPerSecond.of(1.5),
-                                  Degrees.of(-80)))));
-      // L3 placement
-      controller
-          .b()
-          .onTrue(
-              Commands.runOnce(
-                  () ->
-                      SimulatedArena.getInstance()
-                          .addGamePieceProjectile(
-                              new ReefscapeCoralOnFly(
-                                  driveSimulation.getSimulatedDriveTrainPose().getTranslation(),
-                                  new Translation2d(0.4, 0),
-                                  driveSimulation
-                                      .getDriveTrainSimulatedChassisSpeedsFieldRelative(),
-                                  driveSimulation.getSimulatedDriveTrainPose().getRotation(),
-                                  Meters.of(1.35),
-                                  MetersPerSecond.of(1.5),
-                                  Degrees.of(-60)))));
-    }
+    // Set bindings
+    controller.rt.whileTrue(flywheel.shootCommand());
+    controller.povRight.whileTrue(turret.moveTurretRight(1));
+    controller.povLeft.whileTrue(turret.moveTurretRight(-1));
+    controller.leftTrigger().whileTrue(intake.intakeCommand());
+    controller.rightTrigger().whileTrue(indexer.runCommand(0.6));
+    controller.a().whileTrue(indexer.runCommand(-0.6));
   }
 
   /**
@@ -216,7 +179,7 @@ public class RobotContainer {
    * @return the command to run in autonomous
    */
   public Command getAutonomousCommand() {
-    return autoChooser.get();
+    return Commands.none();
   }
 
   public void resetSimulation() {
