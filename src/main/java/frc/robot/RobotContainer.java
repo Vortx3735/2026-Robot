@@ -48,7 +48,7 @@ public class RobotContainer {
   private final Drive drive;
   private final Turret turret = new Turret(Constants.TurretConstants.turretId);
   private final Flywheel flywheel = new Flywheel(Constants.FlywheelConstants.flywheelId);
-  public static final Intake intake = new Intake(IntakeConstants.INTAKE_MOTOR_ID);
+  public static final Intake intake = new Intake(Constants.IntakeConstants.INTAKE_MOTOR_ID);
   private final Indexer indexer = new Indexer(15);
 
   private SwerveDriveSimulation driveSimulation = null;
@@ -155,7 +155,6 @@ public class RobotContainer {
             () -> -controller.getLeftX(),
             () -> -controller.getRightX()));
 
-    
     // Reset gyro / odometry
     final Runnable resetOdometry =
         Constants.currentMode == Constants.Mode.SIM

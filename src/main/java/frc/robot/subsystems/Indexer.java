@@ -5,10 +5,9 @@
 package frc.robot.subsystems;
 
 import com.ctre.phoenix6.hardware.TalonFX;
-import edu.wpi.first.wpilibj2.command.SubsystemBase;
 import edu.wpi.first.wpilibj2.command.Command;
 import edu.wpi.first.wpilibj2.command.RunCommand;
-
+import edu.wpi.first.wpilibj2.command.SubsystemBase;
 
 // import stuff up here
 // for example:
@@ -20,7 +19,6 @@ public class Indexer extends SubsystemBase {
   public final Motor motor1;
    */
   private final TalonFX motor;
-  
 
   /*initialize subsystem objects in constructor
    *for good practice, pass in any constants through the constructor
@@ -37,11 +35,11 @@ public class Indexer extends SubsystemBase {
     motor.set(0);
   }
 
-
   public Command runCommand(double speed) {
     return new RunCommand(() -> run(speed), this);
   }
-  public Command stopCommand(){
+
+  public Command stopCommand() {
     return new RunCommand(() -> stop(), this);
   }
 
@@ -55,4 +53,3 @@ public class Indexer extends SubsystemBase {
     // This method will be called once per scheduler run during simulation
   }
 }
-

@@ -56,7 +56,7 @@ public class Constants {
   public static class TurretConstants {
     public static final int turretId = 1;
   }
-  
+
   public static class IndexerConstants {
     public static final int INDEXER_MOTOR_ID = 17;
   }
