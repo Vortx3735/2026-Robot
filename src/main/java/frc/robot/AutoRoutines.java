@@ -33,10 +33,10 @@ public class AutoRoutines {
                 // multiple arguments, you need commas.
                 exampleTraj.resetOdometry(),
                 exampleTraj.cmd(), // Schedule the trajectory (make the robot move on the trajectory)
-                RobotContainer.exampleSubsystem.exampleMethodCommand(),
+                RobotContainer.indexer.runCommand(1),
                 // Run commands in parallel (at the same time)
                 Commands.parallel(
-                    RobotContainer.exampleSubsystem.exampleMethodCommand(),
+                    RobotContainer.climber.upCommand(),
                     RobotContainer.intake.intakeCommand())));
 
     return routine;

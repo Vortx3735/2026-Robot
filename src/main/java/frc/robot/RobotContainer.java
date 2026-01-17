@@ -46,11 +46,11 @@ public class RobotContainer {
   // Subsystems
   public final Vision vision;
   public final Drive drive;
-  public final Climber climber = new Climber(Constants.ClimberConstants.CLIMBER_MOTOR_ID);
-  public final Turret turret = new Turret(Constants.TurretConstants.TURRET_MOTOR_ID);
-  public final Flywheel flywheel = new Flywheel(Constants.FlywheelConstants.FLYWHEEL_MOTOR_ID);
-  public final Intake intake = new Intake(Constants.IntakeConstants.INTAKE_MOTOR_ID);
-  public final Indexer indexer = new Indexer(Constants.IndexerConstants.INDEXER_MOTOR_ID);
+  public static final Climber climber = new Climber(Constants.ClimberConstants.CLIMBER_MOTOR_ID);
+  public static final Turret turret = new Turret(Constants.TurretConstants.TURRET_MOTOR_ID);
+  public static final Flywheel flywheel = new Flywheel(Constants.FlywheelConstants.FLYWHEEL_MOTOR_ID);
+  public static final Intake intake = new Intake(Constants.IntakeConstants.INTAKE_MOTOR_ID);
+  public static final Indexer indexer = new Indexer(Constants.IndexerConstants.INDEXER_MOTOR_ID);
 
   private SwerveDriveSimulation driveSimulation = null;
 
