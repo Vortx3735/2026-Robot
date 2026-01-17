@@ -45,7 +45,9 @@ public class Constants {
 
   public static class ShooterConstants {}
 
-  public static class IntakeConstants {}
+  public static class IntakeConstants {
+    public static final int INTAKE_MOTOR_ID = 13;
+  }
 
   public static class ClimberConstants {}
 

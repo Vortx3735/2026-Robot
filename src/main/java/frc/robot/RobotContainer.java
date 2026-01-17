@@ -26,9 +26,12 @@ import edu.wpi.first.wpilibj2.command.Commands;
 import edu.wpi.first.wpilibj2.command.sysid.SysIdRoutine;
 import frc.robot.commands.*;
 import frc.robot.generated.TunerConstants;
+import frc.robot.subsystems.Intake;
 import frc.robot.subsystems.drive.*;
 import frc.robot.subsystems.vision.*;
 import frc.robot.util.*;
+import frc.robot.util.Constants;
+import frc.robot.util.Constants.IntakeConstants;
 import org.ironmaple.simulation.SimulatedArena;
 import org.ironmaple.simulation.drivesims.SwerveDriveSimulation;
 import org.littletonrobotics.junction.Logger;
@@ -45,6 +48,7 @@ public class RobotContainer {
   // Subsystems
   private final Vision vision;
   private final Drive drive;
+  public static final Intake intake = new Intake(IntakeConstants.INTAKE_MOTOR_ID);
   private SwerveDriveSimulation driveSimulation = null;
 
   // Controller
@@ -55,6 +59,9 @@ public class RobotContainer {
 
   /** The container for the robot. Contains subsystems, OI devices, and commands. */
   public RobotContainer() {
+    // Default Commands
+    intake.setDefaultCommand(new DefaultIntakeCommand(intake));
+
     switch (Constants.currentMode) {
       case REAL:
         // Real robot, instantiate hardware IO implementations
@@ -152,6 +159,9 @@ public class RobotContainer {
             : () ->
                 drive.resetOdometry(new Pose2d(drive.getPose().getTranslation(), new Rotation2d()));
     controller.start().onTrue(Commands.runOnce(resetOdometry).ignoringDisable(true));
+
+    // Set bindings
+    controller.leftTrigger().whileTrue(intake.intakeCommand());
   }
 
   /**
