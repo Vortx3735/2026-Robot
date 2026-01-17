@@ -44,12 +44,13 @@ import org.littletonrobotics.junction.networktables.LoggedDashboardChooser;
 public class RobotContainer {
 
   // Subsystems
-  private final Vision vision;
-  private final Drive drive;
-  private final Turret turret = new Turret(Constants.TurretConstants.turretId);
-  private final Flywheel flywheel = new Flywheel(Constants.FlywheelConstants.flywheelId);
-  public static final Intake intake = new Intake(Constants.IntakeConstants.INTAKE_MOTOR_ID);
-  private final Indexer indexer = new Indexer(15);
+  public final Vision vision;
+  public final Drive drive;
+  public final Climber climber = new Climber(Constants.ClimberConstants.CLIMBER_MOTOR_ID);
+  public final Turret turret = new Turret(Constants.TurretConstants.turretId);
+  public final Flywheel flywheel = new Flywheel(Constants.FlywheelConstants.flywheelId);
+  public final Intake intake = new Intake(Constants.IntakeConstants.INTAKE_MOTOR_ID);
+  public final Indexer indexer = new Indexer(Constants.IndexerConstants.INDEXER_MOTOR_ID);
 
   private SwerveDriveSimulation driveSimulation = null;
 
@@ -62,6 +63,7 @@ public class RobotContainer {
   public RobotContainer() {
     // Default Commands
     intake.setDefaultCommand(new DefaultIntakeCommand(intake));
+    climber.setDefaultCommand(climber.stopCommand());
     indexer.setDefaultCommand(indexer.stopCommand());
 
     switch (Constants.currentMode) {
@@ -168,6 +170,8 @@ public class RobotContainer {
     controller.povRight.whileTrue(turret.moveTurretRight(1));
     controller.povLeft.whileTrue(turret.moveTurretRight(-1));
     controller.leftTrigger().whileTrue(intake.intakeCommand());
+    controller.yButton.whileTrue(climber.upCommand());
+    controller.bButton.whileTrue(climber.downCommand());
     controller.rightTrigger().whileTrue(indexer.runCommand(0.6));
     controller.a().whileTrue(indexer.runCommand(-0.6));
   }
