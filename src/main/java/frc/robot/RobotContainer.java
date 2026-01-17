@@ -13,7 +13,6 @@
 
 package frc.robot;
 
-import static edu.wpi.first.units.Units.*;
 import static frc.robot.subsystems.vision.VisionConstants.*;
 
 import com.pathplanner.lib.auto.AutoBuilder;
@@ -24,15 +23,13 @@ import edu.wpi.first.wpilibj.XboxController;
 import edu.wpi.first.wpilibj2.command.Command;
 import edu.wpi.first.wpilibj2.command.Commands;
 import edu.wpi.first.wpilibj2.command.sysid.SysIdRoutine;
-import frc.robot.commands.*;
+import frc.robot.commands.DefaultIntakeCommand;
+import frc.robot.commands.DriveCommands;
 import frc.robot.generated.TunerConstants;
-import frc.robot.subsystems.Climber;
-import frc.robot.subsystems.Intake;
+import frc.robot.subsystems.*;
 import frc.robot.subsystems.drive.*;
 import frc.robot.subsystems.vision.*;
 import frc.robot.util.*;
-import frc.robot.util.Constants;
-import frc.robot.util.Constants.IntakeConstants;
 import org.ironmaple.simulation.SimulatedArena;
 import org.ironmaple.simulation.drivesims.SwerveDriveSimulation;
 import org.littletonrobotics.junction.Logger;
@@ -47,10 +44,13 @@ import org.littletonrobotics.junction.networktables.LoggedDashboardChooser;
 public class RobotContainer {
 
   // Subsystems
-  private final Vision vision;
-  private final Drive drive;
-  public static final Intake intake = new Intake(IntakeConstants.INTAKE_MOTOR_ID);
-  public static final Climber climber = new Climber(Constants.ClimberConstants.CLIMBER_MOTOR_ID);
+  public final Vision vision;
+  public final Drive drive;
+  public final Climber climber = new Climber(Constants.ClimberConstants.CLIMBER_MOTOR_ID);
+  public final Turret turret = new Turret(Constants.TurretConstants.turretId);
+  public final Flywheel flywheel = new Flywheel(Constants.FlywheelConstants.flywheelId);
+  public final Intake intake = new Intake(Constants.IntakeConstants.INTAKE_MOTOR_ID);
+  public final Indexer indexer = new Indexer(Constants.IndexerConstants.INDEXER_MOTOR_ID);
 
   private SwerveDriveSimulation driveSimulation = null;
 
@@ -59,12 +59,12 @@ public class RobotContainer {
 
   // Dashboard inputs
   private final LoggedDashboardChooser<Command> autoChooser;
-
   /** The container for the robot. Contains subsystems, OI devices, and commands. */
   public RobotContainer() {
     // Default Commands
     intake.setDefaultCommand(new DefaultIntakeCommand(intake));
     climber.setDefaultCommand(climber.stopCommand());
+    indexer.setDefaultCommand(indexer.stopCommand());
 
     switch (Constants.currentMode) {
       case REAL:
@@ -156,6 +156,7 @@ public class RobotContainer {
             () -> -controller.getLeftY(),
             () -> -controller.getLeftX(),
             () -> -controller.getRightX()));
+
     // Reset gyro / odometry
     final Runnable resetOdometry =
         Constants.currentMode == Constants.Mode.SIM
@@ -165,9 +166,14 @@ public class RobotContainer {
     controller.start().onTrue(Commands.runOnce(resetOdometry).ignoringDisable(true));
 
     // Set bindings
+    controller.rt.whileTrue(flywheel.shootCommand());
+    controller.povRight.whileTrue(turret.moveTurretRight(1));
+    controller.povLeft.whileTrue(turret.moveTurretRight(-1));
     controller.leftTrigger().whileTrue(intake.intakeCommand());
     controller.yButton.whileTrue(climber.upCommand());
     controller.bButton.whileTrue(climber.downCommand());
+    controller.rightTrigger().whileTrue(indexer.runCommand(0.6));
+    controller.a().whileTrue(indexer.runCommand(-0.6));
   }
 
   /**
@@ -176,7 +182,7 @@ public class RobotContainer {
    * @return the command to run in autonomous
    */
   public Command getAutonomousCommand() {
-    return autoChooser.get();
+    return Commands.none();
   }
 
   public void resetSimulation() {

@@ -43,7 +43,9 @@ public class Constants {
 
   public static class DriveConstants {}
 
-  public static class ShooterConstants {}
+  public static class FlywheelConstants {
+    public static final int flywheelId = 1;
+  }
 
   public static class IntakeConstants {
     public static final int INTAKE_MOTOR_ID = 13;
@@ -53,5 +55,11 @@ public class Constants {
     public static final int CLIMBER_MOTOR_ID = 69;
   }
 
-  public static class IndexerConstants {}
+  public static class TurretConstants {
+    public static final int turretId = 1;
+  }
+
+  public static class IndexerConstants {
+    public static final int INDEXER_MOTOR_ID = 17;
+  }
 }
