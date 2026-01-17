@@ -26,6 +26,7 @@ import edu.wpi.first.wpilibj2.command.Commands;
 import edu.wpi.first.wpilibj2.command.sysid.SysIdRoutine;
 import frc.robot.commands.*;
 import frc.robot.generated.TunerConstants;
+import frc.robot.subsystems.Climber;
 import frc.robot.subsystems.Intake;
 import frc.robot.subsystems.drive.*;
 import frc.robot.subsystems.vision.*;
@@ -49,6 +50,8 @@ public class RobotContainer {
   private final Vision vision;
   private final Drive drive;
   public static final Intake intake = new Intake(IntakeConstants.INTAKE_MOTOR_ID);
+  public static final Climber climber = new Climber(Constants.ClimberConstants.CLIMBER_MOTOR_ID);
+
   private SwerveDriveSimulation driveSimulation = null;
 
   // Controller
@@ -61,6 +64,7 @@ public class RobotContainer {
   public RobotContainer() {
     // Default Commands
     intake.setDefaultCommand(new DefaultIntakeCommand(intake));
+    climber.setDefaultCommand(climber.stopCommand());
 
     switch (Constants.currentMode) {
       case REAL:
@@ -162,6 +166,8 @@ public class RobotContainer {
 
     // Set bindings
     controller.leftTrigger().whileTrue(intake.intakeCommand());
+    controller.yButton.whileTrue(climber.upCommand());
+    controller.bButton.whileTrue(climber.downCommand());
   }
 
   /**
