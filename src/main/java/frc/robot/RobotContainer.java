@@ -72,6 +72,7 @@ public class RobotContainer {
   public RobotContainer() {
     // Default Commands
     intake.setDefaultCommand(new DefaultIntakeCommand(intake));
+    indexer.setDefaultCommand(indexer.stopCommand());
 
     switch (Constants.currentMode) {
       case REAL:
@@ -173,6 +174,8 @@ public class RobotContainer {
 
     // Set bindings
     controller.leftTrigger().whileTrue(intake.intakeCommand());
+    controller.rightTrigger().whileTrue(indexer.runCommand(0.6));
+    controller.a().whileTrue(indexer.runCommand(-0.6));
   }
 
   /**

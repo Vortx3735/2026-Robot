@@ -5,9 +5,10 @@
 package frc.robot.subsystems;
 
 import com.ctre.phoenix6.hardware.TalonFX;
+import edu.wpi.first.wpilibj2.command.SubsystemBase;
 import edu.wpi.first.wpilibj2.command.Command;
 import edu.wpi.first.wpilibj2.command.RunCommand;
-import edu.wpi.first.wpilibj2.command.SubsystemBase;
+
 
 // import stuff up here
 // for example:
@@ -19,6 +20,7 @@ public class Indexer extends SubsystemBase {
   public final Motor motor1;
    */
   private final TalonFX motor;
+  
 
   /*initialize subsystem objects in constructor
    *for good practice, pass in any constants through the constructor
@@ -27,42 +29,20 @@ public class Indexer extends SubsystemBase {
     motor = new TalonFX(motorId);
   }
 
-  public void setSpeed(double speed) {
+  public void run(double speed) {
     motor.set(speed);
-    /*example method for the subsystem
-     *for example, set motor speed, read sensor value, etc.
-     *example:
-     *this.motor1.setSpeed(0.);
-     */
   }
 
-  public void stopIndexer() {
+  public void stop() {
     motor.set(0);
   }
-  /*an example method that returns a very basic command
-   *only create commands in the subystem if they only utilize methods from the same subystem
-   */
-  /*public Command exampleMethodCommand() {
-  /*return an inline command
-   *this example uses runOnce, but you can also use run or startEnd depending on your needs
-   */
-  public Command runIndexer(double speed) {
-    return new RunCommand(() -> setSpeed(speed), this);
-  }
-  /*return this.runOnce(
-        () ->
-            // single method goes here
-            // for example:
-            this.exampleMethod());
-  }*/
 
-  // an example getter for the motors, sensors,variables, etc. of the subsystem
-  public boolean getSomeValue() {
-    /*return some value from the subsystem
-     *for example:
-     *return this.motor.getSpeed()
-     */
-    return false;
+
+  public Command runCommand(double speed) {
+    return new RunCommand(() -> run(speed), this);
+  }
+  public Command stopCommand(){
+    return new RunCommand(() -> stop(), this);
   }
 
   @Override
@@ -75,3 +55,4 @@ public class Indexer extends SubsystemBase {
     // This method will be called once per scheduler run during simulation
   }
 }
+
