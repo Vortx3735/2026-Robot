@@ -51,5 +51,7 @@ public class Constants {
 
   public static class ClimberConstants {}
 
-  public static class IndexerConstants {}
+  public static class IndexerConstants {
+    public static final int INDEXER_MOTOR_ID = 17;
+  }
 }
