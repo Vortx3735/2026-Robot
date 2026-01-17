@@ -26,6 +26,7 @@ import edu.wpi.first.wpilibj2.command.Commands;
 import edu.wpi.first.wpilibj2.command.sysid.SysIdRoutine;
 import frc.robot.commands.*;
 import frc.robot.generated.TunerConstants;
+import frc.robot.subsystems.ExampleSubsystem;
 import frc.robot.subsystems.Intake;
 import frc.robot.subsystems.drive.*;
 import frc.robot.subsystems.vision.*;
@@ -48,6 +49,7 @@ public class RobotContainer {
   // Subsystems
   private final Vision vision;
   private final Drive drive;
+  public static final ExampleSubsystem exampleSubsystem = new ExampleSubsystem(); // For auton example
   public static final Intake intake = new Intake(IntakeConstants.INTAKE_MOTOR_ID);
   private SwerveDriveSimulation driveSimulation = null;
 
