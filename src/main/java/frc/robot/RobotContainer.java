@@ -40,12 +40,12 @@ import frc.robot.subsystems.vision.VisionConstants;
 import frc.robot.subsystems.vision.VisionIO;
 import frc.robot.subsystems.vision.VisionIOPhotonVision;
 import frc.robot.subsystems.vision.VisionIOPhotonVisionSim;
+import frc.robot.util.Constants;
 import frc.robot.util.Constants.IntakeConstants;
 import org.ironmaple.simulation.SimulatedArena;
 import org.ironmaple.simulation.drivesims.SwerveDriveSimulation;
 import org.littletonrobotics.junction.Logger;
 import org.littletonrobotics.junction.networktables.LoggedDashboardChooser;
-
 
 /**
  * This class is where the bulk of the robot should be declared. Since Command-based is a
@@ -184,7 +184,7 @@ public class RobotContainer {
     return Commands.none();
   }
 
-    public void resetSimulation() {
+  public void resetSimulation() {
     if (Constants.currentMode != Constants.Mode.SIM) return;
 
     drive.resetOdometry(new Pose2d(3, 3, new Rotation2d()));
