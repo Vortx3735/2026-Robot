@@ -18,8 +18,8 @@ import org.littletonrobotics.junction.Logger;
 public class Turret extends SubsystemBase {
   public static TalonFX turretMotor;
   public double turretPosition;
-  private static final double kGearRatio = 10.0;
-  private static final double kMOI = 0.001; // kg*m^2
+  private static final double kGearRatio = 15.0;
+  private static final double kMOI = 0.2; // kg*m^2
   public double targetRotations = 0;
   private final DCMotorSim m_motorSimModel =
       new DCMotorSim(

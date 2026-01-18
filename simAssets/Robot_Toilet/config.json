@@ -1,0 +1,8 @@
+{
+  "name": "Toilet",
+  "disableSimplification": true,   
+  "rotations": [{"axis":"x","degrees":90}],
+  "position": [2.35, 0, -8.75],
+  "cameras": [],
+  "components": []
+}
