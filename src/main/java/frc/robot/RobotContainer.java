@@ -22,6 +22,7 @@ import edu.wpi.first.wpilibj.GenericHID;
 import edu.wpi.first.wpilibj.XboxController;
 import edu.wpi.first.wpilibj2.command.Command;
 import edu.wpi.first.wpilibj2.command.Commands;
+import edu.wpi.first.wpilibj2.command.RunCommand;
 import edu.wpi.first.wpilibj2.command.sysid.SysIdRoutine;
 import frc.robot.commands.DriveCommands;
 import frc.robot.generated.TunerConstants;
@@ -174,9 +175,12 @@ public class RobotContainer {
     controller.povLeft.whileTrue(turret.moveCommand(-1));
     controller.lt.whileTrue(intake.intakeCommand());
     controller.yButton.whileTrue(climber.upCommand());
-    controller.bButton.whileTrue(climber.downCommand());
+    // controller.bButton.whileTrue(climber.downCommand());
     controller.rt.whileTrue(indexer.runCommand(0.6));
-    controller.aButton.whileTrue(indexer.runCommand(-0.6));
+    // controller.aButton.whileTrue(indexer.runCommand(-0.6));
+
+    controller.a().whileTrue(new RunCommand(() -> turret.setPositionPID(-0.5), turret));
+    controller.b().whileTrue(new RunCommand(() -> turret.setPositionPID(0.5), turret));
   }
 
   /**
@@ -205,5 +209,11 @@ public class RobotContainer {
         "FieldSimulation/Coral", SimulatedArena.getInstance().getGamePiecesArrayByType("Coral"));
     Logger.recordOutput(
         "FieldSimulation/Algae", SimulatedArena.getInstance().getGamePiecesArrayByType("Algae"));
+    Logger.recordOutput(
+        "Turret/simulatedPose",
+        new Pose2d(
+            driveSimulation.getSimulatedDriveTrainPose().getX(),
+            driveSimulation.getSimulatedDriveTrainPose().getY(),
+            new Rotation2d(turret.turretPosition * 2 * Math.PI)));
   }
 }
