@@ -1,5 +1,7 @@
 package frc.robot;
 
+import edu.wpi.first.math.geometry.Pose3d;
+import edu.wpi.first.math.geometry.Rotation3d;
 import edu.wpi.first.wpilibj.RobotBase;
 
 public class Constants {
@@ -61,5 +63,13 @@ public class Constants {
 
   public static class IndexerConstants {
     public static final int INDEXER_MOTOR_ID = 17;
+  }
+
+  public static class FieldConstants {
+    public static final double DISTANCE_X_TO_HUB = 5.4736;
+    public static final Pose3d BLUE_HUB_POSE3D =
+        new Pose3d(DISTANCE_X_TO_HUB, 4.05, 1.8, new Rotation3d());
+    public static final Pose3d RED_HUB_POSE3D =
+        new Pose3d(17.3736 - DISTANCE_X_TO_HUB, 4.05, 1.8, new Rotation3d());
   }
 }

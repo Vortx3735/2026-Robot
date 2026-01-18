@@ -82,6 +82,10 @@ public class Turret extends SubsystemBase {
     targetRotations = rotations;
   }
 
+  public Command setPositionPIDCommand(double rotations) {
+    return runOnce(() -> setPositionPID(rotations));
+  }
+
   public double getTurretPosition() {
     return turretPosition;
   }

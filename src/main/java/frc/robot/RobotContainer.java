@@ -22,6 +22,8 @@ import edu.wpi.first.math.geometry.Rotation2d;
 import edu.wpi.first.math.geometry.Rotation3d;
 import edu.wpi.first.math.geometry.Transform2d;
 import edu.wpi.first.math.geometry.Transform3d;
+import edu.wpi.first.wpilibj.DriverStation;
+import edu.wpi.first.wpilibj.DriverStation.Alliance;
 import edu.wpi.first.wpilibj.GenericHID;
 import edu.wpi.first.wpilibj.XboxController;
 import edu.wpi.first.wpilibj2.command.Command;
@@ -186,6 +188,36 @@ public class RobotContainer {
 
     controller.a().whileTrue(new RunCommand(() -> turret.setPositionPID(-0.5), turret));
     controller.b().whileTrue(new RunCommand(() -> turret.setPositionPID(0.5), turret));
+    controller
+        .x()
+        .whileTrue(
+            new RunCommand(
+                () -> {
+                  // Compute field-relative angle from robot to red hub, then convert to
+                  // robot-relative
+                  Pose2d robotPose = drive.getPose();
+                  Pose2d hubPose =
+                      DriverStation.getAlliance().isPresent()
+                              && DriverStation.getAlliance().get() == Alliance.Red
+                          ? new Pose2d(
+                              Constants.FieldConstants.RED_HUB_POSE3D.getX(),
+                              Constants.FieldConstants.RED_HUB_POSE3D.getY(),
+                              new Rotation2d())
+                          : new Pose2d(
+                              Constants.FieldConstants.BLUE_HUB_POSE3D.getX(),
+                              Constants.FieldConstants.BLUE_HUB_POSE3D.getY(),
+                              new Rotation2d());
+                  double angleToHub =
+                      Math.atan2(
+                          hubPose.getY() - robotPose.getY(), hubPose.getX() - robotPose.getX());
+                  double robotYaw = robotPose.getRotation().getRadians();
+                  double angleRelative = angleToHub - robotYaw;
+                  // normalize to [-pi, pi]
+                  angleRelative = Math.atan2(Math.sin(angleRelative), Math.cos(angleRelative));
+                  double rotations = angleRelative / (2 * Math.PI);
+                  turret.setPositionPID(rotations);
+                },
+                turret));
   }
 
   /**
@@ -211,9 +243,10 @@ public class RobotContainer {
     Logger.recordOutput(
         "FieldSimulation/RobotPosition", driveSimulation.getSimulatedDriveTrainPose());
     Logger.recordOutput(
-        "FieldSimulation/Coral", SimulatedArena.getInstance().getGamePiecesArrayByType("Coral"));
-    Logger.recordOutput(
-        "FieldSimulation/Algae", SimulatedArena.getInstance().getGamePiecesArrayByType("Algae"));
+        "FieldSimulation/Hub",
+        DriverStation.getAlliance().isPresent() && DriverStation.getAlliance().get() == Alliance.Red
+            ? Constants.FieldConstants.RED_HUB_POSE3D
+            : Constants.FieldConstants.BLUE_HUB_POSE3D);
     Logger.recordOutput(
         "Turret/simulatedPose",
         new Pose3d(
@@ -222,6 +255,15 @@ public class RobotContainer {
                     .plus(
                         new Transform2d(
                             0.13, -0.2, new Rotation2d(turret.turretPosition * 2 * Math.PI))))
+            .plus(new Transform3d(0, 0, 0.3, new Rotation3d())));
+    Logger.recordOutput(
+        "Turret/targetPose",
+        new Pose3d(
+                driveSimulation
+                    .getSimulatedDriveTrainPose()
+                    .plus(
+                        new Transform2d(
+                            0.13, -0.2, new Rotation2d(turret.targetRotations * 2 * Math.PI))))
             .plus(new Transform3d(0, 0, 0.3, new Rotation3d())));
   }
 }
