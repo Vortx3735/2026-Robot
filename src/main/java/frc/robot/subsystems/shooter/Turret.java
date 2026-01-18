@@ -13,26 +13,25 @@ import edu.wpi.first.units.Units;
 import edu.wpi.first.wpilibj.simulation.DCMotorSim;
 import edu.wpi.first.wpilibj2.command.Command;
 import edu.wpi.first.wpilibj2.command.SubsystemBase;
+import frc.robot.Constants.Mode;
 import org.littletonrobotics.junction.Logger;
 
 public class Turret extends SubsystemBase {
   public static TalonFX turretMotor;
   public double turretPosition;
-  private static final double kGearRatio = 15.0;
-  private static final double kMOI = 0.2; // kg*m^2
+  private static final double kGearRatio = 10.0;
+  private static final double kMOI = 0.001; // kg*m^2
   public double targetRotations = 0;
   private final DCMotorSim m_motorSimModel =
       new DCMotorSim(
           LinearSystemId.createDCMotorSystem(DCMotor.getKrakenX60(1), kMOI, kGearRatio),
           DCMotor.getKrakenX60(1));
 
-  public Turret(int turretMotorID) {
+  public Turret(int turretMotorID, Mode state) {
     turretMotor = new TalonFX(turretMotorID);
 
-    // in init function
     var talonFXConfigs = new TalonFXConfiguration();
 
-    // set slot 0 gains
     var slot0Configs = talonFXConfigs.Slot0;
     slot0Configs.kS = 0.25; // Add 0.25 V output to overcome static friction
     slot0Configs.kV = 0.12; // A velocity target of 1 rps results in 0.12 V output
@@ -41,7 +40,6 @@ public class Turret extends SubsystemBase {
     slot0Configs.kI = 0; // no output for integrated error
     slot0Configs.kD = 0.1; // A velocity error of 1 rps results in 0.1 V output
 
-    // set Motion Magic settings
     var motionMagicConfigs = talonFXConfigs.MotionMagic;
     motionMagicConfigs.MotionMagicCruiseVelocity = 80; // Target cruise velocity of 80 rps
     motionMagicConfigs.MotionMagicAcceleration =
@@ -50,9 +48,12 @@ public class Turret extends SubsystemBase {
 
     turretMotor.getConfigurator().apply(talonFXConfigs);
 
-    var talonFXSim = turretMotor.getSimState();
-    talonFXSim.Orientation = ChassisReference.CounterClockwise_Positive;
-    talonFXSim.setMotorType(TalonFXSimState.MotorType.KrakenX60);
+    // configure talonfx sim state if the mode is sim
+    if (state == Mode.SIM) {
+      var talonFXSim = turretMotor.getSimState();
+      talonFXSim.Orientation = ChassisReference.CounterClockwise_Positive;
+      talonFXSim.setMotorType(TalonFXSimState.MotorType.KrakenX60);
+    }
   }
 
   public void setTurretSpeed(double speed) {
@@ -77,7 +78,6 @@ public class Turret extends SubsystemBase {
     // create a Motion Magic request, voltage output
     final MotionMagicVoltage m_request = new MotionMagicVoltage(rotations);
 
-    // set target position to 100 rotations
     turretMotor.setControl(m_request);
     targetRotations = rotations;
   }

@@ -17,7 +17,11 @@ import static frc.robot.subsystems.vision.VisionConstants.*;
 
 import com.pathplanner.lib.auto.AutoBuilder;
 import edu.wpi.first.math.geometry.Pose2d;
+import edu.wpi.first.math.geometry.Pose3d;
 import edu.wpi.first.math.geometry.Rotation2d;
+import edu.wpi.first.math.geometry.Rotation3d;
+import edu.wpi.first.math.geometry.Transform2d;
+import edu.wpi.first.math.geometry.Transform3d;
 import edu.wpi.first.wpilibj.GenericHID;
 import edu.wpi.first.wpilibj.XboxController;
 import edu.wpi.first.wpilibj2.command.Command;
@@ -49,7 +53,8 @@ public class RobotContainer {
   public final Vision vision;
   public final Drive drive;
   public final Climber climber = new Climber(Constants.ClimberConstants.CLIMBER_MOTOR_ID);
-  public final Turret turret = new Turret(Constants.TurretConstants.TURRET_MOTOR_ID);
+  public final Turret turret =
+      new Turret(Constants.TurretConstants.TURRET_MOTOR_ID, Constants.currentMode);
   public final Flywheel flywheel = new Flywheel(Constants.FlywheelConstants.FLYWHEEL_MOTOR_ID);
   public final Intake intake = new Intake(Constants.IntakeConstants.INTAKE_MOTOR_ID);
   public final Indexer indexer = new Indexer(Constants.IndexerConstants.INDEXER_MOTOR_ID);
@@ -211,9 +216,12 @@ public class RobotContainer {
         "FieldSimulation/Algae", SimulatedArena.getInstance().getGamePiecesArrayByType("Algae"));
     Logger.recordOutput(
         "Turret/simulatedPose",
-        new Pose2d(
-            driveSimulation.getSimulatedDriveTrainPose().getX(),
-            driveSimulation.getSimulatedDriveTrainPose().getY(),
-            new Rotation2d(turret.turretPosition * 2 * Math.PI)));
+        new Pose3d(
+                driveSimulation
+                    .getSimulatedDriveTrainPose()
+                    .plus(
+                        new Transform2d(
+                            0.13, -0.2, new Rotation2d(turret.turretPosition * 2 * Math.PI))))
+            .plus(new Transform3d(0, 0, 0.3, new Rotation3d())));
   }
 }
