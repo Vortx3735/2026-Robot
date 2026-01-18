@@ -23,11 +23,12 @@ import edu.wpi.first.wpilibj.XboxController;
 import edu.wpi.first.wpilibj2.command.Command;
 import edu.wpi.first.wpilibj2.command.Commands;
 import edu.wpi.first.wpilibj2.command.sysid.SysIdRoutine;
-import frc.robot.commands.DefaultIntakeCommand;
 import frc.robot.commands.DriveCommands;
 import frc.robot.generated.TunerConstants;
 import frc.robot.subsystems.*;
 import frc.robot.subsystems.drive.*;
+import frc.robot.subsystems.shooter.Flywheel;
+import frc.robot.subsystems.shooter.Turret;
 import frc.robot.subsystems.vision.*;
 import frc.robot.util.*;
 import org.ironmaple.simulation.SimulatedArena;
@@ -62,9 +63,11 @@ public class RobotContainer {
   /** The container for the robot. Contains subsystems, OI devices, and commands. */
   public RobotContainer() {
     // Default Commands
-    intake.setDefaultCommand(new DefaultIntakeCommand(intake));
+    intake.setDefaultCommand(intake.stopCommand());
     climber.setDefaultCommand(climber.stopCommand());
     indexer.setDefaultCommand(indexer.stopCommand());
+    flywheel.setDefaultCommand(flywheel.stopCommand());
+    turret.setDefaultCommand(turret.stopCommand());
 
     switch (Constants.currentMode) {
       case REAL:
@@ -167,8 +170,8 @@ public class RobotContainer {
 
     // Set bindings
     controller.rt.whileTrue(flywheel.shootCommand());
-    controller.povRight.whileTrue(turret.moveTurretRight(1));
-    controller.povLeft.whileTrue(turret.moveTurretRight(-1));
+    controller.povRight.whileTrue(turret.moveCommand(1));
+    controller.povLeft.whileTrue(turret.moveCommand(-1));
     controller.lt.whileTrue(intake.intakeCommand());
     controller.yButton.whileTrue(climber.upCommand());
     controller.bButton.whileTrue(climber.downCommand());

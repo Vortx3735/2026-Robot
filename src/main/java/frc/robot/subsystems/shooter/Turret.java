@@ -1,4 +1,4 @@
-package frc.robot.subsystems;
+package frc.robot.subsystems.shooter;
 
 import com.ctre.phoenix6.hardware.TalonFX;
 import edu.wpi.first.wpilibj2.command.Command;
@@ -16,7 +16,7 @@ public class Turret extends SubsystemBase {
     turretMotor.set(speed);
   }
 
-  public Command moveTurretRight(double speed) {
+  public Command moveCommand(double speed) {
     return runOnce(() -> setTurretSpeed(speed));
   }
 
@@ -36,6 +36,10 @@ public class Turret extends SubsystemBase {
 
   public void stop() {
     turretMotor.set(0);
+  }
+
+  public Command stopCommand() {
+    return run(() -> stop());
   }
 
   @Override
