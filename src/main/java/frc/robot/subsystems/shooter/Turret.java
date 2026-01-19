@@ -85,7 +85,7 @@ public class Turret extends SubsystemBase {
 
   public void setPositionPID(double rotations) {
     // create a Motion Magic request, voltage output
-    final MotionMagicVoltage m_request = new MotionMagicVoltage(rotations);
+    final MotionMagicVoltage m_request = new MotionMagicVoltage(rotations*kGearRatio);
 
     turretMotor.setControl(m_request);
     targetRotations = rotations;
