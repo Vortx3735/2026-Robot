@@ -115,6 +115,34 @@ public class RobotContainer {
                 drive,
                 new VisionIOPhotonVisionSim(
                     camera0Name, robotToCamera0, driveSimulation::getSimulatedDriveTrainPose));
+        turret.setDefaultCommand(
+            new RunCommand(
+                () -> {
+                  // Compute field-relative angle from robot to red hub, then convert to
+                  // robot-relative
+                  Pose2d robotPose = drive.getPose();
+                  Pose2d hubPose =
+                      DriverStation.getAlliance().isPresent()
+                              && DriverStation.getAlliance().get() == Alliance.Red
+                          ? new Pose2d(
+                              Constants.FieldConstants.RED_HUB_POSE3D.getX(),
+                              Constants.FieldConstants.RED_HUB_POSE3D.getY(),
+                              new Rotation2d())
+                          : new Pose2d(
+                              Constants.FieldConstants.BLUE_HUB_POSE3D.getX(),
+                              Constants.FieldConstants.BLUE_HUB_POSE3D.getY(),
+                              new Rotation2d());
+                  double angleToHub =
+                      Math.atan2(
+                          hubPose.getY() - robotPose.getY(), hubPose.getX() - robotPose.getX());
+                  double robotYaw = robotPose.getRotation().getRadians();
+                  double angleRelative = angleToHub - robotYaw;
+                  // normalize to [-pi, pi]
+                  angleRelative = Math.atan2(Math.sin(angleRelative), Math.cos(angleRelative));
+                  double rotations = angleRelative / (2 * Math.PI);
+                  turret.setPositionPID(rotations);
+                },
+                turret));
         break;
 
       default:
