@@ -13,6 +13,7 @@
 
 package frc.robot;
 
+import static edu.wpi.first.units.Units.*;
 import static frc.robot.subsystems.vision.VisionConstants.*;
 
 import com.pathplanner.lib.auto.AutoBuilder;
@@ -148,7 +149,28 @@ public class RobotContainer {
         "Drive SysId (Dynamic Forward)", drive.sysIdDynamic(SysIdRoutine.Direction.kForward));
     autoChooser.addOption(
         "Drive SysId (Dynamic Reverse)", drive.sysIdDynamic(SysIdRoutine.Direction.kReverse));
-
+    // Create the SysId routine
+    var sysIdRoutine =
+        new SysIdRoutine(
+            new SysIdRoutine.Config(
+                null,
+                null,
+                null, // Use default config
+                (s) -> Logger.recordOutput("Turret/SysIdTestState", s.toString())),
+            new SysIdRoutine.Mechanism(
+                (voltage) -> turret.setVoltage(voltage.in(Volts)),
+                null, // No log consumer, since data is recorded by AdvantageKit
+                turret));
+    autoChooser.addOption(
+        "turret SysId (Quasistatic Forward)",
+        sysIdRoutine.quasistatic(SysIdRoutine.Direction.kForward));
+    autoChooser.addOption(
+        "turret SysId (Quasistatic Reverse)",
+        sysIdRoutine.quasistatic(SysIdRoutine.Direction.kReverse));
+    autoChooser.addOption(
+        "turret SysId (Dynamic Forward)", sysIdRoutine.dynamic(SysIdRoutine.Direction.kForward));
+    autoChooser.addOption(
+        "turret SysId (Dynamic Reverse)", sysIdRoutine.dynamic(SysIdRoutine.Direction.kReverse));
     // Configure the button bindings
     configureButtonBindings();
   }

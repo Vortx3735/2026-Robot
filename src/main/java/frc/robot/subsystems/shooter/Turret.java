@@ -4,6 +4,7 @@ import static edu.wpi.first.units.Units.Volts;
 
 import com.ctre.phoenix6.configs.TalonFXConfiguration;
 import com.ctre.phoenix6.controls.MotionMagicVoltage;
+import com.ctre.phoenix6.controls.VoltageOut;
 import com.ctre.phoenix6.hardware.TalonFX;
 import com.ctre.phoenix6.sim.ChassisReference;
 import com.ctre.phoenix6.sim.TalonFXSimState;
@@ -58,6 +59,11 @@ public class Turret extends SubsystemBase {
 
   public void setTurretSpeed(double speed) {
     turretMotor.set(speed);
+  }
+
+  public void setVoltage(double voltage) {
+    VoltageOut request = new VoltageOut(voltage);
+    turretMotor.setControl(request);
   }
 
   public Command moveCommand(double speed) {
