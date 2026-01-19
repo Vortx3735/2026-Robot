@@ -40,9 +40,9 @@ public class Turret extends SubsystemBase {
     slot0Configs.kS = 0; // Add 0.25 V output to overcome static friction
     slot0Configs.kV = 0; // A velocity target of 1 rps results in 0.12 V output
     slot0Configs.kA = 0; // An acceleration of 1 rps/s requires 0.01 V output
-    slot0Configs.kP = 10; // A position error of 2.5 rotations results in 12 V output
+    slot0Configs.kP = 12.5; // A position error of 2.5 rotations results in 12 V output
     slot0Configs.kI = 0; // no output for integrated error
-    slot0Configs.kD = 0; // A velocity error of 1 rps results in 0.1 V output
+    slot0Configs.kD = 0.05; // A velocity error of 1 rps results in 0.1 V output
 
     var motionMagicConfigs = talonFXConfigs.MotionMagic;
     motionMagicConfigs.MotionMagicCruiseVelocity = 8000; // Target cruise velocity of 80 rps
@@ -85,7 +85,7 @@ public class Turret extends SubsystemBase {
 
   public void setPositionPID(double rotations) {
     // create a Motion Magic request, voltage output
-    final MotionMagicVoltage m_request = new MotionMagicVoltage(rotations*kGearRatio);
+    final MotionMagicVoltage m_request = new MotionMagicVoltage(rotations * kGearRatio);
 
     turretMotor.setControl(m_request);
     targetRotations = rotations;
