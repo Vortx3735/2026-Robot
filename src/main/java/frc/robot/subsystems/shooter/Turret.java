@@ -58,10 +58,11 @@ public class Turret extends SubsystemBase {
     slot0Configs.kD = 0.065; // A velocity error of 1 rps results in 0.1 V output
 
     var motionMagicConfigs = talonFXConfigs.MotionMagic;
-    motionMagicConfigs.MotionMagicCruiseVelocity = 80; // Target cruise velocity of 80 rps
+    motionMagicConfigs.MotionMagicCruiseVelocity =
+        3 * kGearRatio; // target cruise velocity of 3 rps after gearing
     motionMagicConfigs.MotionMagicAcceleration =
-        160; // Target acceleration of 160 rps/s (0.5 seconds)
-    motionMagicConfigs.MotionMagicJerk = 1600; // Target jerk of 1600 rps/s/s (0.1 seconds)
+        200; // Target acceleration of 160 rps/s (0.5 seconds)
+    motionMagicConfigs.MotionMagicJerk = 2000; // Target jerk of 1600 rps/s/s (0.1 seconds)
 
     turretMotor.getConfigurator().apply(talonFXConfigs);
 
@@ -99,8 +100,8 @@ public class Turret extends SubsystemBase {
   public void setPositionPID(double rotations) {
     // create a Motion Magic request, voltage output
     // if (Math.abs(turretPosition - rotations) > error) {
-    // final MotionMagicVoltage m_request = new MotionMagicVoltage(rotations * kGearRatio);
-    final PositionVoltage m_request = new PositionVoltage(rotations * kGearRatio);
+    final MotionMagicVoltage m_request = new MotionMagicVoltage(rotations * kGearRatio);
+    // final PositionVoltage m_request = new PositionVoltage(rotations * kGearRatio);
     turretMotor.setControl(m_request);
     // }
     targetRotations = rotations;
