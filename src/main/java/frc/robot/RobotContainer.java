@@ -29,9 +29,9 @@ import edu.wpi.first.wpilibj.GenericHID;
 import edu.wpi.first.wpilibj.XboxController;
 import edu.wpi.first.wpilibj2.command.Command;
 import edu.wpi.first.wpilibj2.command.Commands;
-import edu.wpi.first.wpilibj2.command.RunCommand;
 import edu.wpi.first.wpilibj2.command.sysid.SysIdRoutine;
 import frc.robot.commands.DriveCommands;
+import frc.robot.commands.TurretDefaultCommand;
 import frc.robot.generated.TunerConstants;
 import frc.robot.subsystems.*;
 import frc.robot.subsystems.drive.*;
@@ -72,11 +72,6 @@ public class RobotContainer {
   /** The container for the robot. Contains subsystems, OI devices, and commands. */
   public RobotContainer() {
     // Default Commands
-    intake.setDefaultCommand(intake.stopCommand());
-    climber.setDefaultCommand(climber.stopCommand());
-    indexer.setDefaultCommand(indexer.stopCommand());
-    flywheel.setDefaultCommand(flywheel.stopCommand());
-    turret.setDefaultCommand(turret.stopCommand());
 
     switch (Constants.currentMode) {
       case REAL:
@@ -115,34 +110,6 @@ public class RobotContainer {
                 drive,
                 new VisionIOPhotonVisionSim(
                     camera0Name, robotToCamera0, driveSimulation::getSimulatedDriveTrainPose));
-        turret.setDefaultCommand(
-            new RunCommand(
-                () -> {
-                  // Compute field-relative angle from robot to red hub, then convert to
-                  // robot-relative
-                  Pose2d robotPose = drive.getPose();
-                  Pose2d hubPose =
-                      DriverStation.getAlliance().isPresent()
-                              && DriverStation.getAlliance().get() == Alliance.Red
-                          ? new Pose2d(
-                              Constants.FieldConstants.RED_HUB_POSE3D.getX(),
-                              Constants.FieldConstants.RED_HUB_POSE3D.getY(),
-                              new Rotation2d())
-                          : new Pose2d(
-                              Constants.FieldConstants.BLUE_HUB_POSE3D.getX(),
-                              Constants.FieldConstants.BLUE_HUB_POSE3D.getY(),
-                              new Rotation2d());
-                  double angleToHub =
-                      Math.atan2(
-                          hubPose.getY() - robotPose.getY(), hubPose.getX() - robotPose.getX());
-                  double robotYaw = robotPose.getRotation().getRadians();
-                  double angleRelative = angleToHub - robotYaw;
-                  // normalize to [-pi, pi]
-                  angleRelative = Math.atan2(Math.sin(angleRelative), Math.cos(angleRelative));
-                  double rotations = angleRelative / (2 * Math.PI);
-                  turret.setPositionPID(rotations);
-                },
-                turret));
         break;
 
       default:
@@ -210,6 +177,14 @@ public class RobotContainer {
    * edu.wpi.first.wpilibj2.command.button.JoystickButton}.
    */
   private void configureButtonBindings() {
+    // do not move the defaultcommands
+    intake.setDefaultCommand(intake.stopCommand());
+    climber.setDefaultCommand(climber.stopCommand());
+    indexer.setDefaultCommand(indexer.stopCommand());
+    flywheel.setDefaultCommand(flywheel.stopCommand());
+    turret.setDefaultCommand(turret.stopCommand());
+    turret.setDefaultCommand(new TurretDefaultCommand(turret, () -> drive.getPose()));
+
     // Default command, normal field-relative drive
     drive.setDefaultCommand(
         DriveCommands.joystickDrive(
@@ -232,42 +207,9 @@ public class RobotContainer {
     controller.povLeft.whileTrue(turret.moveCommand(-1));
     controller.lt.whileTrue(intake.intakeCommand());
     controller.yButton.whileTrue(climber.upCommand());
-    // controller.bButton.whileTrue(climber.downCommand());
+    controller.bButton.whileTrue(climber.downCommand());
     controller.rt.whileTrue(indexer.runCommand(0.6));
-    // controller.aButton.whileTrue(indexer.runCommand(-0.6));
-
-    controller.a().whileTrue(new RunCommand(() -> turret.setPositionPID(-0.5), turret));
-    controller.b().whileTrue(new RunCommand(() -> turret.setPositionPID(0.5), turret));
-    controller
-        .x()
-        .whileTrue(
-            new RunCommand(
-                () -> {
-                  // Compute field-relative angle from robot to red hub, then convert to
-                  // robot-relative
-                  Pose2d robotPose = drive.getPose();
-                  Pose2d hubPose =
-                      DriverStation.getAlliance().isPresent()
-                              && DriverStation.getAlliance().get() == Alliance.Red
-                          ? new Pose2d(
-                              Constants.FieldConstants.RED_HUB_POSE3D.getX(),
-                              Constants.FieldConstants.RED_HUB_POSE3D.getY(),
-                              new Rotation2d())
-                          : new Pose2d(
-                              Constants.FieldConstants.BLUE_HUB_POSE3D.getX(),
-                              Constants.FieldConstants.BLUE_HUB_POSE3D.getY(),
-                              new Rotation2d());
-                  double angleToHub =
-                      Math.atan2(
-                          hubPose.getY() - robotPose.getY(), hubPose.getX() - robotPose.getX());
-                  double robotYaw = robotPose.getRotation().getRadians();
-                  double angleRelative = angleToHub - robotYaw;
-                  // normalize to [-pi, pi]
-                  angleRelative = Math.atan2(Math.sin(angleRelative), Math.cos(angleRelative));
-                  double rotations = angleRelative / (2 * Math.PI);
-                  turret.setPositionPID(rotations);
-                },
-                turret));
+    controller.aButton.whileTrue(indexer.runCommand(-0.6));
   }
 
   /**
@@ -276,7 +218,8 @@ public class RobotContainer {
    * @return the command to run in autonomous
    */
   public Command getAutonomousCommand() {
-    return Commands.none();
+    // Timothy you fraud this was the only line you had to add to complete your issue
+    return autoChooser.get();
   }
 
   public void resetSimulation() {
