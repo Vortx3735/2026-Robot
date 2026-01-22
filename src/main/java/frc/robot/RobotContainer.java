@@ -17,6 +17,8 @@ import static edu.wpi.first.units.Units.*;
 import static frc.robot.subsystems.vision.VisionConstants.*;
 
 import com.pathplanner.lib.auto.AutoBuilder;
+
+import choreo.auto.AutoFactory;
 import edu.wpi.first.math.geometry.Pose2d;
 import edu.wpi.first.math.geometry.Pose3d;
 import edu.wpi.first.math.geometry.Rotation2d;
@@ -55,31 +57,31 @@ public class RobotContainer {
   // Subsystems
   public final Vision vision;
   public final Drive drive;
-<<<<<<< HEAD
-  public static final Climber climber = new Climber(Constants.ClimberConstants.CLIMBER_MOTOR_ID);
-  public static final Turret turret = new Turret(Constants.TurretConstants.TURRET_MOTOR_ID);
+  public final Climber climber = new Climber(Constants.ClimberConstants.CLIMBER_MOTOR_ID);
+  public static final Turret turret =
+      new Turret(Constants.TurretConstants.TURRET_MOTOR_ID, Constants.currentMode);
   public static final Flywheel flywheel = new Flywheel(Constants.FlywheelConstants.FLYWHEEL_MOTOR_ID);
   public static final Intake intake = new Intake(Constants.IntakeConstants.INTAKE_MOTOR_ID);
   public static final Indexer indexer = new Indexer(Constants.IndexerConstants.INDEXER_MOTOR_ID);
-=======
-  public final Climber climber = new Climber(Constants.ClimberConstants.CLIMBER_MOTOR_ID);
-  public final Turret turret =
-      new Turret(Constants.TurretConstants.TURRET_MOTOR_ID, Constants.currentMode);
-  public final Flywheel flywheel = new Flywheel(Constants.FlywheelConstants.FLYWHEEL_MOTOR_ID);
-  public final Intake intake = new Intake(Constants.IntakeConstants.INTAKE_MOTOR_ID);
-  public final Indexer indexer = new Indexer(Constants.IndexerConstants.INDEXER_MOTOR_ID);
->>>>>>> main
 
   private SwerveDriveSimulation driveSimulation = null;
 
   // Controller
   private final VorTXControllerXbox controller = new VorTXControllerXbox(0);
 
+  // Auton
+//private final AutoFactory autoFactory;
+//private final AutoRoutines autoRoutines;
+
   // Dashboard inputs
   private final LoggedDashboardChooser<Command> autoChooser;
   /** The container for the robot. Contains subsystems, OI devices, and commands. */
   public RobotContainer() {
-    // Default Commands
+    // Init auton objects
+    /*autoFactory = new AutoFactory(
+       drive::getPose,
+       drive::resetOdometry,
+       drive::followTrajectory) */
 
     switch (Constants.currentMode) {
       case REAL:
@@ -227,7 +229,6 @@ public class RobotContainer {
    * @return the command to run in autonomous
    */
   public Command getAutonomousCommand() {
-    // Timothy you fraud this was the only line you had to add to complete your issue
     return autoChooser.get();
   }
 

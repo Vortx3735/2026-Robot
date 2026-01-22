@@ -17,7 +17,7 @@ public class AutoRoutines {
     // path the robot will take during auton. Look at
     // https://choreo.autos/usage/editing-paths/#generating for an example.
     final AutoRoutine routine = m_factory.newRoutine("example");
-    final AutoTrajectory exampleTraj = routine.trajectory("ExampleTrajectory");
+    final AutoTrajectory exampleTraj = routine.trajectory("ExampleTraj");
 
     // If a routine was a method, you could think of this as its body.
     // The "routine.active())" trigger is essentially the "entrance" to a routine.
@@ -33,11 +33,17 @@ public class AutoRoutines {
                 // multiple arguments, you need commas.
                 exampleTraj.resetOdometry(),
                 exampleTraj.cmd(), // Schedule the trajectory (make the robot move on the trajectory)
-                RobotContainer.indexer.runCommand(1),
                 // Run commands in parallel (at the same time)
                 Commands.parallel(
-                    RobotContainer.climber.upCommand(),
-                    RobotContainer.intake.intakeCommand())));
+                    // Run intake and indexer
+                    RobotContainer.intake.intakeCommand(),
+                    RobotContainer.indexer.runCommand(1)),
+                // Stop intake and indexer
+                RobotContainer.intake.stopCommand(),
+                RobotContainer.indexer.stopCommand(),
+                // Run flywheel then stop
+                RobotContainer.flywheel.shootCommand(),
+                RobotContainer.flywheel.stopCommand()));
 
     return routine;
   }
