@@ -1,4 +1,4 @@
-package frc.robot.subsystems;
+package frc.robot.subsystems.shooter;
 
 import com.ctre.phoenix6.hardware.TalonFX;
 import edu.wpi.first.wpilibj2.command.Command;
@@ -24,11 +24,15 @@ public class Flywheel extends SubsystemBase {
     flywheelMotor.set(motorSpeed);
   }
 
-  public Command shootCommand() {
-    return runOnce(() -> shoot());
-  }
-
   public void stop() {
     flywheelMotor.set(0);
+  }
+
+  public Command stopCommand() {
+    return run(() -> stop());
+  }
+
+  public Command shootCommand() {
+    return run(() -> shoot());
   }
 }

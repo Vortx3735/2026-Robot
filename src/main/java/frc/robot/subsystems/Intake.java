@@ -38,6 +38,10 @@ public class Intake extends SubsystemBase {
     return this.run(() -> this.intake());
   }
 
+  public Command stopCommand() {
+    return this.run(() -> this.stopIntake());
+  }
+
   @Override
   public void periodic() {
     // This method will be called once per scheduler run
