@@ -13,17 +13,25 @@
 
 package frc.robot;
 
+import static edu.wpi.first.units.Units.*;
 import static frc.robot.subsystems.vision.VisionConstants.*;
 
 import com.pathplanner.lib.auto.AutoBuilder;
 import edu.wpi.first.math.geometry.Pose2d;
+import edu.wpi.first.math.geometry.Pose3d;
 import edu.wpi.first.math.geometry.Rotation2d;
+import edu.wpi.first.math.geometry.Rotation3d;
+import edu.wpi.first.math.geometry.Transform2d;
+import edu.wpi.first.math.geometry.Transform3d;
+import edu.wpi.first.wpilibj.DriverStation;
+import edu.wpi.first.wpilibj.DriverStation.Alliance;
 import edu.wpi.first.wpilibj.GenericHID;
 import edu.wpi.first.wpilibj.XboxController;
 import edu.wpi.first.wpilibj2.command.Command;
 import edu.wpi.first.wpilibj2.command.Commands;
 import edu.wpi.first.wpilibj2.command.sysid.SysIdRoutine;
 import frc.robot.commands.DriveCommands;
+import frc.robot.commands.TurretCommands;
 import frc.robot.generated.TunerConstants;
 import frc.robot.subsystems.*;
 import frc.robot.subsystems.drive.*;
@@ -48,7 +56,8 @@ public class RobotContainer {
   public final Vision vision;
   public final Drive drive;
   public final Climber climber = new Climber(Constants.ClimberConstants.CLIMBER_MOTOR_ID);
-  public final Turret turret = new Turret(Constants.TurretConstants.TURRET_MOTOR_ID);
+  public final Turret turret =
+      new Turret(Constants.TurretConstants.TURRET_MOTOR_ID, Constants.currentMode);
   public final Flywheel flywheel = new Flywheel(Constants.FlywheelConstants.FLYWHEEL_MOTOR_ID);
   public final Intake intake = new Intake(Constants.IntakeConstants.INTAKE_MOTOR_ID);
   public final Indexer indexer = new Indexer(Constants.IndexerConstants.INDEXER_MOTOR_ID);
@@ -63,11 +72,6 @@ public class RobotContainer {
   /** The container for the robot. Contains subsystems, OI devices, and commands. */
   public RobotContainer() {
     // Default Commands
-    intake.setDefaultCommand(intake.stopCommand());
-    climber.setDefaultCommand(climber.stopCommand());
-    indexer.setDefaultCommand(indexer.stopCommand());
-    flywheel.setDefaultCommand(flywheel.stopCommand());
-    turret.setDefaultCommand(turret.stopCommand());
 
     switch (Constants.currentMode) {
       case REAL:
@@ -140,7 +144,28 @@ public class RobotContainer {
         "Drive SysId (Dynamic Forward)", drive.sysIdDynamic(SysIdRoutine.Direction.kForward));
     autoChooser.addOption(
         "Drive SysId (Dynamic Reverse)", drive.sysIdDynamic(SysIdRoutine.Direction.kReverse));
-
+    // Create the SysId routine
+    var sysIdRoutine =
+        new SysIdRoutine(
+            new SysIdRoutine.Config(
+                null,
+                null,
+                null, // Use default config
+                (s) -> Logger.recordOutput("Turret/SysIdTestState", s.toString())),
+            new SysIdRoutine.Mechanism(
+                (voltage) -> turret.setVoltage(voltage.in(Volts)),
+                null, // No log consumer, since data is recorded by AdvantageKit
+                turret));
+    autoChooser.addOption(
+        "turret SysId (Quasistatic Forward)",
+        sysIdRoutine.quasistatic(SysIdRoutine.Direction.kForward));
+    autoChooser.addOption(
+        "turret SysId (Quasistatic Reverse)",
+        sysIdRoutine.quasistatic(SysIdRoutine.Direction.kReverse));
+    autoChooser.addOption(
+        "turret SysId (Dynamic Forward)", sysIdRoutine.dynamic(SysIdRoutine.Direction.kForward));
+    autoChooser.addOption(
+        "turret SysId (Dynamic Reverse)", sysIdRoutine.dynamic(SysIdRoutine.Direction.kReverse));
     // Configure the button bindings
     configureButtonBindings();
   }
@@ -152,6 +177,14 @@ public class RobotContainer {
    * edu.wpi.first.wpilibj2.command.button.JoystickButton}.
    */
   private void configureButtonBindings() {
+    // do not move the defaultcommands
+    intake.setDefaultCommand(intake.stopCommand());
+    climber.setDefaultCommand(climber.stopCommand());
+    indexer.setDefaultCommand(indexer.stopCommand());
+    flywheel.setDefaultCommand(flywheel.stopCommand());
+    turret.setDefaultCommand(turret.stopCommand());
+    turret.setDefaultCommand(TurretCommands.AimToHub(turret, () -> drive.getPose()));
+
     // Default command, normal field-relative drive
     drive.setDefaultCommand(
         DriveCommands.joystickDrive(
@@ -177,6 +210,7 @@ public class RobotContainer {
     controller.bButton.whileTrue(climber.downCommand());
     controller.rt.whileTrue(indexer.runCommand(0.6));
     controller.aButton.whileTrue(indexer.runCommand(-0.6));
+    controller.xButton.whileTrue(TurretCommands.AimToSide(turret, () -> drive.getPose()));
   }
 
   /**
@@ -185,7 +219,8 @@ public class RobotContainer {
    * @return the command to run in autonomous
    */
   public Command getAutonomousCommand() {
-    return Commands.none();
+    // Timothy you fraud this was the only line you had to add to complete your issue
+    return autoChooser.get();
   }
 
   public void resetSimulation() {
@@ -202,8 +237,27 @@ public class RobotContainer {
     Logger.recordOutput(
         "FieldSimulation/RobotPosition", driveSimulation.getSimulatedDriveTrainPose());
     Logger.recordOutput(
-        "FieldSimulation/Coral", SimulatedArena.getInstance().getGamePiecesArrayByType("Coral"));
+        "FieldSimulation/Hub",
+        DriverStation.getAlliance().isPresent() && DriverStation.getAlliance().get() == Alliance.Red
+            ? Constants.FieldConstants.RED_HUB_POSE3D
+            : Constants.FieldConstants.BLUE_HUB_POSE3D);
     Logger.recordOutput(
-        "FieldSimulation/Algae", SimulatedArena.getInstance().getGamePiecesArrayByType("Algae"));
+        "Turret/simulatedPose",
+        new Pose3d(
+                driveSimulation
+                    .getSimulatedDriveTrainPose()
+                    .plus(
+                        new Transform2d(
+                            0.13, -0.2, new Rotation2d(turret.turretPosition * 2 * Math.PI))))
+            .plus(new Transform3d(0, 0, 0.3, new Rotation3d())));
+    Logger.recordOutput(
+        "Turret/targetPose",
+        new Pose3d(
+                driveSimulation
+                    .getSimulatedDriveTrainPose()
+                    .plus(
+                        new Transform2d(
+                            0.13, -0.2, new Rotation2d(turret.targetRotations * 2 * Math.PI))))
+            .plus(new Transform3d(0, 0, 0.3, new Rotation3d())));
   }
 }

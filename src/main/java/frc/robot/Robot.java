@@ -104,6 +104,11 @@ public class Robot extends LoggedRobot {
   public void autonomousInit() {
     autonomousCommand = robotContainer.getAutonomousCommand();
 
+    // Log which autonomous command was selected to help debugging
+    // Logger.recordOutput(
+    //     "Autonomous/SelectedCommand",
+    //     autonomousCommand == null ? "<null>" : autonomousCommand.getClass().getSimpleName());
+
     // schedule the autonomous command (example)
     if (autonomousCommand != null) {
       CommandScheduler.getInstance().schedule(autonomousCommand);
