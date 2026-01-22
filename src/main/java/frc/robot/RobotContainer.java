@@ -31,7 +31,7 @@ import edu.wpi.first.wpilibj2.command.Command;
 import edu.wpi.first.wpilibj2.command.Commands;
 import edu.wpi.first.wpilibj2.command.sysid.SysIdRoutine;
 import frc.robot.commands.DriveCommands;
-import frc.robot.commands.TurretDefaultCommand;
+import frc.robot.commands.TurretCommands;
 import frc.robot.generated.TunerConstants;
 import frc.robot.subsystems.*;
 import frc.robot.subsystems.drive.*;
@@ -183,7 +183,7 @@ public class RobotContainer {
     indexer.setDefaultCommand(indexer.stopCommand());
     flywheel.setDefaultCommand(flywheel.stopCommand());
     turret.setDefaultCommand(turret.stopCommand());
-    turret.setDefaultCommand(new TurretDefaultCommand(turret, () -> drive.getPose()));
+    turret.setDefaultCommand(TurretCommands.AimToHub(turret, () -> drive.getPose()));
 
     // Default command, normal field-relative drive
     drive.setDefaultCommand(
@@ -210,6 +210,7 @@ public class RobotContainer {
     controller.bButton.whileTrue(climber.downCommand());
     controller.rt.whileTrue(indexer.runCommand(0.6));
     controller.aButton.whileTrue(indexer.runCommand(-0.6));
+    controller.xButton.whileTrue(TurretCommands.AimToSide(turret, () -> drive.getPose()));
   }
 
   /**
