@@ -16,9 +16,9 @@ package frc.robot;
 import static edu.wpi.first.units.Units.*;
 import static frc.robot.subsystems.vision.VisionConstants.*;
 
-import com.pathplanner.lib.auto.AutoBuilder;
-
+import choreo.auto.AutoChooser;
 import choreo.auto.AutoFactory;
+import com.pathplanner.lib.auto.AutoBuilder;
 import edu.wpi.first.math.geometry.Pose2d;
 import edu.wpi.first.math.geometry.Pose3d;
 import edu.wpi.first.math.geometry.Rotation2d;
@@ -29,6 +29,7 @@ import edu.wpi.first.wpilibj.DriverStation;
 import edu.wpi.first.wpilibj.DriverStation.Alliance;
 import edu.wpi.first.wpilibj.GenericHID;
 import edu.wpi.first.wpilibj.XboxController;
+import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
 import edu.wpi.first.wpilibj2.command.Command;
 import edu.wpi.first.wpilibj2.command.Commands;
 import edu.wpi.first.wpilibj2.command.sysid.SysIdRoutine;
@@ -60,7 +61,8 @@ public class RobotContainer {
   public final Climber climber = new Climber(Constants.ClimberConstants.CLIMBER_MOTOR_ID);
   public static final Turret turret =
       new Turret(Constants.TurretConstants.TURRET_MOTOR_ID, Constants.currentMode);
-  public static final Flywheel flywheel = new Flywheel(Constants.FlywheelConstants.FLYWHEEL_MOTOR_ID);
+  public static final Flywheel flywheel =
+      new Flywheel(Constants.FlywheelConstants.FLYWHEEL_MOTOR_ID);
   public static final Intake intake = new Intake(Constants.IntakeConstants.INTAKE_MOTOR_ID);
   public static final Indexer indexer = new Indexer(Constants.IndexerConstants.INDEXER_MOTOR_ID);
 
@@ -70,19 +72,14 @@ public class RobotContainer {
   private final VorTXControllerXbox controller = new VorTXControllerXbox(0);
 
   // Auton
-//private final AutoFactory autoFactory;
-//private final AutoRoutines autoRoutines;
+  private final AutoFactory autoFactory;
+  private final AutoRoutines autoRoutines;
+  final AutoChooser autonChooser = new AutoChooser();
 
   // Dashboard inputs
   private final LoggedDashboardChooser<Command> autoChooser;
   /** The container for the robot. Contains subsystems, OI devices, and commands. */
   public RobotContainer() {
-    // Init auton objects
-    /*autoFactory = new AutoFactory(
-       drive::getPose,
-       drive::resetOdometry,
-       drive::followTrajectory) */
-
     switch (Constants.currentMode) {
       case REAL:
         // Real robot, instantiate hardware IO implementations
@@ -94,6 +91,11 @@ public class RobotContainer {
                 new ModuleIOTalonFX(TunerConstants.BackLeft),
                 new ModuleIOTalonFX(TunerConstants.BackRight),
                 (robotPose) -> {});
+
+        // Init auton objects
+        autoFactory = drive.createAutoFactory();
+        autoRoutines = new AutoRoutines(autoFactory);
+
         vision =
             new Vision(
                 drive,
@@ -115,6 +117,10 @@ public class RobotContainer {
                 new ModuleIOSim(driveSimulation.getModules()[3]),
                 driveSimulation::setSimulationWorldPose);
 
+        // Init auton objects
+        autoFactory = drive.createAutoFactory();
+        autoRoutines = new AutoRoutines(autoFactory);
+
         vision =
             new Vision(
                 drive,
@@ -132,12 +138,19 @@ public class RobotContainer {
                 new ModuleIO() {},
                 new ModuleIO() {},
                 (robotPose) -> {});
+
+        // Init auton objects
+        autoFactory = drive.createAutoFactory();
+        autoRoutines = new AutoRoutines(autoFactory);
+
         vision = new Vision(drive, new VisionIO() {});
         break;
     }
 
     // Set up auto routines
     autoChooser = new LoggedDashboardChooser<>("Auto Choices", AutoBuilder.buildAutoChooser());
+    autonChooser.addRoutine("Example Auton", autoRoutines::exampleRoutine); // Logged dashboard chooser no support Choreo AutoRoutine objects
+    SmartDashboard.putData("Auton Chooser", autonChooser);
 
     // Set up SysId routines
     autoChooser.addOption(
@@ -229,7 +242,7 @@ public class RobotContainer {
    * @return the command to run in autonomous
    */
   public Command getAutonomousCommand() {
-    return autoChooser.get();
+    return autonChooser.selectedCommand();
   }
 
   public void resetSimulation() {
