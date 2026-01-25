@@ -151,7 +151,6 @@ public class Turret extends SubsystemBase {
 
     turretPosition = m_motorSimModel.getAngularPosition().in(Units.Rotations);
     Logger.recordOutput("Turret/TargetPosition", targetRotations);
-    Logger.recordOutput(
-        "Turret/SimulatedTurretPosition", m_motorSimModel.getAngularPosition().in(Units.Rotations));
+    Logger.recordOutput("Turret/SimulatedTurretPosition", turretPosition);
   }
 }
