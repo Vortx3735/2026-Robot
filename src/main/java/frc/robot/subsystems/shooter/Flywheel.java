@@ -29,10 +29,10 @@ public class Flywheel extends SubsystemBase {
   }
 
   public Command stopCommand() {
-    return run(() -> stop());
+    return run(() -> stop()).withName("stop flywheel");
   }
 
   public Command shootCommand() {
-    return run(() -> shoot());
+    return run(() -> shoot()).withName("shoot flywheel");
   }
 }

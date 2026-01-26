@@ -36,11 +36,11 @@ public class Indexer extends SubsystemBase {
   }
 
   public Command runCommand(double speed) {
-    return new RunCommand(() -> run(speed), this);
+    return new RunCommand(() -> run(speed), this).withName("run indexer");
   }
 
   public Command stopCommand() {
-    return new RunCommand(() -> stop(), this);
+    return new RunCommand(() -> stop(), this).withName("stop indexer");
   }
 
   @Override
