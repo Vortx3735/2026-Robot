@@ -149,7 +149,10 @@ public class RobotContainer {
 
     // Set up auto routines
     autoChooser = new LoggedDashboardChooser<>("Auto Choices", AutoBuilder.buildAutoChooser());
-    autonChooser.addRoutine("Example Auton", autoRoutines::exampleRoutine); // Logged dashboard chooser no support Choreo AutoRoutine objects
+    autonChooser.addRoutine(
+        "Example Auton",
+        autoRoutines
+            ::exampleRoutine); // Logged dashboard chooser no support Choreo AutoRoutine objects
     SmartDashboard.putData("Auton Chooser", autonChooser);
 
     // Set up SysId routines

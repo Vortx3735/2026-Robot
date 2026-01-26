@@ -32,12 +32,12 @@ public class AutoRoutines {
                 // semicolon only comes at the end of a statement. Also, since you are passing
                 // multiple arguments, you need commas.
                 exampleTraj.resetOdometry(),
-                exampleTraj.cmd(), // Schedule the trajectory (make the robot move on the trajectory)
+                exampleTraj
+                    .cmd(), // Schedule the trajectory (make the robot move on the trajectory)
                 // Run commands in parallel (at the same time)
                 Commands.parallel(
                     // Run intake and indexer
-                    RobotContainer.intake.intakeCommand(),
-                    RobotContainer.indexer.runCommand(1)),
+                    RobotContainer.intake.intakeCommand(), RobotContainer.indexer.runCommand(1)),
                 // Stop intake and indexer
                 RobotContainer.intake.stopCommand(),
                 RobotContainer.indexer.stopCommand(),
