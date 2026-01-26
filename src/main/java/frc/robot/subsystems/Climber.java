@@ -39,17 +39,17 @@ public class Climber extends SubsystemBase {
 
   public Command upCommand() {
 
-    return this.run(() -> this.up());
+    return this.run(() -> this.up()).withName("climb up");
   }
 
   public Command downCommand() {
 
-    return this.run(() -> this.down());
+    return this.run(() -> this.down()).withName("climb down");
   }
 
   public Command stopCommand() {
 
-    return this.runOnce(() -> this.stop());
+    return this.runOnce(() -> this.stop()).withName("stop climber");
   }
 
   @Override

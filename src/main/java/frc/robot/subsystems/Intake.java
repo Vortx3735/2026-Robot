@@ -35,11 +35,11 @@ public class Intake extends SubsystemBase {
   }
 
   public Command intakeCommand() {
-    return this.run(() -> this.intake());
+    return this.run(() -> this.intake()).withName("run intake");
   }
 
   public Command stopCommand() {
-    return this.run(() -> this.stopIntake());
+    return this.run(() -> this.stopIntake()).withName("stop intake");
   }
 
   @Override

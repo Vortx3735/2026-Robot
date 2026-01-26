@@ -84,7 +84,7 @@ public class Turret extends SubsystemBase {
   }
 
   public Command moveCommand(double speed) {
-    return runOnce(() -> setTurretSpeed(speed));
+    return runOnce(() -> setTurretSpeed(speed)).withName("Move Turret");
   }
 
   public void changeTurretPosition(double position) {
@@ -108,7 +108,7 @@ public class Turret extends SubsystemBase {
   }
 
   public Command setPositionPIDCommand(double rotations) {
-    return runOnce(() -> setPositionPID(rotations));
+    return runOnce(() -> setPositionPID(rotations)).withName("Set Turret Position PID");
   }
 
   public double getTurretPosition() {
@@ -120,7 +120,7 @@ public class Turret extends SubsystemBase {
   }
 
   public Command stopCommand() {
-    return run(() -> stop());
+    return run(() -> stop()).withName("stop turret");
   }
 
   @Override

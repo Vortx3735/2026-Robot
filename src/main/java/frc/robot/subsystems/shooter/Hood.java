@@ -34,11 +34,11 @@ public class Hood extends SubsystemBase {
   }
 
   public Command runCommand(double speed) {
-    return new RunCommand(() -> run(speed), this);
+    return new RunCommand(() -> run(speed), this).withName("run hood");
   }
 
   public Command stopCommand() {
-    return new RunCommand(() -> stop(), this);
+    return new RunCommand(() -> stop(), this).withName("stop hood");
   }
 
   public double getHoodAngleDegrees() {
