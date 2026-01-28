@@ -14,6 +14,7 @@ public class Flywheel extends SubsystemBase {
 
   public void setFlywheelSpeed(double speed) {
     motorSpeed = speed;
+    
   }
 
   public double getFlywheelSpeed() {
