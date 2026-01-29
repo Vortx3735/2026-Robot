@@ -189,6 +189,7 @@ public class RobotContainer {
     climber.setDefaultCommand(climber.stopCommand().withName("stop climber"));
     indexer.setDefaultCommand(indexer.stopCommand().withName("stop indexer"));
     flywheel.setDefaultCommand(flywheel.stopCommand().withName("stop flywheel"));
+    hood.setDefaultCommand(hood.stopCommand().withName("stop hood"));
     turret.setDefaultCommand(turret.stopCommand().withName("stop turret"));
     turret.setDefaultCommand(
         TurretCommands.AimToHub(turret, () -> drive.getPose()).withName("aim to hub"));
@@ -275,13 +276,13 @@ public class RobotContainer {
                             0.13, -0.2, new Rotation2d(turret.targetRotations * 2 * Math.PI))))
             .plus(new Transform3d(0, 0, 0.3, new Rotation3d())));
     Logger.recordOutput(
-        "Hood/SimulatedHoodAngle",
+        "Hood/simulatedPose",
         new Pose3d(
                 driveSimulation
                     .getSimulatedDriveTrainPose()
                     .plus(
                         new Transform2d(
                             0.13, -0.2, new Rotation2d(turret.targetRotations * 2 * Math.PI))))
-            .plus(new Transform3d(0, 0, 0.6, new Rotation3d())));
+            .plus(new Transform3d(0, 0, 0.6, new Rotation3d(0, hood.getHoodAngleDegrees(), 0))));
   }
 }

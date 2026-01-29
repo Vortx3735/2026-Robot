@@ -29,7 +29,7 @@ public class Flywheel extends SubsystemBase {
     var slot0Configs = talonFXConfigs.Slot0;
 
     slot0Configs.kS = 0.1; // Output to overcome static friction
-    slot0Configs.kV = 0.12; // Output per unit of requested velocity
+    slot0Configs.kV = 0.12; // Velocity target
     slot0Configs.kP = 0.11; // Proportional
     slot0Configs.kI = 0; // Integral
     slot0Configs.kD = 0; // Derivative

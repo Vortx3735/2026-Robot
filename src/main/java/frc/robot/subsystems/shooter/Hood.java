@@ -9,6 +9,7 @@ import static edu.wpi.first.units.Units.Volts;
 import com.ctre.phoenix6.configs.Slot0Configs;
 import com.ctre.phoenix6.hardware.CANcoder;
 import com.ctre.phoenix6.hardware.TalonFX;
+import com.ctre.phoenix6.sim.ChassisReference;
 import com.ctre.phoenix6.sim.TalonFXSimState;
 import edu.wpi.first.math.system.plant.DCMotor;
 import edu.wpi.first.math.system.plant.LinearSystemId;
@@ -17,6 +18,7 @@ import edu.wpi.first.wpilibj.simulation.DCMotorSim;
 import edu.wpi.first.wpilibj2.command.Command;
 import edu.wpi.first.wpilibj2.command.RunCommand;
 import edu.wpi.first.wpilibj2.command.SubsystemBase;
+import frc.robot.Constants;
 import frc.robot.Constants.Mode;
 import org.littletonrobotics.junction.Logger;
 
@@ -46,7 +48,7 @@ public class Hood extends SubsystemBase {
     var slot0Configs = new Slot0Configs();
 
     slot0Configs.kS = 0.1; // Output to overcome static friction
-    slot0Configs.kV = 0.12; // Output per unit of requested velocity
+    slot0Configs.kV = 0.12; // Velocity target
     slot0Configs.kP = 0.11; // Proportional
     slot0Configs.kI = 0; // Integral
     slot0Configs.kD = 0; // Derivative
@@ -57,6 +59,7 @@ public class Hood extends SubsystemBase {
     // Config motor sim state if mode is sim
     if (state == Mode.SIM) {
       var talonFXSim = hoodMotor.getSimState();
+      talonFXSim.Orientation = ChassisReference.CounterClockwise_Positive;
       talonFXSim.setMotorType(TalonFXSimState.MotorType.KrakenX44);
     }
   }
@@ -70,7 +73,7 @@ public class Hood extends SubsystemBase {
   }
 
   public Command moveCommand(double speed) {
-    return new RunCommand(() -> move(speed), this).withName("run hood");
+    return new RunCommand(() -> move(speed), this).withName("move hood");
   }
 
   public Command stopCommand() {
@@ -78,7 +81,10 @@ public class Hood extends SubsystemBase {
   }
 
   public double getHoodAngleDegrees() {
-    return canCoder.getAbsolutePosition().getValueAsDouble() * 360.0;
+    if (Constants.currentMode == Mode.REAL) {
+      return canCoder.getAbsolutePosition().getValueAsDouble() * 360.0;
+    }
+    return m_motorSimModel.getAngularPosition().in(Units.Rotations);
   }
 
   @Override
@@ -109,6 +115,6 @@ public class Hood extends SubsystemBase {
     talonFXSim.setRotorVelocity(m_motorSimModel.getAngularVelocity().times(kGearRatio));
 
     simHoodAngle = m_motorSimModel.getAngularPosition().in(Units.Rotations);
-    Logger.recordOutput("Hood/SimulatedHoodAngle", simHoodAngle);
+    Logger.recordOutput("Hood/simulatedHoodAngle", simHoodAngle);
   }
 }
