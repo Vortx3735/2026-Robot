@@ -195,6 +195,7 @@ public class Drive extends SubsystemBase implements Vision.VisionConsumer {
         (targetPose) -> {
           Logger.recordOutput("Odometry/TrajectorySetpoint", targetPose);
         });
+    m_pathThetaController.enableContinuousInput(-Math.PI, Math.PI);
   }
 
   @Override
@@ -292,6 +293,10 @@ public class Drive extends SubsystemBase implements Vision.VisionConsumer {
     runVelocity(new ChassisSpeeds());
   }
 
+  public Command stopCommand() {
+    return runOnce(() -> this.stop());
+  }
+
   /**
    * Stops the drive and turns the modules to an X arrangement to resist movement. The modules will
    * return to their normal orientations the next time a nonzero velocity is requested.
@@ -378,8 +383,6 @@ public class Drive extends SubsystemBase implements Vision.VisionConsumer {
   }
 
   public void followPath(SwerveSample sample) {
-    m_pathThetaController.enableContinuousInput(-Math.PI, Math.PI);
-
     var pose = getPose();
 
     var targetSpeeds = sample.getChassisSpeeds();

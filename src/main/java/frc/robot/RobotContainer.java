@@ -59,12 +59,11 @@ public class RobotContainer {
   public final Vision vision;
   public final Drive drive;
   public final Climber climber = new Climber(Constants.ClimberConstants.CLIMBER_MOTOR_ID);
-  public static final Turret turret =
+  public final Turret turret =
       new Turret(Constants.TurretConstants.TURRET_MOTOR_ID, Constants.currentMode);
-  public static final Flywheel flywheel =
-      new Flywheel(Constants.FlywheelConstants.FLYWHEEL_MOTOR_ID);
-  public static final Intake intake = new Intake(Constants.IntakeConstants.INTAKE_MOTOR_ID);
-  public static final Indexer indexer = new Indexer(Constants.IndexerConstants.INDEXER_MOTOR_ID);
+  public final Flywheel flywheel = new Flywheel(Constants.FlywheelConstants.FLYWHEEL_MOTOR_ID);
+  public final Intake intake = new Intake(Constants.IntakeConstants.INTAKE_MOTOR_ID);
+  public final Indexer indexer = new Indexer(Constants.IndexerConstants.INDEXER_MOTOR_ID);
 
   private SwerveDriveSimulation driveSimulation = null;
 
@@ -92,10 +91,6 @@ public class RobotContainer {
                 new ModuleIOTalonFX(TunerConstants.BackRight),
                 (robotPose) -> {});
 
-        // Init auton objects
-        autoFactory = drive.createAutoFactory();
-        autoRoutines = new AutoRoutines(autoFactory);
-
         vision =
             new Vision(
                 drive,
@@ -117,10 +112,6 @@ public class RobotContainer {
                 new ModuleIOSim(driveSimulation.getModules()[3]),
                 driveSimulation::setSimulationWorldPose);
 
-        // Init auton objects
-        autoFactory = drive.createAutoFactory();
-        autoRoutines = new AutoRoutines(autoFactory);
-
         vision =
             new Vision(
                 drive,
@@ -139,14 +130,11 @@ public class RobotContainer {
                 new ModuleIO() {},
                 (robotPose) -> {});
 
-        // Init auton objects
-        autoFactory = drive.createAutoFactory();
-        autoRoutines = new AutoRoutines(autoFactory);
-
         vision = new Vision(drive, new VisionIO() {});
-        break;
     }
-
+    // Init auton objects
+    autoFactory = drive.createAutoFactory();
+    autoRoutines = new AutoRoutines(autoFactory, this);
     // Set up auto routines
     autoChooser = new LoggedDashboardChooser<>("Auto Choices", AutoBuilder.buildAutoChooser());
     autonChooser.addRoutine(

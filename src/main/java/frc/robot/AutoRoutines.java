@@ -7,9 +7,11 @@ import edu.wpi.first.wpilibj2.command.Commands;
 
 public class AutoRoutines {
   private final AutoFactory m_factory;
+  private final RobotContainer m_container;
 
-  public AutoRoutines(AutoFactory factory) {
+  public AutoRoutines(AutoFactory factory, RobotContainer container) {
     m_factory = factory;
+    m_container = container;
   }
 
   public AutoRoutine exampleRoutine() {
@@ -35,15 +37,16 @@ public class AutoRoutines {
                 exampleTraj
                     .cmd(), // Schedule the trajectory (make the robot move on the trajectory)
                 // Run commands in parallel (at the same time)
+                m_container.drive.stopCommand(),
                 Commands.parallel(
                     // Run intake and indexer
-                    RobotContainer.intake.intakeCommand(), RobotContainer.indexer.runCommand(1)),
+                    m_container.intake.intakeCommand(), m_container.indexer.runCommand(1)),
                 // Stop intake and indexer
-                RobotContainer.intake.stopCommand(),
-                RobotContainer.indexer.stopCommand(),
+                m_container.intake.stopCommand(),
+                m_container.indexer.stopCommand(),
                 // Run flywheel then stop
-                RobotContainer.flywheel.shootCommand(),
-                RobotContainer.flywheel.stopCommand()));
+                m_container.flywheel.shootCommand(),
+                m_container.flywheel.stopCommand()));
 
     return routine;
   }
