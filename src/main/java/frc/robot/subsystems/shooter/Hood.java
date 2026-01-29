@@ -6,8 +6,10 @@ package frc.robot.subsystems.shooter;
 
 import static edu.wpi.first.units.Units.Volts;
 
+import com.ctre.phoenix6.configs.Slot0Configs;
 import com.ctre.phoenix6.hardware.CANcoder;
 import com.ctre.phoenix6.hardware.TalonFX;
+import com.ctre.phoenix6.sim.TalonFXSimState;
 import edu.wpi.first.math.system.plant.DCMotor;
 import edu.wpi.first.math.system.plant.LinearSystemId;
 import edu.wpi.first.units.Units;
@@ -15,6 +17,7 @@ import edu.wpi.first.wpilibj.simulation.DCMotorSim;
 import edu.wpi.first.wpilibj2.command.Command;
 import edu.wpi.first.wpilibj2.command.RunCommand;
 import edu.wpi.first.wpilibj2.command.SubsystemBase;
+import frc.robot.Constants.Mode;
 import org.littletonrobotics.junction.Logger;
 
 public class Hood extends SubsystemBase {
@@ -35,21 +38,39 @@ public class Hood extends SubsystemBase {
   /*initialize subsystem objects in constructor
    *for good practice, pass in any constants through the constructor
    */
-  public Hood(int hoodMotorID, int canCoderID) {
+  public Hood(int hoodMotorID, int canCoderID, Mode state) {
     hoodMotor = new TalonFX(hoodMotorID);
     canCoder = new CANcoder(canCoderID);
+
+    // Config PID
+    var slot0Configs = new Slot0Configs();
+
+    slot0Configs.kS = 0.1; // Output to overcome static friction
+    slot0Configs.kV = 0.12; // Output per unit of requested velocity
+    slot0Configs.kP = 0.11; // Proportional
+    slot0Configs.kI = 0; // Integral
+    slot0Configs.kD = 0; // Derivative
+
+    // Apply PID config to motor
+    hoodMotor.getConfigurator().apply(slot0Configs);
+
+    // Config motor sim state if mode is sim
+    if (state == Mode.SIM) {
+      var talonFXSim = hoodMotor.getSimState();
+      talonFXSim.setMotorType(TalonFXSimState.MotorType.KrakenX44);
+    }
   }
 
-  public void run(double speed) {
+  private void move(double speed) {
     hoodMotor.set(speed);
   }
 
-  public void stop() {
+  private void stop() {
     hoodMotor.set(0);
   }
 
-  public Command runCommand(double speed) {
-    return new RunCommand(() -> run(speed), this).withName("run hood");
+  public Command moveCommand(double speed) {
+    return new RunCommand(() -> move(speed), this).withName("run hood");
   }
 
   public Command stopCommand() {

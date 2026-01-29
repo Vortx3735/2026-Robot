@@ -36,6 +36,7 @@ import frc.robot.generated.TunerConstants;
 import frc.robot.subsystems.*;
 import frc.robot.subsystems.drive.*;
 import frc.robot.subsystems.shooter.Flywheel;
+import frc.robot.subsystems.shooter.Hood;
 import frc.robot.subsystems.shooter.Turret;
 import frc.robot.subsystems.vision.*;
 import frc.robot.util.*;
@@ -58,8 +59,14 @@ public class RobotContainer {
   public final Climber climber = new Climber(Constants.ClimberConstants.CLIMBER_MOTOR_ID);
   public final Turret turret =
       new Turret(Constants.TurretConstants.TURRET_MOTOR_ID, Constants.currentMode);
-  public final Flywheel flywheel = new Flywheel(Constants.FlywheelConstants.FLYWHEEL_MOTOR_ID);
+  public final Flywheel flywheel =
+      new Flywheel(Constants.FlywheelConstants.FLYWHEEL_MOTOR_ID, Constants.currentMode);
   public final Intake intake = new Intake(Constants.IntakeConstants.INTAKE_MOTOR_ID);
+  public final Hood hood =
+      new Hood(
+          Constants.HoodConstants.HOOD_MOTOR_ID,
+          Constants.HoodConstants.HOOD_CANCODER_ID,
+          Constants.currentMode);
   public final Indexer indexer = new Indexer(Constants.IndexerConstants.INDEXER_MOTOR_ID);
 
   private SwerveDriveSimulation driveSimulation = null;
@@ -203,15 +210,22 @@ public class RobotContainer {
     controller.start().onTrue(Commands.runOnce(resetOdometry).ignoringDisable(true));
 
     // Set bindings
+
+    // Shooter
     controller.rt.whileTrue(flywheel.shootCommand());
     controller.povRight.whileTrue(turret.moveCommand(1));
     controller.povLeft.whileTrue(turret.moveCommand(-1));
+    controller.povUp.whileTrue(hood.moveCommand(1));
+    controller.povDown.whileTrue(hood.moveCommand(-1));
+    controller.xButton.whileTrue(TurretCommands.AimToSide(turret, () -> drive.getPose()));
+    // Intake
     controller.lt.whileTrue(intake.intakeCommand());
+    // Climber
     controller.yButton.whileTrue(climber.upCommand());
     controller.bButton.whileTrue(climber.downCommand());
+    // Indexer
     controller.rt.whileTrue(indexer.runCommand(0.6));
     controller.aButton.whileTrue(indexer.runCommand(-0.6));
-    controller.xButton.whileTrue(TurretCommands.AimToSide(turret, () -> drive.getPose()));
   }
 
   /**

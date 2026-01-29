@@ -20,8 +20,8 @@ import org.littletonrobotics.junction.Logger;
 public class Turret extends SubsystemBase {
   public static TalonFX turretMotor;
   public double turretPosition;
-  private static final double kGearRatio = 10.0;
-  private static final double kMOI = 0.001; // kg*m^2
+  private static final double kGearRatio = 45.45; // Thanks Landon!
+  private static final double kMOI = 0.0117; // kg*m^2, thanks Landon!
   public double targetRotations = 0;
   private final double error = 0.005;
   private final DCMotorSim m_motorSimModel =
@@ -32,8 +32,11 @@ public class Turret extends SubsystemBase {
   public Turret(int turretMotorID, Mode state) {
     turretMotor = new TalonFX(turretMotorID);
 
+    // Config PID and MotionMagic
+    // Needed because we config PID and MotionMagic
     var talonFXConfigs = new TalonFXConfiguration();
 
+    // Config PID
     var slot0Configs = talonFXConfigs.Slot0;
     // slot0Configs.kS = 0.1; // Add 0.25 V output to overcome static friction
     // slot0Configs.kV = 0.1178; // A velocity target of 1 rps results in 0.12 V output
@@ -57,6 +60,7 @@ public class Turret extends SubsystemBase {
     slot0Configs.kI = 0; // no output for integrated error
     slot0Configs.kD = 0.065; // A velocity error of 1 rps results in 0.1 V output
 
+    // Config MotionMagic
     var motionMagicConfigs = talonFXConfigs.MotionMagic;
     motionMagicConfigs.MotionMagicCruiseVelocity =
         3 * kGearRatio; // target cruise velocity of 3 rps after gearing

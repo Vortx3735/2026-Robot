@@ -47,10 +47,6 @@ public class Constants {
 
   public static class DriveConstants {}
 
-  public static class FlywheelConstants {
-    public static final int FLYWHEEL_MOTOR_ID = 1;
-  }
-
   public static class IntakeConstants {
     public static final int INTAKE_MOTOR_ID = 13;
   }
@@ -61,6 +57,15 @@ public class Constants {
 
   public static class TurretConstants {
     public static final int TURRET_MOTOR_ID = 1;
+  }
+
+  public static class FlywheelConstants {
+    public static final int FLYWHEEL_MOTOR_ID = 1;
+  }
+
+  public static class HoodConstants {
+    public static final int HOOD_MOTOR_ID = 67;
+    public static final int HOOD_CANCODER_ID = 21;
   }
 
   public static class IndexerConstants {
