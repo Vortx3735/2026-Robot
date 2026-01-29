@@ -18,21 +18,21 @@ public class Indexer extends SubsystemBase {
    *for example:
   public final Motor motor1;
    */
-  private final TalonFX motor;
+  private final TalonFX indexerMotor;
 
   /*initialize subsystem objects in constructor
    *for good practice, pass in any constants through the constructor
    */
-  public Indexer(int motorId) {
-    motor = new TalonFX(motorId);
+  public Indexer(int indexerMotorID) {
+    indexerMotor = new TalonFX(indexerMotorID);
   }
 
   public void run(double speed) {
-    motor.set(speed);
+    indexerMotor.set(speed);
   }
 
   public void stop() {
-    motor.set(0);
+    indexerMotor.set(0);
   }
 
   public Command runCommand(double speed) {

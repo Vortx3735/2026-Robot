@@ -10,11 +10,11 @@ import edu.wpi.first.wpilibj2.command.SubsystemBase;
 
 public class Climber extends SubsystemBase {
 
-  private final TalonFX climberMotor1;
+  private final TalonFX climberMotor;
   private double speed = 0.25;
 
-  public Climber(int motorId) {
-    climberMotor1 = new TalonFX(motorId);
+  public Climber(int climberMotorID) {
+    climberMotor = new TalonFX(climberMotorID);
   }
 
   public double getSpeed() {
@@ -26,15 +26,15 @@ public class Climber extends SubsystemBase {
   }
 
   public void up() {
-    climberMotor1.set(speed);
+    climberMotor.set(speed);
   }
 
   public void down() {
-    climberMotor1.set(-speed);
+    climberMotor.set(-speed);
   }
 
   public void stop() {
-    climberMotor1.set(0);
+    climberMotor.set(0);
   }
 
   public Command upCommand() {

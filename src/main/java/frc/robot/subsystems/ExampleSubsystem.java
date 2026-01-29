@@ -14,13 +14,13 @@ import edu.wpi.first.wpilibj2.command.SubsystemBase;
 public class ExampleSubsystem extends SubsystemBase {
   /*define objects and variables here (e.g. motors, sensors, variables)
    *for example:
-   *public final Motor motor1;
+   *public final Motor subsystemNameMotor;
    */
 
   /*initialize subsystem objects in constructor
    *for good practice, pass in any constants through the constructor
    */
-  public ExampleSubsystem(/*take in can ids here  (for example:int motorId)*/ ) {
+  public ExampleSubsystem(/*take in can ids here  (for example:int subsystemNameMotorID)*/ ) {
     /*initialize motors from port numbers etc.
      *also send configurations to the motor
      *for example:

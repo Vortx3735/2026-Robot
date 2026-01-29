@@ -10,11 +10,11 @@ import edu.wpi.first.wpilibj2.command.SubsystemBase;
 
 public class Intake extends SubsystemBase {
 
-  private final TalonFX motor;
+  private final TalonFX intakeMotor;
   private double speed = 0.25;
 
-  public Intake(int motorId) {
-    motor = new TalonFX(motorId);
+  public Intake(int intakeMotorID) {
+    intakeMotor = new TalonFX(intakeMotorID);
   }
 
   public double getSpeed() {
@@ -27,11 +27,11 @@ public class Intake extends SubsystemBase {
 
   public void stopIntake() {
     // Stop motor
-    motor.set(0);
+    intakeMotor.set(0);
   }
 
   public void intake() {
-    motor.set(speed);
+    intakeMotor.set(speed);
   }
 
   public Command intakeCommand() {
