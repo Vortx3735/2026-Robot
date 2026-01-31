@@ -88,7 +88,7 @@ public class Turret extends SubsystemBase {
   }
 
   public Command moveCommand(double speed) {
-    return runOnce(() -> setTurretSpeed(speed)).withName("Move Turret");
+    return run(() -> setTurretSpeed(speed)).withName("Move Turret");
   }
 
   public void changeTurretPosition(double position) {
@@ -141,7 +141,6 @@ public class Turret extends SubsystemBase {
 
     // get the motor voltage of the TalonFX
     var motorVoltage = talonFXSim.getMotorVoltageMeasure();
-
     // use the motor voltage to calculate new position and velocity
     // using WPILib's DCMotorSim class for physics simulation
     m_motorSimModel.setInputVoltage(motorVoltage.in(Volts));
