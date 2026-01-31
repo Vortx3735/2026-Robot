@@ -204,7 +204,6 @@ public class RobotContainer {
     indexer.setDefaultCommand(indexer.stopCommand().withName("stop indexer"));
     flywheel.setDefaultCommand(flywheel.stopCommand().withName("stop flywheel"));
     hood.setDefaultCommand(hood.stopCommand().withName("stop hood"));
-    turret.setDefaultCommand(turret.stopCommand().withName("stop turret"));
     turret.setDefaultCommand(
         TurretCommands.AimToHub(turret, () -> drive.getPose()).withName("aim to hub"));
 
@@ -232,7 +231,7 @@ public class RobotContainer {
     controller.povLeft.whileTrue(turret.moveCommand(-1));
     controller.povUp.whileTrue(hood.moveCommand(1));
     controller.povDown.whileTrue(hood.moveCommand(-1));
-    controller.xButton.whileTrue(TurretCommands.AimToSide(turret, () -> drive.getPose()));
+    controller.xButton.whileTrue(turret.setPositionPIDCommand(0.5));
     // Intake
     controller.lt.whileTrue(intake.intakeCommand());
     // Climber
