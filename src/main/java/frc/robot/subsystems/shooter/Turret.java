@@ -56,9 +56,9 @@ public class Turret extends SubsystemBase {
                     * DCMotor.getKrakenX60(1).rOhms
                     * kMOI))
             * slot0Configs.kA; // A velocity target of 1 rps results in 0.12 V output
-    slot0Configs.kP = 2.075; // A position error of 2.5 rotations results in 12 V output
+    slot0Configs.kP = 500; // A position error of 2.5 rotations results in 12 V output
     slot0Configs.kI = 0; // no output for integrated error
-    slot0Configs.kD = 0.065; // A velocity error of 1 rps results in 0.1 V output
+    slot0Configs.kD = 0; // A velocity error of 1 rps results in 0.1 V output
 
     // Config MotionMagic
     var motionMagicConfigs = talonFXConfigs.MotionMagic;
@@ -104,15 +104,15 @@ public class Turret extends SubsystemBase {
   public void setPositionPID(double rotations) {
     // create a Motion Magic request, voltage output
     // if (Math.abs(turretPosition - rotations) > error) {
-    final MotionMagicVoltage m_request = new MotionMagicVoltage(rotations * kGearRatio);
-    // final PositionVoltage m_request = new PositionVoltage(rotations * kGearRatio);
+    // final MotionMagicVoltage m_request = new MotionMagicVoltage(rotations * kGearRatio);
+    final PositionVoltage m_request = new PositionVoltage(rotations * kGearRatio);
     turretMotor.setControl(m_request);
     // }
     targetRotations = rotations;
   }
 
   public Command setPositionPIDCommand(double rotations) {
-    return runOnce(() -> setPositionPID(rotations)).withName("Set Turret Position PID");
+    return run(() -> setPositionPID(rotations)).withName("Set Turret Position PID");
   }
 
   public double getTurretPosition() {
@@ -141,6 +141,7 @@ public class Turret extends SubsystemBase {
 
     // get the motor voltage of the TalonFX
     var motorVoltage = talonFXSim.getMotorVoltageMeasure();
+    Logger.recordOutput("simTurretMotorVoltage", motorVoltage);
     // use the motor voltage to calculate new position and velocity
     // using WPILib's DCMotorSim class for physics simulation
     m_motorSimModel.setInputVoltage(motorVoltage.in(Volts));
