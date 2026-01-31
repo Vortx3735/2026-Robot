@@ -295,6 +295,6 @@ public class RobotContainer {
                     .plus(
                         new Transform2d(
                             0.13, -0.2, new Rotation2d(turret.targetRotations * 2 * Math.PI))))
-            .plus(new Transform3d(0, 0, 0.6, new Rotation3d(0, hood.getHoodAngleDegrees(), 0))));
+            .plus(new Transform3d(0, 0, 0.6, new Rotation3d(0, hood.simHoodRotation, 0))));
   }
 }
