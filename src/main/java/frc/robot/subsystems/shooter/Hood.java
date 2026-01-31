@@ -31,7 +31,8 @@ public class Hood extends SubsystemBase {
   private final CANcoder canCoder;
   private static final double kGearRatio = 10.0;
   private static final double kMOI = 0.001; // kg*m^2
-  public double simHoodAngle;
+  public double simHoodRotation;
+  private double commandedPercent = 0;
   private final DCMotorSim m_motorSimModel =
       new DCMotorSim(
           LinearSystemId.createDCMotorSystem(DCMotor.getKrakenX44(1), kMOI, kGearRatio),
@@ -65,10 +66,12 @@ public class Hood extends SubsystemBase {
   }
 
   private void move(double speed) {
+    commandedPercent = speed;
     hoodMotor.set(speed);
   }
 
   private void stop() {
+    commandedPercent = 0;
     hoodMotor.set(0);
   }
 
@@ -81,10 +84,7 @@ public class Hood extends SubsystemBase {
   }
 
   public double getHoodAngleDegrees() {
-    if (Constants.currentMode == Mode.REAL) {
       return canCoder.getAbsolutePosition().getValueAsDouble() * 360.0;
-    }
-    return m_motorSimModel.getAngularPosition().in(Units.Rotations);
   }
 
   @Override
@@ -105,7 +105,7 @@ public class Hood extends SubsystemBase {
 
     // use the motor voltage to calculate new position and velocity
     // using WPILib's DCMotorSim class for physics simulation
-    m_motorSimModel.setInputVoltage(motorVoltage.in(Volts));
+    m_motorSimModel.setInputVoltage(commandedPercent * 12);
     m_motorSimModel.update(0.020); // assume 20 ms loop time
 
     // apply the new rotor position and velocity to the TalonFX;
@@ -114,7 +114,9 @@ public class Hood extends SubsystemBase {
     talonFXSim.setRawRotorPosition(m_motorSimModel.getAngularPosition().times(kGearRatio));
     talonFXSim.setRotorVelocity(m_motorSimModel.getAngularVelocity().times(kGearRatio));
 
-    simHoodAngle = m_motorSimModel.getAngularPosition().in(Units.Rotations);
-    Logger.recordOutput("Hood/simulatedHoodAngle", simHoodAngle);
+    double rotation = m_motorSimModel.getAngularPosition().in(Units.Rotations);
+    if (rotation <= 0.5 && rotation >= -0.5)
+      simHoodRotation = rotation;
+    Logger.recordOutput("Hood/simulatedHoodRotation", simHoodRotation);
   }
 }
