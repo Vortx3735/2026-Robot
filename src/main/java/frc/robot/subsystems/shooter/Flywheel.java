@@ -1,6 +1,7 @@
 package frc.robot.subsystems.shooter;
 
 import com.ctre.phoenix6.configs.TalonFXConfiguration;
+import com.ctre.phoenix6.controls.MotionMagicVelocityVoltage;
 import com.ctre.phoenix6.hardware.TalonFX;
 import com.ctre.phoenix6.sim.TalonFXSimState;
 import edu.wpi.first.networktables.DoubleEntry;
@@ -8,7 +9,9 @@ import edu.wpi.first.networktables.DoubleTopic;
 import edu.wpi.first.networktables.NetworkTableInstance;
 import edu.wpi.first.wpilibj2.command.Command;
 import edu.wpi.first.wpilibj2.command.SubsystemBase;
+import frc.robot.Constants;
 import frc.robot.Constants.Mode;
+import org.littletonrobotics.junction.Logger;
 
 public class Flywheel extends SubsystemBase {
   private static TalonFX flywheelMotor;
@@ -17,8 +20,9 @@ public class Flywheel extends SubsystemBase {
   private DoubleTopic dblTopic;
   public final DoubleEntry velocityEntry;
   public double simFlywheelVelocity = 0; // rad/sec
+  public double targetVelocity = 0;
 
-  public Flywheel(int flywheelMotorID, Mode state) {
+  public Flywheel(int flywheelMotorID) {
     flywheelMotor = new TalonFX(flywheelMotorID);
 
     // Config PID/MotionMagic
@@ -48,7 +52,7 @@ public class Flywheel extends SubsystemBase {
     velocityEntry.set(simFlywheelVelocity);
 
     // Config motor sim state if mode is sim
-    if (state == Mode.SIM) {
+    if (Constants.currentMode == Mode.SIM) {
       var talonFXSim = flywheelMotor.getSimState();
       talonFXSim.setMotorType(TalonFXSimState.MotorType.KrakenX44);
     }
@@ -70,6 +74,17 @@ public class Flywheel extends SubsystemBase {
     flywheelMotor.set(0);
   }
 
+  public void setPositionPID(double velocity) {
+    final MotionMagicVelocityVoltage m_request = new MotionMagicVelocityVoltage(velocity);
+
+    flywheelMotor.setControl(m_request);
+    targetVelocity = velocity;
+  }
+
+  public Command setPositionPIDCommand(double rotations) {
+    return run(() -> setPositionPID(rotations)).withName("Set Flywhe3l Position PID");
+  }
+
   public Command stopCommand() {
     return run(() -> stop()).withName("stop flywheel");
   }
@@ -80,6 +95,7 @@ public class Flywheel extends SubsystemBase {
 
   @Override
   public void simulationPeriodic() {
+    Logger.recordOutput("Flywheel/targetVelocity", targetVelocity);
     simFlywheelVelocity = velocityEntry.get(0.0);
   }
 }

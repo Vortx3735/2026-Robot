@@ -60,10 +60,8 @@ public class RobotContainer {
   public final Vision vision;
   public final Drive drive;
   public final Climber climber = new Climber(Constants.ClimberConstants.CLIMBER_MOTOR_ID);
-  public final Turret turret =
-      new Turret(Constants.TurretConstants.TURRET_MOTOR_ID, Constants.currentMode);
-  public final Flywheel flywheel =
-      new Flywheel(Constants.FlywheelConstants.FLYWHEEL_MOTOR_ID, Constants.currentMode);
+  public final Turret turret = new Turret(Constants.TurretConstants.TURRET_MOTOR_ID);
+  public final Flywheel flywheel = new Flywheel(Constants.FlywheelConstants.FLYWHEEL_MOTOR_ID);
   public final Intake intake = new Intake(Constants.IntakeConstants.INTAKE_MOTOR_ID);
   public final Hood hood =
       new Hood(
@@ -229,8 +227,8 @@ public class RobotContainer {
     controller.rt.whileTrue(flywheel.shootCommand());
     controller.povRight.whileTrue(turret.moveCommand(1));
     controller.povLeft.whileTrue(turret.moveCommand(-1));
-    controller.povUp.whileTrue(hood.moveCommand(1));
-    controller.povDown.whileTrue(hood.moveCommand(-1));
+    controller.povUp.whileTrue(hood.moveCommand(0.0625));
+    controller.povDown.whileTrue(hood.moveCommand(-0.0625));
     controller.xButton.whileTrue(turret.setPositionPIDCommand(0.5));
     // Intake
     controller.lt.whileTrue(intake.intakeCommand());

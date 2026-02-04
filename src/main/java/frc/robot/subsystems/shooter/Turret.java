@@ -14,6 +14,7 @@ import edu.wpi.first.units.Units;
 import edu.wpi.first.wpilibj.simulation.DCMotorSim;
 import edu.wpi.first.wpilibj2.command.Command;
 import edu.wpi.first.wpilibj2.command.SubsystemBase;
+import frc.robot.Constants;
 import frc.robot.Constants.Mode;
 import org.littletonrobotics.junction.Logger;
 
@@ -29,7 +30,7 @@ public class Turret extends SubsystemBase {
           LinearSystemId.createDCMotorSystem(DCMotor.getKrakenX60(1), kMOI, kGearRatio),
           DCMotor.getKrakenX60(1));
 
-  public Turret(int turretMotorID, Mode state) {
+  public Turret(int turretMotorID) {
     turretMotor = new TalonFX(turretMotorID);
 
     // Config PID and MotionMagic
@@ -56,7 +57,7 @@ public class Turret extends SubsystemBase {
                     * DCMotor.getKrakenX60(1).rOhms
                     * kMOI))
             * slot0Configs.kA; // A velocity target of 1 rps results in 0.12 V output
-    slot0Configs.kP = 500; // A position error of 2.5 rotations results in 12 V output
+    slot0Configs.kP = 50000; // A position error of 2.5 rotations results in 12 V output
     slot0Configs.kI = 0; // no output for integrated error
     slot0Configs.kD = 0; // A velocity error of 1 rps results in 0.1 V output
 
@@ -71,7 +72,7 @@ public class Turret extends SubsystemBase {
     turretMotor.getConfigurator().apply(talonFXConfigs);
 
     // configure talonfx sim state if the mode is sim
-    if (state == Mode.SIM) {
+    if (Constants.currentMode == Mode.SIM) {
       var talonFXSim = turretMotor.getSimState();
       talonFXSim.Orientation = ChassisReference.CounterClockwise_Positive;
       talonFXSim.setMotorType(TalonFXSimState.MotorType.KrakenX60);
