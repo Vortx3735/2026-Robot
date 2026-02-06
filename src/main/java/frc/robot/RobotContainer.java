@@ -238,6 +238,8 @@ public class RobotContainer {
     // Indexer
     controller.rt.whileTrue(indexer.runCommand(0.6));
     controller.aButton.whileTrue(indexer.runCommand(-0.6));
+    controller.lb.whileTrue(flywheel.setPositionPIDCommand(300));
+    controller.rb.whileTrue(flywheel.setPositionPIDCommand(1));
   }
 
   /**
