@@ -15,7 +15,7 @@ import edu.wpi.first.wpilibj2.command.Command;
 import edu.wpi.first.wpilibj2.command.SubsystemBase;
 import frc.robot.Constants.Mode;
 import org.littletonrobotics.junction.Logger;
-
+    
 public class Turret extends SubsystemBase {
   public static TalonFX turretMotor;
   public double turretPosition;
