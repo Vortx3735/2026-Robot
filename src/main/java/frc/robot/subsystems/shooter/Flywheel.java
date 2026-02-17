@@ -108,7 +108,8 @@ public class Flywheel extends SubsystemBase {
 
   @Override
   public void periodic() {
-    // This method will be called once per scheduler run
+    Logger.recordOutput("Flywheel/TargetVelocity(rps)", targetVelocity);
+    Logger.recordOutput("Flywheel/SimulatedVelocity(rps)", currentVelocity);
   }
 
   @Override

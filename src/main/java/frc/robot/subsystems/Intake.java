@@ -4,6 +4,9 @@
 
 package frc.robot.subsystems;
 
+import org.littletonrobotics.junction.Logger;
+
+
 import com.ctre.phoenix6.hardware.TalonFX;
 import edu.wpi.first.networktables.DoubleEntry;
 // NetworkTable imports
@@ -11,7 +14,6 @@ import edu.wpi.first.networktables.NetworkTable;
 import edu.wpi.first.networktables.NetworkTableInstance;
 import edu.wpi.first.wpilibj2.command.Command;
 import edu.wpi.first.wpilibj2.command.SubsystemBase;
-
 public class Intake extends SubsystemBase {
 
   private final TalonFX motor;
@@ -63,6 +65,7 @@ public class Intake extends SubsystemBase {
   @Override
   public void periodic() {
     publishTelemetry();
+    Logger.recordOutput("Intake/Speed", speed);
   }
 
   @Override

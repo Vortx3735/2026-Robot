@@ -127,6 +127,9 @@ public class Turret extends SubsystemBase {
 
   @Override
   public void periodic() {
+    Logger.recordOutput("Turret/TargetPosition", targetRotations);
+    Logger.recordOutput("Turret/SimulatedTurretPosition", turretPosition);
+    Logger.recordOutput("Turret/PositionError", targetRotations - turretPosition);
     // This method will be called once per scheduler run
   }
 

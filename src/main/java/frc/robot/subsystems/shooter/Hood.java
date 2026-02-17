@@ -131,7 +131,9 @@ public class Hood extends SubsystemBase {
 
   @Override
   public void periodic() {
-    // This method will be called once per scheduler run
+  Logger.recordOutput("Hood/TargetPosition", targetAngle);
+  Logger.recordOutput("Hood/SimulatedHoodPosition(degrees)", hoodAngle);
+  Logger.recordOutput("Hood/PositionError", targetAngle - hoodAngle);
   }
 
   @Override
