@@ -157,10 +157,5 @@ public class Robot extends LoggedRobot {
 
   /** This function is called periodically whilst in simulation. */
   @Override
-  public void simulationPeriodic() {
-    // Step the physics sim and record simulation-only logs
-    if (robotContainer != null) {
-      robotContainer.updateSimulation();
-    }
-  }
+  public void simulationPeriodic() {}
 }

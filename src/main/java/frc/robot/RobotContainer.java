@@ -20,13 +20,7 @@ import choreo.auto.AutoChooser;
 import choreo.auto.AutoFactory;
 import com.pathplanner.lib.auto.AutoBuilder;
 import edu.wpi.first.math.geometry.Pose2d;
-import edu.wpi.first.math.geometry.Pose3d;
 import edu.wpi.first.math.geometry.Rotation2d;
-import edu.wpi.first.math.geometry.Rotation3d;
-import edu.wpi.first.math.geometry.Transform2d;
-import edu.wpi.first.math.geometry.Transform3d;
-import edu.wpi.first.wpilibj.DriverStation;
-import edu.wpi.first.wpilibj.DriverStation.Alliance;
 import edu.wpi.first.wpilibj.GenericHID;
 import edu.wpi.first.wpilibj.XboxController;
 import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
@@ -34,7 +28,6 @@ import edu.wpi.first.wpilibj2.command.Command;
 import edu.wpi.first.wpilibj2.command.Commands;
 import edu.wpi.first.wpilibj2.command.sysid.SysIdRoutine;
 import frc.robot.commands.DriveCommands;
-import frc.robot.commands.TurretCommands;
 import frc.robot.generated.TunerConstants;
 import frc.robot.subsystems.*;
 import frc.robot.subsystems.drive.*;
@@ -45,7 +38,6 @@ import frc.robot.subsystems.vision.*;
 import frc.robot.util.*;
 import org.ironmaple.simulation.SimulatedArena;
 import org.ironmaple.simulation.drivesims.SwerveDriveSimulation;
-import org.littletonrobotics.junction.Logger;
 import org.littletonrobotics.junction.networktables.LoggedDashboardChooser;
 
 /**
@@ -168,28 +160,6 @@ public class RobotContainer {
         "Drive SysId (Dynamic Forward)", drive.sysIdDynamic(SysIdRoutine.Direction.kForward));
     autoChooser.addOption(
         "Drive SysId (Dynamic Reverse)", drive.sysIdDynamic(SysIdRoutine.Direction.kReverse));
-    // Create the SysId routine
-    var sysIdRoutine =
-        new SysIdRoutine(
-            new SysIdRoutine.Config(
-                null,
-                null,
-                null, // Use default config
-                (s) -> Logger.recordOutput("Turret/SysIdTestState", s.toString())),
-            new SysIdRoutine.Mechanism(
-                (voltage) -> turret.setVoltage(voltage.in(Volts)),
-                null, // No log consumer, since data is recorded by AdvantageKit
-                turret));
-    autoChooser.addOption(
-        "turret SysId (Quasistatic Forward)",
-        sysIdRoutine.quasistatic(SysIdRoutine.Direction.kForward));
-    autoChooser.addOption(
-        "turret SysId (Quasistatic Reverse)",
-        sysIdRoutine.quasistatic(SysIdRoutine.Direction.kReverse));
-    autoChooser.addOption(
-        "turret SysId (Dynamic Forward)", sysIdRoutine.dynamic(SysIdRoutine.Direction.kForward));
-    autoChooser.addOption(
-        "turret SysId (Dynamic Reverse)", sysIdRoutine.dynamic(SysIdRoutine.Direction.kReverse));
     // Configure the button bindings
     configureButtonBindings();
   }
@@ -205,10 +175,9 @@ public class RobotContainer {
     intake.setDefaultCommand(intake.stopCommand().withName("stop intake"));
     climber.setDefaultCommand(climber.stopCommand().withName("stop climber"));
     indexer.setDefaultCommand(indexer.stopCommand().withName("stop indexer"));
-    hood.setDefaultCommand(hood.hold().withName("hold hood"));
-    flywheel.setDefaultCommand(flywheel.stopCommand().withName("hold flywheel velocity"));
-    turret.setDefaultCommand(
-        TurretCommands.AimToHub(turret, () -> drive.getPose()).withName("aim to hub"));
+    hood.setDefaultCommand(hood.stopCommand().withName("stop hood"));
+    flywheel.setDefaultCommand(flywheel.stopCommand().withName("stop flywheel"));
+    turret.setDefaultCommand(turret.stopCommand().withName("stop turret"));
 
     // Default command, normal field-relative drive
     drive.setDefaultCommand(
@@ -227,16 +196,20 @@ public class RobotContainer {
     controller.start().onTrue(Commands.runOnce(resetOdometry).ignoringDisable(true));
 
     // Set bindings
-    controller.povUp.whileTrue(flywheel.setVelocityPIDCommand(100));
-    controller.povDown.whileTrue(flywheel.setVelocityPIDCommand(0));
-    controller.povRight.whileTrue(turret.moveCommand(0.5));
-    controller.povLeft.whileTrue(turret.moveCommand(-0.5));
-    controller.yButton.whileTrue(hood.setPositionPIDCommand(-45));
-    controller.bButton.whileTrue(hood.setPositionPIDCommand(0));
-    controller.rt.whileTrue(indexer.runIndexerCommand(true));
+    controller.povUp.whileTrue(climber.upCommand());
+    controller.povRight.whileTrue(indexer.runIndexerMotorCommand());
+    controller.povLeft.whileTrue(indexer.runRollerMotorCommand());
+    controller.povDown.whileTrue(climber.downCommand());
+
     controller.lt.whileTrue(intake.intakeCommand());
-    controller.aButton.whileTrue(indexer.runIndexerCommand(true));
-    controller.xButton.whileTrue(TurretCommands.AimToSide(turret, () -> drive.getPose()));
+    controller.lb.whileTrue(indexer.runIndexerCommand(true));
+    controller.rt.whileTrue(flywheel.shootCommand());
+    controller.rb.whileTrue(indexer.runIndexerCommand(false));
+
+    controller.yButton.whileTrue(hood.moveCommand(1));
+    controller.xButton.whileTrue(turret.moveCommand(1));
+    controller.bButton.whileTrue(turret.moveCommand(-1));
+    controller.aButton.whileTrue(hood.moveCommand(-1));
   }
 
   /**
@@ -253,46 +226,5 @@ public class RobotContainer {
 
     drive.resetOdometry(new Pose2d(3, 3, new Rotation2d()));
     SimulatedArena.getInstance().resetFieldForAuto();
-  }
-
-  public void updateSimulation() {
-    if (Constants.currentMode != Constants.Mode.SIM) return;
-
-    SimulatedArena.getInstance().simulationPeriodic();
-    Logger.recordOutput(
-        "FieldSimulation/RobotPosition", driveSimulation.getSimulatedDriveTrainPose());
-    Logger.recordOutput(
-        "FieldSimulation/Hub",
-        DriverStation.getAlliance().isPresent() && DriverStation.getAlliance().get() == Alliance.Red
-            ? Constants.FieldConstants.RED_HUB_POSE3D
-            : Constants.FieldConstants.BLUE_HUB_POSE3D);
-    Logger.recordOutput(
-        "Turret/simulatedPose",
-        new Pose3d(
-                driveSimulation
-                    .getSimulatedDriveTrainPose()
-                    .plus(
-                        new Transform2d(
-                            0.13, -0.2, new Rotation2d(turret.turretPosition * 2 * Math.PI))))
-            .plus(new Transform3d(0, 0, 0.3, new Rotation3d())));
-    Logger.recordOutput(
-        "Hood/simulatedPose",
-        new Pose3d(
-                driveSimulation
-                    .getSimulatedDriveTrainPose()
-                    .plus(
-                        new Transform2d(
-                            0.13, -0.2, new Rotation2d(turret.turretPosition * 2 * Math.PI))))
-            .plus(
-                new Transform3d(0, 0, 0.3, new Rotation3d(0, hood.hoodAngle * Math.PI / 180, 0))));
-    Logger.recordOutput(
-        "Turret/targetPose",
-        new Pose3d(
-                driveSimulation
-                    .getSimulatedDriveTrainPose()
-                    .plus(
-                        new Transform2d(
-                            0.13, -0.2, new Rotation2d(turret.targetRotations * 2 * Math.PI))))
-            .plus(new Transform3d(0, 0, 0.3, new Rotation3d())));
   }
 }

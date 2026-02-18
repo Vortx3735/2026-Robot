@@ -1,21 +1,18 @@
 package frc.robot.subsystems;
 
-import com.ctre.phoenix6.controls.Follower;
 import com.ctre.phoenix6.hardware.TalonFX;
-import com.ctre.phoenix6.signals.MotorAlignmentValue;
 import edu.wpi.first.networktables.DoubleEntry;
-// NetworkTable imports
 import edu.wpi.first.networktables.NetworkTable;
 import edu.wpi.first.networktables.NetworkTableInstance;
 import edu.wpi.first.wpilibj2.command.Command;
 import edu.wpi.first.wpilibj2.command.RunCommand;
 import edu.wpi.first.wpilibj2.command.SubsystemBase;
-import org.littletonrobotics.junction.Logger;
 
 public class Indexer extends SubsystemBase {
   private final TalonFX indexerMotor;
   private final TalonFX rollerMotor;
-  private double motorSpeed;
+  private double indexerMotorSpeed;
+  private double rollerMotorSpeed;
 
   // Network Table Entry
   final DoubleEntry indexerMotorSpeedEntry;
@@ -23,9 +20,7 @@ public class Indexer extends SubsystemBase {
   public Indexer(int indexerID, int rollerID) {
     indexerMotor = new TalonFX(indexerID);
     rollerMotor = new TalonFX(rollerID);
-    rollerMotor.setControl(
-        new Follower(
-            indexerID, MotorAlignmentValue.Opposed)); // TODO: change direction based on real robot
+
     // Indexer Network Table
     NetworkTableInstance inst = NetworkTableInstance.getDefault();
     NetworkTable indexerTable = inst.getTable("Indexer");
@@ -34,23 +29,40 @@ public class Indexer extends SubsystemBase {
   }
 
   public void setIndexerSpeed(double speed) {
-    motorSpeed = speed;
+    indexerMotorSpeed = speed;
+  }
+
+  public void setRollerSpeed(double speed) {
+    rollerMotorSpeed = speed;
   }
 
   public double getIndexerSpeed() {
-    return motorSpeed;
+    return indexerMotorSpeed;
+  }
+
+  public double getRollerSpeed() {
+    return rollerMotorSpeed;
   }
 
   public void run(Boolean inverted) {
     if (inverted) {
-      indexerMotor.set(-motorSpeed);
+      indexerMotor.set(-indexerMotorSpeed);
     } else {
-      indexerMotor.set(motorSpeed);
+      indexerMotor.set(indexerMotorSpeed);
     }
+  }
+
+  public void runIndexerMotor() {
+    indexerMotor.set(indexerMotorSpeed);
+  }
+
+  public void runRollerMotor() {
+    rollerMotor.set(rollerMotorSpeed);
   }
 
   public void stop() {
     indexerMotor.set(0);
+    rollerMotor.set(0);
   }
 
   public Command runIndexerCommand(Boolean inverted) {
@@ -62,18 +74,21 @@ public class Indexer extends SubsystemBase {
         .withName("run indexer");
   }
 
+  public Command runIndexerMotorCommand() {
+    return this.run(() -> this.runIndexerMotor()).withName("run indexer motor");
+  }
+
+  public Command runRollerMotorCommand() {
+    return this.run(() -> this.runRollerMotor()).withName("run roller motor");
+  }
+
   public Command stopCommand() {
     return new RunCommand(() -> stop(), this).withName("stop indexer");
   }
 
   @Override
-  public void periodic() {
-    Logger.recordOutput("Indexer/motorSpeed", motorSpeed);
-  }
+  public void periodic() {}
 
   @Override
-  public void simulationPeriodic() {
-    // This method will be called once per scheduler run during simulation
-    Logger.recordOutput("Indexer/simulatedVoltage", indexerMotor.getSimState().getMotorVoltage());
-  }
+  public void simulationPeriodic() {}
 }

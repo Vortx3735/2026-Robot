@@ -33,7 +33,6 @@ public class TurretCommands {
           // normalize to [-pi, pi]
           angleRelative = Math.atan2(Math.sin(angleRelative), Math.cos(angleRelative));
           double rotations = angleRelative / (2 * Math.PI);
-          turret.setPositionPID(rotations);
         },
         turret);
   }
@@ -70,7 +69,6 @@ public class TurretCommands {
           // normalize to [-pi, pi]
           angleRelative = Math.atan2(Math.sin(angleRelative), Math.cos(angleRelative));
           double rotations = angleRelative / (2 * Math.PI);
-          turret.setPositionPID(rotations);
         },
         turret);
   }
