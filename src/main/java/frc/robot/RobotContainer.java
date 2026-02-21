@@ -65,7 +65,8 @@ public class RobotContainer {
   public final Indexer indexer =
       new Indexer(
           Constants.IndexerConstants.INDEXER_MOTOR_ID,
-          Constants.IndexerConstants.INDEXER_ROLLER_MOTOR_ID);
+          Constants.IndexerConstants.INDEXER_ROLLER_MOTOR_ID,
+          Constants.IndexerConstants.INDEXER_BELT_MOTOR_ID);
 
   private SwerveDriveSimulation driveSimulation = null;
 
@@ -197,8 +198,8 @@ public class RobotContainer {
 
     // Set bindings
     controller.povUp.whileTrue(climber.upCommand());
-    controller.povRight.whileTrue(indexer.runIndexerMotorCommand());
-    controller.povLeft.whileTrue(indexer.runRollerMotorCommand());
+    // controller.povRight.whileTrue(indexer.runIndexerMotorCommand());
+    // controller.povLeft.whileTrue(indexer.runRollerMotorCommand());
     controller.povDown.whileTrue(climber.downCommand());
 
     controller.lt.whileTrue(intake.intakeCommand());

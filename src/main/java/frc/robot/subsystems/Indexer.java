@@ -1,94 +1,87 @@
 package frc.robot.subsystems;
 
+import com.ctre.phoenix6.controls.Follower;
 import com.ctre.phoenix6.hardware.TalonFX;
+import com.ctre.phoenix6.signals.MotorAlignmentValue;
 import edu.wpi.first.networktables.DoubleEntry;
+// NetworkTable imports
 import edu.wpi.first.networktables.NetworkTable;
 import edu.wpi.first.networktables.NetworkTableInstance;
 import edu.wpi.first.wpilibj2.command.Command;
 import edu.wpi.first.wpilibj2.command.RunCommand;
 import edu.wpi.first.wpilibj2.command.SubsystemBase;
+import org.littletonrobotics.junction.Logger;
 
 public class Indexer extends SubsystemBase {
   private final TalonFX indexerMotor;
   private final TalonFX rollerMotor;
-  private double indexerMotorSpeed;
-  private double rollerMotorSpeed;
+  private final TalonFX beltMotor;
+
+  private double indexerSpeed;
+  private double rollerSpeed;
 
   // Network Table Entry
-  final DoubleEntry indexerMotorSpeedEntry;
+  final DoubleEntry indexerSpeedEntry;
+  final DoubleEntry rollerSpeedEntry;
 
-  public Indexer(int indexerID, int rollerID) {
+  public Indexer(int indexerID, int rollerID, int beltID) {
     indexerMotor = new TalonFX(indexerID);
     rollerMotor = new TalonFX(rollerID);
+    beltMotor = new TalonFX(beltID);
 
+    // Configure followers: roller follows indexer (opposed), belt follows indexer (same)
+    beltMotor.setControl(new Follower(rollerID, MotorAlignmentValue.Aligned));
     // Indexer Network Table
     NetworkTableInstance inst = NetworkTableInstance.getDefault();
     NetworkTable indexerTable = inst.getTable("Indexer");
-    indexerMotorSpeedEntry = indexerTable.getDoubleTopic("indexerMotorSpeed").getEntry(0);
-    indexerMotorSpeedEntry.set(1);
+    indexerSpeedEntry = indexerTable.getDoubleTopic("indexerSpeed").getEntry(0);
+    indexerSpeedEntry.set(1);
+    rollerSpeedEntry = indexerTable.getDoubleTopic("indexerSpeed").getEntry(0);
+    rollerSpeedEntry.set(1);
   }
 
-  public void setIndexerSpeed(double speed) {
-    indexerMotorSpeed = speed;
-  }
-
-  public void setRollerSpeed(double speed) {
-    rollerMotorSpeed = speed;
+  public void setIndexerSpeed(double indexerSpeed, double rollerSpeed) {
+    this.indexerSpeed = indexerSpeed;
+    this.rollerSpeed = rollerSpeed;
   }
 
   public double getIndexerSpeed() {
-    return indexerMotorSpeed;
-  }
-
-  public double getRollerSpeed() {
-    return rollerMotorSpeed;
+    return indexerSpeed;
   }
 
   public void run(Boolean inverted) {
     if (inverted) {
-      indexerMotor.set(-indexerMotorSpeed);
+      indexerMotor.set(-indexerSpeed);
+      rollerMotor.set(-rollerSpeed);
     } else {
-      indexerMotor.set(indexerMotorSpeed);
+      indexerMotor.set(indexerSpeed);
+      rollerMotor.set(rollerSpeed);
     }
-  }
-
-  public void runIndexerMotor() {
-    indexerMotor.set(indexerMotorSpeed);
-  }
-
-  public void runRollerMotor() {
-    rollerMotor.set(rollerMotorSpeed);
   }
 
   public void stop() {
     indexerMotor.set(0);
-    rollerMotor.set(0);
   }
 
   public Command runIndexerCommand(Boolean inverted) {
     // Execute setIndexerSpeed AND set the motor every loop
     return run(() -> {
-          setIndexerSpeed(indexerMotorSpeedEntry.getAsDouble());
+          setIndexerSpeed(indexerSpeedEntry.getAsDouble(), rollerSpeedEntry.getAsDouble());
           run(inverted); // Ensure the motor is actually updated
         })
         .withName("run indexer");
   }
-
-  public Command runIndexerMotorCommand() {
-    return this.run(() -> this.runIndexerMotor()).withName("run indexer motor");
-  }
-
-  public Command runRollerMotorCommand() {
-    return this.run(() -> this.runRollerMotor()).withName("run roller motor");
-  }
-
   public Command stopCommand() {
     return new RunCommand(() -> stop(), this).withName("stop indexer");
   }
 
   @Override
-  public void periodic() {}
+  public void periodic() {
+  }
 
   @Override
-  public void simulationPeriodic() {}
+  public void simulationPeriodic() {
+    // This method will be called once per scheduler run during simulation
+    Logger.recordOutput("Indexer/simulatedVoltage", indexerMotor.getSimState().getMotorVoltage());
+  }
 }
