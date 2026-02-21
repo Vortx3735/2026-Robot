@@ -76,7 +76,8 @@ public class RobotContainer {
   public final Indexer indexer =
       new Indexer(
           Constants.IndexerConstants.INDEXER_MOTOR_ID,
-          Constants.IndexerConstants.INDEXER_ROLLER_MOTOR_ID);
+          Constants.IndexerConstants.INDEXER_ROLLER_MOTOR_ID,
+          Constants.IndexerConstants.INDEXER_BELT_MOTOR_ID);
 
   private SwerveDriveSimulation driveSimulation = null;
 

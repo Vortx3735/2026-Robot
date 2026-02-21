@@ -15,37 +15,42 @@ import org.littletonrobotics.junction.Logger;
 public class Indexer extends SubsystemBase {
   private final TalonFX indexerMotor;
   private final TalonFX rollerMotor;
-  private double motorSpeed;
+  private final TalonFX beltMotor;
+
+  private double indexerSpeed;
+  private double rollerSpeed;
 
   // Network Table Entry
-  final DoubleEntry indexerMotorSpeedEntry;
+  final DoubleEntry indexerindexerSpeedEntry;
 
-  public Indexer(int indexerID, int rollerID) {
+  public Indexer(int indexerID, int rollerID, int beltID) {
     indexerMotor = new TalonFX(indexerID);
     rollerMotor = new TalonFX(rollerID);
-    rollerMotor.setControl(
-        new Follower(
-            indexerID, MotorAlignmentValue.Opposed)); // TODO: change direction based on real robot
+    beltMotor = new TalonFX(beltID);
+
+    // Configure followers: roller follows indexer (opposed), belt follows indexer (same)
+    beltMotor.setControl(new Follower(rollerID, MotorAlignmentValue.Aligned));
     // Indexer Network Table
     NetworkTableInstance inst = NetworkTableInstance.getDefault();
     NetworkTable indexerTable = inst.getTable("Indexer");
-    indexerMotorSpeedEntry = indexerTable.getDoubleTopic("indexerMotorSpeed").getEntry(0);
-    indexerMotorSpeedEntry.set(1);
+    indexerindexerSpeedEntry = indexerTable.getDoubleTopic("indexerindexerSpeed").getEntry(0);
+    indexerindexerSpeedEntry.set(1);
   }
 
   public void setIndexerSpeed(double speed) {
-    motorSpeed = speed;
+    indexerSpeed = speed;
   }
 
   public double getIndexerSpeed() {
-    return motorSpeed;
+    return indexerSpeed;
   }
 
   public void run(Boolean inverted) {
     if (inverted) {
-      indexerMotor.set(-motorSpeed);
+      indexerMotor.set(-indexerSpeed);
+      rollerMotor.set()
     } else {
-      indexerMotor.set(motorSpeed);
+      indexerMotor.set(indexerSpeed);
     }
   }
 
@@ -56,7 +61,7 @@ public class Indexer extends SubsystemBase {
   public Command runIndexerCommand(Boolean inverted) {
     // Execute setIndexerSpeed AND set the motor every loop
     return run(() -> {
-          setIndexerSpeed(indexerMotorSpeedEntry.getAsDouble());
+          setIndexerSpeed(indexerindexerSpeedEntry.getAsDouble());
           run(inverted); // Ensure the motor is actually updated
         })
         .withName("run indexer");
@@ -68,7 +73,7 @@ public class Indexer extends SubsystemBase {
 
   @Override
   public void periodic() {
-    Logger.recordOutput("Indexer/motorSpeed", motorSpeed);
+    Logger.recordOutput("Indexer/indexerSpeed", indexerSpeed);
   }
 
   @Override
