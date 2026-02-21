@@ -61,7 +61,8 @@ public class Constants {
 
   public static class TurretConstants {
     public static final int TURRET_MOTOR_ID = 17;
-    public static final int TURRET_CANCODER_ID = 67; // placeholder, unsure if CANCoder will be added yet
+    public static final int TURRET_CANCODER_ID =
+        67; // placeholder, unsure if CANCoder will be added yet
   }
 
   public static class HoodConstants {

@@ -22,8 +22,8 @@ public class VisionConstants {
   public static String camera1Name = "usbcRight";
   public static String camera2Name = "usb2.0top";
   public static String camera3Name = "usb3.0bottom";
-  
-  //note: zero z component is 0.5 meters above the ground
+
+  // note: zero z component is 0.5 meters above the ground
   // Robot to camera transforms
   // (Not used by Limelight, configure in web UI instead)
   public static Transform3d robotToCamera0 =

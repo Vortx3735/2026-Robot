@@ -61,8 +61,9 @@ public class RobotContainer {
   public final Drive drive;
   public final Climber climber = new Climber(Constants.ClimberConstants.CLIMBER_MOTOR_ID);
   public final Turret turret =
-        new Turret(Constants.TurretConstants.TURRET_MOTOR_ID, Constants.currentMode);
-        //new Turret(Constants.TurretConstants.TURRET_MOTOR_ID, Constants.TurretConstants.TURRET_CANCODER_ID, Constants.currentMode);
+      new Turret(Constants.TurretConstants.TURRET_MOTOR_ID, Constants.currentMode);
+  // new Turret(Constants.TurretConstants.TURRET_MOTOR_ID,
+  // Constants.TurretConstants.TURRET_CANCODER_ID, Constants.currentMode);
 
   public final Hood hood =
       new Hood(

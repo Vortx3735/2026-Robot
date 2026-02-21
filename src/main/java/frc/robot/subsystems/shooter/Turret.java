@@ -4,7 +4,6 @@ import static edu.wpi.first.units.Units.Volts;
 
 import com.ctre.phoenix6.configs.TalonFXConfiguration;
 import com.ctre.phoenix6.controls.*;
-import com.ctre.phoenix6.hardware.CANcoder;
 import com.ctre.phoenix6.hardware.TalonFX;
 import com.ctre.phoenix6.sim.ChassisReference;
 import com.ctre.phoenix6.sim.TalonFXSimState;
@@ -19,7 +18,7 @@ import org.littletonrobotics.junction.Logger;
 
 public class Turret extends SubsystemBase {
   private final TalonFX turretMotor;
-//private final CANcoder canCoder; // unsure if will be added yet
+  // private final CANcoder canCoder; // unsure if will be added yet
   public double turretPosition;
   private static final double kGearRatio = 45.45;
   private static final double kMOI = 0.0117; // kg*m^2
@@ -32,7 +31,7 @@ public class Turret extends SubsystemBase {
 
   public Turret(int turretMotorID, /*int canCoderId,*/ Mode state) {
     turretMotor = new TalonFX(turretMotorID);
-    //canCoder = new CANcoder(canCoderId); // unsure if will be added yet
+    // canCoder = new CANcoder(canCoderId); // unsure if will be added yet
 
     var talonFXConfigs = new TalonFXConfiguration();
 
@@ -136,7 +135,7 @@ public class Turret extends SubsystemBase {
   @Override
   public void simulationPeriodic() {
     var talonFXSim = turretMotor.getSimState();
-    //var canCoderSim = canCoder.getSimState();
+    // var canCoderSim = canCoder.getSimState();
 
     // set the supply voltage of the TalonFX
     talonFXSim.setSupplyVoltage(12);
