@@ -56,7 +56,7 @@ public class Constants {
   }
 
   public static class ClimberConstants {
-    public static final int CLIMBER_MOTOR_ID = 19;
+    public static final int CLIMBER_MOTOR_ID = 21;
   }
 
   public static class TurretConstants {
