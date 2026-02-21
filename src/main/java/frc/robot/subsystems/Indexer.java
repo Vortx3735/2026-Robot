@@ -21,7 +21,8 @@ public class Indexer extends SubsystemBase {
   private double rollerSpeed;
 
   // Network Table Entry
-  final DoubleEntry indexerindexerSpeedEntry;
+  final DoubleEntry indexerSpeedEntry;
+  final DoubleEntry rollerSpeedEntry;
 
   public Indexer(int indexerID, int rollerID, int beltID) {
     indexerMotor = new TalonFX(indexerID);
@@ -33,12 +34,15 @@ public class Indexer extends SubsystemBase {
     // Indexer Network Table
     NetworkTableInstance inst = NetworkTableInstance.getDefault();
     NetworkTable indexerTable = inst.getTable("Indexer");
-    indexerindexerSpeedEntry = indexerTable.getDoubleTopic("indexerindexerSpeed").getEntry(0);
-    indexerindexerSpeedEntry.set(1);
+    indexerSpeedEntry = indexerTable.getDoubleTopic("indexerSpeed").getEntry(0);
+    indexerSpeedEntry.set(1);
+    rollerSpeedEntry = indexerTable.getDoubleTopic("indexerSpeed").getEntry(0);
+    rollerSpeedEntry.set(1);
   }
 
-  public void setIndexerSpeed(double speed) {
-    indexerSpeed = speed;
+  public void setIndexerSpeed(double indexerSpeed, double rollerSpeed) {
+    this.indexerSpeed = indexerSpeed;
+    this.rollerSpeed = rollerSpeed;
   }
 
   public double getIndexerSpeed() {
@@ -48,9 +52,10 @@ public class Indexer extends SubsystemBase {
   public void run(Boolean inverted) {
     if (inverted) {
       indexerMotor.set(-indexerSpeed);
-      rollerMotor.set()
+      rollerMotor.set(-rollerSpeed);
     } else {
       indexerMotor.set(indexerSpeed);
+      rollerMotor.set(rollerSpeed);
     }
   }
 
@@ -61,7 +66,7 @@ public class Indexer extends SubsystemBase {
   public Command runIndexerCommand(Boolean inverted) {
     // Execute setIndexerSpeed AND set the motor every loop
     return run(() -> {
-          setIndexerSpeed(indexerindexerSpeedEntry.getAsDouble());
+          setIndexerSpeed(indexerSpeedEntry.getAsDouble(), rollerSpeedEntry.getAsDouble());
           run(inverted); // Ensure the motor is actually updated
         })
         .withName("run indexer");
