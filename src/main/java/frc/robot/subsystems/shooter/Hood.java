@@ -9,6 +9,7 @@ import edu.wpi.first.wpilibj2.command.Command;
 import edu.wpi.first.wpilibj2.command.RunCommand;
 import edu.wpi.first.wpilibj2.command.SubsystemBase;
 import frc.robot.Constants.Mode;
+import org.littletonrobotics.junction.Logger;
 
 public class Hood extends SubsystemBase {
   /*define objects and variables here (e.g. motors, sensors, variables)
@@ -43,5 +44,7 @@ public class Hood extends SubsystemBase {
   }
 
   @Override
-  public void simulationPeriodic() {}
+  public void simulationPeriodic() {
+    Logger.recordOutput("Hood/simulatedVoltage", motor.getSimState().getMotorVoltage());
+  }
 }

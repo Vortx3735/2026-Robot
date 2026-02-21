@@ -4,17 +4,32 @@
 
 package frc.robot.subsystems;
 
+import com.ctre.phoenix6.controls.Follower;
 import com.ctre.phoenix6.hardware.TalonFX;
+import com.ctre.phoenix6.signals.MotorAlignmentValue;
+
+import edu.wpi.first.networktables.DoubleEntry;
+import edu.wpi.first.networktables.NetworkTable;
+import edu.wpi.first.networktables.NetworkTableInstance;
 import edu.wpi.first.wpilibj2.command.Command;
 import edu.wpi.first.wpilibj2.command.SubsystemBase;
+import org.littletonrobotics.junction.Logger;
 
 public class Climber extends SubsystemBase {
 
   private final TalonFX climberMotor1;
+  private final TalonFX climberMotor2;
   private double speed = 0.25;
+  final DoubleEntry flywheelMotorSpeedEntry;
 
-  public Climber(int motorId) {
-    climberMotor1 = new TalonFX(motorId);
+  public Climber(int motorIdLeft, int motorIdRight) {
+    climberMotor1 = new TalonFX(motorIdLeft);
+    climberMotor2 = new TalonFX(motorIdRight);
+    climberMotor2.setControl(new Follower(motorIdLeft, MotorAlignmentValue.Opposed));
+    NetworkTableInstance inst = NetworkTableInstance.getDefault();
+    NetworkTable intakeTable = inst.getTable("Intake");
+    flywheelMotorSpeedEntry = intakeTable.getDoubleTopic("flywheelMotorSpeed").getEntry(0);
+    flywheelMotorSpeedEntry.set(1);
   }
 
   public double getSpeed() {
@@ -39,12 +54,22 @@ public class Climber extends SubsystemBase {
 
   public Command upCommand() {
 
-    return this.run(() -> this.up()).withName("Climber Up");
+    return this.run(
+            () -> {
+              setSpeed(flywheelMotorSpeedEntry.getAsDouble());
+              this.up();
+            })
+        .withName("run intake");
   }
 
   public Command downCommand() {
 
-    return this.run(() -> this.down()).withName("Climber Down");
+    return this.run(
+            () -> {
+              setSpeed(flywheelMotorSpeedEntry.getAsDouble());
+              this.down();
+            })
+        .withName("run intake");
   }
 
   public Command stopCommand() {
@@ -60,5 +85,6 @@ public class Climber extends SubsystemBase {
   @Override
   public void simulationPeriodic() {
     // This method will be called once per scheduler run during simulation
+    Logger.recordOutput("Climber/simulatedVoltage", climberMotor1.getSimState().getMotorVoltage());
   }
 }

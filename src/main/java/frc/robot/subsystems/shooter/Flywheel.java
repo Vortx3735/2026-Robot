@@ -1,17 +1,26 @@
 package frc.robot.subsystems.shooter;
 
 import com.ctre.phoenix6.hardware.TalonFX;
+import edu.wpi.first.networktables.DoubleEntry;
+import edu.wpi.first.networktables.NetworkTable;
+import edu.wpi.first.networktables.NetworkTableInstance;
 import edu.wpi.first.wpilibj2.command.Command;
 import edu.wpi.first.wpilibj2.command.Commands;
 import edu.wpi.first.wpilibj2.command.SubsystemBase;
 import frc.robot.Constants.Mode;
+import org.littletonrobotics.junction.Logger;
 
 public class Flywheel extends SubsystemBase {
   private static TalonFX flywheelMotor;
   private double motorSpeed;
+  final DoubleEntry flywheelMotorSpeedEntry;
 
   public Flywheel(int flywheelMotorID, Mode state) {
     flywheelMotor = new TalonFX(flywheelMotorID);
+    NetworkTableInstance inst = NetworkTableInstance.getDefault();
+    NetworkTable intakeTable = inst.getTable("Flywheel");
+    flywheelMotorSpeedEntry = intakeTable.getDoubleTopic("flywheelMotorSpeed").getEntry(0);
+    flywheelMotorSpeedEntry.set(1);
   }
 
   public void setFlywheelSpeed(double speed) {
@@ -35,7 +44,12 @@ public class Flywheel extends SubsystemBase {
   }
 
   public Command shootCommand() {
-    return Commands.run(() -> shoot(), this).withName("shoot flywheel");
+    return this.run(
+            () -> {
+              setFlywheelSpeed(flywheelMotorSpeedEntry.getAsDouble());
+              this.shoot();
+            })
+        .withName("shoot flywheel");
   }
 
   @Override
@@ -44,5 +58,7 @@ public class Flywheel extends SubsystemBase {
   }
 
   @Override
-  public void simulationPeriodic() {}
+  public void simulationPeriodic() {
+    Logger.recordOutput("Flywheel/simulatedVoltage", flywheelMotor.getSimState().getMotorVoltage());
+  }
 }

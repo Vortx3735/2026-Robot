@@ -36,7 +36,7 @@ public class Indexer extends SubsystemBase {
     NetworkTable indexerTable = inst.getTable("Indexer");
     indexerSpeedEntry = indexerTable.getDoubleTopic("indexerSpeed").getEntry(0);
     indexerSpeedEntry.set(1);
-    rollerSpeedEntry = indexerTable.getDoubleTopic("indexerSpeed").getEntry(0);
+    rollerSpeedEntry = indexerTable.getDoubleTopic("rollerSpeed").getEntry(0);
     rollerSpeedEntry.set(1);
   }
 
@@ -61,6 +61,7 @@ public class Indexer extends SubsystemBase {
 
   public void stop() {
     indexerMotor.set(0);
+    rollerMotor.set(0);
   }
 
   public Command runIndexerCommand(Boolean inverted) {
@@ -71,17 +72,18 @@ public class Indexer extends SubsystemBase {
         })
         .withName("run indexer");
   }
+
   public Command stopCommand() {
     return new RunCommand(() -> stop(), this).withName("stop indexer");
   }
 
   @Override
-  public void periodic() {
-  }
+  public void periodic() {}
 
   @Override
   public void simulationPeriodic() {
     // This method will be called once per scheduler run during simulation
-    Logger.recordOutput("Indexer/simulatedVoltage", indexerMotor.getSimState().getMotorVoltage());
+    Logger.recordOutput("Indexer/simulatedVoltage1", indexerMotor.getSimState().getMotorVoltage());
+    Logger.recordOutput("Indexer/simulatedVoltage2", rollerMotor.getSimState().getMotorVoltage());
   }
 }
