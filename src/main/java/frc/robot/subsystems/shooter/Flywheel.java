@@ -17,6 +17,7 @@ public class Flywheel extends SubsystemBase {
 
   public Flywheel(int flywheelMotorID, Mode state) {
     flywheelMotor = new TalonFX(flywheelMotorID);
+
     NetworkTableInstance inst = NetworkTableInstance.getDefault();
     NetworkTable intakeTable = inst.getTable("Flywheel");
     flywheelMotorSpeedEntry = intakeTable.getDoubleTopic("flywheelMotorSpeed").getEntry(0);
@@ -32,7 +33,7 @@ public class Flywheel extends SubsystemBase {
   }
 
   public void shoot() {
-    flywheelMotor.set(motorSpeed);
+    flywheelMotor.set(-motorSpeed);
   }
 
   public void stop() {

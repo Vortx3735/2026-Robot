@@ -30,14 +30,14 @@ public class Indexer extends SubsystemBase {
     beltMotor = new TalonFX(beltID);
 
     // Configure followers: roller follows indexer (opposed), belt follows indexer (same)
-    beltMotor.setControl(new Follower(rollerID, MotorAlignmentValue.Aligned));
+    beltMotor.setControl(new Follower(rollerID, MotorAlignmentValue.Opposed));
     // Indexer Network Table
     NetworkTableInstance inst = NetworkTableInstance.getDefault();
     NetworkTable indexerTable = inst.getTable("Indexer");
     indexerSpeedEntry = indexerTable.getDoubleTopic("indexerSpeed").getEntry(0);
-    indexerSpeedEntry.set(1);
+    indexerSpeedEntry.set(0.7);
     rollerSpeedEntry = indexerTable.getDoubleTopic("rollerSpeed").getEntry(0);
-    rollerSpeedEntry.set(1);
+    rollerSpeedEntry.set(0.7);
   }
 
   public void setIndexerSpeed(double indexerSpeed, double rollerSpeed) {

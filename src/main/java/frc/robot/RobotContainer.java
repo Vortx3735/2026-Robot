@@ -210,10 +210,10 @@ public class RobotContainer {
     controller.rt.whileTrue(flywheel.shootCommand());
     controller.rb.whileTrue(indexer.runIndexerCommand(false));
 
-    controller.yButton.whileTrue(hood.moveCommand(1));
-    controller.xButton.whileTrue(turret.moveCommand(1));
-    controller.bButton.whileTrue(turret.moveCommand(-1));
-    controller.aButton.whileTrue(hood.moveCommand(-1));
+    controller.yButton.whileTrue(hood.moveCommand(true));
+    controller.xButton.whileTrue(turret.moveCommand(true));
+    controller.bButton.whileTrue(turret.moveCommand(false));
+    controller.aButton.whileTrue(hood.moveCommand(false));
   }
 
   /**

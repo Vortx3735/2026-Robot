@@ -5,6 +5,9 @@
 package frc.robot.subsystems.shooter;
 
 import com.ctre.phoenix6.hardware.TalonFX;
+import edu.wpi.first.networktables.DoubleEntry;
+import edu.wpi.first.networktables.NetworkTable;
+import edu.wpi.first.networktables.NetworkTableInstance;
 import edu.wpi.first.wpilibj2.command.Command;
 import edu.wpi.first.wpilibj2.command.RunCommand;
 import edu.wpi.first.wpilibj2.command.SubsystemBase;
@@ -17,21 +20,40 @@ public class Hood extends SubsystemBase {
   public final Motor motor1;
    */
   private final TalonFX motor;
+  final DoubleEntry hoodMotorSpeedEntry;
+  double speed;
 
   public Hood(int motorId, int canCoderId, Mode state) {
     motor = new TalonFX(motorId);
+    NetworkTableInstance inst = NetworkTableInstance.getDefault();
+    NetworkTable intakeTable = inst.getTable("Hood");
+    hoodMotorSpeedEntry = intakeTable.getDoubleTopic("hoodMotorSpeed").getEntry(0);
+    hoodMotorSpeedEntry.set(0.1);
   }
 
   public void setSpeed(double speed) {
-    motor.set(speed);
+    this.speed = speed;
+  }
+
+  public void set(boolean reversed) {
+    if (reversed) {
+      motor.set(-speed);
+    } else {
+      motor.set(speed);
+    }
   }
 
   private void stop() {
     motor.set(0);
   }
 
-  public Command moveCommand(double speed) {
-    return new RunCommand(() -> setSpeed(speed), this).withName("run hood");
+  public Command moveCommand(boolean reversed) {
+    return this.run(
+            () -> {
+              setSpeed(hoodMotorSpeedEntry.getAsDouble());
+              this.set(reversed);
+            })
+        .withName("move hood");
   }
 
   public Command stopCommand() {
