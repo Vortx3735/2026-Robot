@@ -29,7 +29,7 @@ public class Climber extends SubsystemBase {
     // Climber Network Table
     NetworkTableInstance inst = NetworkTableInstance.getDefault();
     NetworkTable climberTable = inst.getTable("Climber");
-    climberSpeedEntry = climberTable.getDoubleTopic("climberSpeed").getEntry(0.25);
+    climberSpeedEntry = climberTable.getDoubleTopic("climberSpeed").getEntry(0);
     climberSpeedEntry.set(0.25);
   }
 
