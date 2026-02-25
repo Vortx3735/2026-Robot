@@ -3,9 +3,9 @@ package frc.robot.commands;
 import edu.wpi.first.wpilibj2.command.Command;
 import edu.wpi.first.wpilibj2.command.Commands;
 import edu.wpi.first.wpilibj2.command.WaitUntilCommand;
-import frc.robot.subsystems.Hopper;
-import frc.robot.subsystems.Intake;
-import frc.robot.subsystems.Tunnel;
+import frc.robot.subsystems.intake.Hopper;
+import frc.robot.subsystems.intake.Intake;
+import frc.robot.subsystems.intake.Tunnel;
 import frc.robot.subsystems.shooter.Flywheel;
 
 public class CommandFactory {

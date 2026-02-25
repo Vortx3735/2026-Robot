@@ -7,6 +7,9 @@ package frc.robot.subsystems;
 import com.ctre.phoenix6.controls.Follower;
 import com.ctre.phoenix6.hardware.TalonFX;
 import com.ctre.phoenix6.signals.MotorAlignmentValue;
+import edu.wpi.first.networktables.DoubleEntry;
+import edu.wpi.first.networktables.NetworkTable;
+import edu.wpi.first.networktables.NetworkTableInstance;
 import edu.wpi.first.wpilibj2.command.Command;
 import edu.wpi.first.wpilibj2.command.SubsystemBase;
 import org.littletonrobotics.junction.Logger;
@@ -15,12 +18,19 @@ public class Climber extends SubsystemBase {
 
   private final TalonFX climberMotor1;
   private final TalonFX climberMotor2;
+  private final DoubleEntry climberSpeedEntry;
   private double speed = 0.25;
 
   public Climber(int motorIdLeft, int motorIdRight) {
     climberMotor1 = new TalonFX(motorIdLeft);
     climberMotor2 = new TalonFX(motorIdRight);
     climberMotor2.setControl(new Follower(motorIdLeft, MotorAlignmentValue.Opposed));
+
+    // Climber Network Table
+    NetworkTableInstance inst = NetworkTableInstance.getDefault();
+    NetworkTable climberTable = inst.getTable("Climber");
+    climberSpeedEntry = climberTable.getDoubleTopic("climberSpeed").getEntry(0.25);
+    climberSpeedEntry.set(0.25);
   }
 
   public double getSpeed() {
@@ -44,11 +54,21 @@ public class Climber extends SubsystemBase {
   }
 
   public Command upCommand() {
-    return this.run(() -> this.up()).withName("Climber Up");
+    return this.run(
+            () -> {
+              setSpeed(climberSpeedEntry.getAsDouble());
+              this.up();
+            })
+        .withName("Climber Up");
   }
 
   public Command downCommand() {
-    return this.run(() -> this.down()).withName("Climber Down");
+    return this.run(
+            () -> {
+              setSpeed(climberSpeedEntry.getAsDouble());
+              this.down();
+            })
+        .withName("Climber Down");
   }
 
   public Command stopCommand() {
@@ -58,6 +78,7 @@ public class Climber extends SubsystemBase {
   @Override
   public void periodic() {
     // This method will be called once per scheduler run
+    Logger.recordOutput("Climber/speed", speed);
   }
 
   @Override

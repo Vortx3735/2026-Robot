@@ -38,6 +38,7 @@ import frc.robot.commands.DriveCommands;
 import frc.robot.generated.TunerConstants;
 import frc.robot.subsystems.*;
 import frc.robot.subsystems.drive.*;
+import frc.robot.subsystems.intake.*;
 import frc.robot.subsystems.shooter.Flywheel;
 import frc.robot.subsystems.shooter.Hood;
 import frc.robot.subsystems.shooter.Turret;
