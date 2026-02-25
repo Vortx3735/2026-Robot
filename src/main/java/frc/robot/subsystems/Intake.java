@@ -15,13 +15,13 @@ import org.littletonrobotics.junction.Logger;
 
 public class Intake extends SubsystemBase {
 
-  private final TalonFX motor;
+  private final TalonFX intakeMotor;
   // Network Table Entry
-  final DoubleEntry intakeMotorSpeedEntry;
+  private final DoubleEntry intakeMotorSpeedEntry;
   private double speed = 0.25;
 
   public Intake(int motorId) {
-    motor = new TalonFX(motorId);
+    intakeMotor = new TalonFX(motorId);
 
     // Intake Network Table
     NetworkTableInstance inst = NetworkTableInstance.getDefault();
@@ -40,11 +40,11 @@ public class Intake extends SubsystemBase {
 
   public void stopIntake() {
     // Stop motor
-    motor.set(0);
+    intakeMotor.set(0);
   }
 
   public void intake() {
-    motor.set(speed);
+    intakeMotor.set(speed);
   }
 
   public Command intakeCommand() {
@@ -66,6 +66,6 @@ public class Intake extends SubsystemBase {
   @Override
   public void simulationPeriodic() {
     // This method will be called once per scheduler run during simulation
-    Logger.recordOutput("Intake/simulatedVoltage", motor.getSimState().getMotorVoltage());
+    Logger.recordOutput("Intake/simulatedVoltage", intakeMotor.getSimState().getMotorVoltage());
   }
 }

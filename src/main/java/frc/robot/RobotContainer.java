@@ -32,7 +32,6 @@ import edu.wpi.first.wpilibj.XboxController;
 import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
 import edu.wpi.first.wpilibj2.command.Command;
 import edu.wpi.first.wpilibj2.command.Commands;
-import edu.wpi.first.wpilibj2.command.InstantCommand;
 import edu.wpi.first.wpilibj2.command.sysid.SysIdRoutine;
 import frc.robot.commands.CommandFactory;
 import frc.robot.commands.DriveCommands;
@@ -226,7 +225,7 @@ public class RobotContainer {
     // hood.setDefaultCommand(hood.hold().withName("hold hood"));
     // flywheel.setDefaultCommand(flywheel.stopCommand().withName("hold flywheel velocity"));
     // turret.setDefaultCommand(
-    //     TurretCommands.AimToHub(turret, () -> drive.getPose()).withName("aim to hub"));
+    //     TurretCommands.aimToHub(turret, () -> drive.getPose()).withName("aim to hub"));
     hood.setDefaultCommand(hood.stopCommand().withName("stop hood"));
     flywheel.setDefaultCommand(flywheel.stopCommand().withName("stop flywheel"));
     tunnel.setDefaultCommand(tunnel.stopCommand().withName("stop tunnel"));
@@ -249,8 +248,8 @@ public class RobotContainer {
     controller.start().onTrue(Commands.runOnce(resetOdometry).ignoringDisable(true));
 
     // Set bindings
-    // controller.povUp.whileTrue(flywheel.setVelocityPIDCommand(100));
-    // controller.povDown.whileTrue(flywheel.setVelocityPIDCommand(0));
+    // controller.povUp.whileTrue(flywheel.shootCommand());
+    // controller.povDown.whileTrue(flywheel.shootCommand());
     // controller.povRight.whileTrue(turret.moveCommand(0.5));
     // controller.povLeft.whileTrue(turret.moveCommand(-0.5));
     // controller.yButton.whileTrue(hood.setPositionPIDCommand(-45));
@@ -258,15 +257,15 @@ public class RobotContainer {
     // controller.rt.whileTrue(hopper.runHopperCommand(true));
     controller.lt.whileTrue(intake.intakeCommand());
     // controller.aButton.whileTrue(hopper.runHopperCommand(true));
-    // controller.xButton.whileTrue(TurretCommands.AimToSide(turret, () -> drive.getPose()));
+    // controller.xButton.whileTrue(TurretCommands.aimToSide(turret, () -> drive.getPose()));
 
     controller.povUp.whileTrue(climber.upCommand());
     // controller.povRight.whileTrue(hopper.runHopperCommand(true));
     controller.povLeft.whileTrue(turret.setPositionPIDCommandManualSetpoint());
-    // controller.povRight.whileTrue(TurretCommands.AimToSide(turret, () -> drive.getPose()));
+    // controller.povRight.whileTrue(TurretCommands.aimToSide(turret, () -> drive.getPose()));
     controller.povDown.whileTrue(climber.downCommand());
     controller.lb.whileTrue(hopper.runHopperCommand(true));
-    // controller.rt.whileTrue(flywheel.setVelocityPIDCommand());
+    // controller.rt.whileTrue(flywheel.shootCommand());
     controller.rt.whileTrue(CommandFactory.shootCommand(flywheel, tunnel));
     controller.rb.whileTrue(hopper.runHopperCommand(false));
 
@@ -275,7 +274,7 @@ public class RobotContainer {
     controller.bButton.whileTrue(turret.moveCommand(false));
     controller.aButton.whileTrue(hood.moveCommand(false));
 
-    controller.menu.onTrue(new InstantCommand(() -> turret.zero()));
+    controller.menu.onTrue(Commands.runOnce(() -> turret.zero()));
   }
 
   /**
@@ -312,7 +311,7 @@ public class RobotContainer {
                     .getSimulatedDriveTrainPose()
                     .plus(
                         new Transform2d(
-                            0.13, -0.2, new Rotation2d(turret.turretPosition * 2 * Math.PI))))
+                            0.13, -0.2, new Rotation2d(turret.currentPosition * 2 * Math.PI))))
             .plus(new Transform3d(0, 0, 0.3, new Rotation3d())));
     Logger.recordOutput(
         "Hood/simulatedPose",
@@ -321,7 +320,7 @@ public class RobotContainer {
                     .getSimulatedDriveTrainPose()
                     .plus(
                         new Transform2d(
-                            0.13, -0.2, new Rotation2d(turret.turretPosition * 2 * Math.PI))))
+                            0.13, -0.2, new Rotation2d(turret.currentPosition * 2 * Math.PI))))
             .plus(
                 new Transform3d(0, 0, 0.3, new Rotation3d(0, hood.hoodAngle * Math.PI / 180, 0))));
     Logger.recordOutput(
@@ -331,7 +330,7 @@ public class RobotContainer {
                     .getSimulatedDriveTrainPose()
                     .plus(
                         new Transform2d(
-                            0.13, -0.2, new Rotation2d(turret.targetRotations * 2 * Math.PI))))
+                            0.13, -0.2, new Rotation2d(turret.targetPosition * 2 * Math.PI))))
             .plus(new Transform3d(0, 0, 0.3, new Rotation3d())));
   }
 }

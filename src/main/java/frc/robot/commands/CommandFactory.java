@@ -11,7 +11,7 @@ import frc.robot.subsystems.shooter.Flywheel;
 public class CommandFactory {
   public static Command shootCommand(Flywheel flywheel, Tunnel tunnel) {
     return Commands.parallel(
-            flywheel.setVelocityPIDCommand(),
+            flywheel.shootCommand(),
             Commands.sequence(
                 new WaitUntilCommand(() -> flywheel.isAtSpeed()), tunnel.runTunnelCommand(false)))
         .withName("shoot command group");

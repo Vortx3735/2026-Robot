@@ -7,7 +7,6 @@ package frc.robot.subsystems;
 import com.ctre.phoenix6.controls.Follower;
 import com.ctre.phoenix6.hardware.TalonFX;
 import com.ctre.phoenix6.signals.MotorAlignmentValue;
-import edu.wpi.first.networktables.NetworkTableInstance;
 import edu.wpi.first.wpilibj2.command.Command;
 import edu.wpi.first.wpilibj2.command.SubsystemBase;
 import org.littletonrobotics.junction.Logger;
@@ -16,17 +15,12 @@ public class Climber extends SubsystemBase {
 
   private final TalonFX climberMotor1;
   private final TalonFX climberMotor2;
-  // final DoubleEntry flywheelMotorSpeedEntry;
   private double speed = 0.25;
 
   public Climber(int motorIdLeft, int motorIdRight) {
     climberMotor1 = new TalonFX(motorIdLeft);
     climberMotor2 = new TalonFX(motorIdRight);
     climberMotor2.setControl(new Follower(motorIdLeft, MotorAlignmentValue.Opposed));
-    NetworkTableInstance inst = NetworkTableInstance.getDefault();
-    // NetworkTable intakeTable = inst.getTable("Intake");
-    // flywheelMotorSpeedEntry = intakeTable.getDoubleTopic("flywheelMotorSpeed").getEntry(0);
-    // flywheelMotorSpeedEntry.set(1);
   }
 
   public double getSpeed() {
@@ -50,28 +44,15 @@ public class Climber extends SubsystemBase {
   }
 
   public Command upCommand() {
-
-    return this.run(
-            () -> {
-              // setSpeed(flywheelMotorSpeedEntry.getAsDouble());
-              this.up();
-            })
-        .withName("run intake");
+    return this.run(() -> this.up()).withName("Climber Up");
   }
 
   public Command downCommand() {
-
     return this.run(() -> this.down()).withName("Climber Down");
   }
 
   public Command stopCommand() {
-
-    return this.run(
-            () -> {
-              // setSpeed(flywheelMotorSpeedEntry.getAsDouble());
-              this.down();
-            })
-        .withName("run intake");
+    return this.run(() -> this.stop()).withName("Stop Climber");
   }
 
   @Override

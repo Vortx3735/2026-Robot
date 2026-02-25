@@ -1,3 +1,7 @@
+// Copyright (c) FIRST and other WPILib contributors.
+// Open Source Software; you can modify and/or share it under the terms of
+// the WPILib BSD license file in the root directory of this project.
+
 package frc.robot.subsystems;
 
 import com.ctre.phoenix6.configs.TalonFXConfiguration;
@@ -8,7 +12,6 @@ import edu.wpi.first.networktables.DoubleEntry;
 import edu.wpi.first.networktables.NetworkTable;
 import edu.wpi.first.networktables.NetworkTableInstance;
 import edu.wpi.first.wpilibj2.command.Command;
-import edu.wpi.first.wpilibj2.command.RunCommand;
 import edu.wpi.first.wpilibj2.command.SubsystemBase;
 import org.littletonrobotics.junction.Logger;
 
@@ -17,8 +20,8 @@ public class Tunnel extends SubsystemBase {
   private final TalonFX topTunnelMotor;
 
   // Network Table Entry
-  final DoubleEntry topTunnelSpeedEntry;
-  final DoubleEntry bottomTunnelSpeedEntry;
+  private final DoubleEntry topTunnelSpeedEntry;
+  private final DoubleEntry bottomTunnelSpeedEntry;
 
   private double topTunnelSpeed;
   private double bottomTunnelSpeed;
@@ -78,7 +81,7 @@ public class Tunnel extends SubsystemBase {
   }
 
   public Command stopCommand() {
-    return new RunCommand(() -> stop(), this).withName("stop tunnel");
+    return this.run(() -> stop()).withName("stop tunnel");
   }
 
   @Override

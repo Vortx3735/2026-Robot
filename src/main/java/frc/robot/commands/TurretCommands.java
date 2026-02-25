@@ -11,7 +11,7 @@ import frc.robot.subsystems.shooter.Turret;
 import java.util.function.Supplier;
 
 public class TurretCommands {
-  public static Command AimToHub(Turret turret, Supplier<Pose2d> poseSupplier) {
+  public static Command aimToHub(Turret turret, Supplier<Pose2d> poseSupplier) {
     return Commands.run(
         () -> {
           Pose2d robotPose = poseSupplier.get();
@@ -38,7 +38,7 @@ public class TurretCommands {
         turret);
   }
 
-  public static Command AimToSide(Turret turret, Supplier<Pose2d> poseSupplier) {
+  public static Command aimToSide(Turret turret, Supplier<Pose2d> poseSupplier) {
     return Commands.run(
         () -> {
           Pose2d robotPose = poseSupplier.get();
