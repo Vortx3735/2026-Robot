@@ -61,7 +61,9 @@ public class Intake extends SubsystemBase {
   }
 
   @Override
-  public void periodic() {}
+  public void periodic() {
+    Logger.recordOutput("Intake/motorCurrent", intakeMotor.getStatorCurrent().getValueAsDouble());
+  }
 
   @Override
   public void simulationPeriodic() {

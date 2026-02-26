@@ -62,7 +62,9 @@ public class Hopper extends SubsystemBase {
   }
 
   @Override
-  public void periodic() {}
+  public void periodic() {
+    Logger.recordOutput("Hopper/motorCurrent", hopperMotor.getStatorCurrent().getValueAsDouble());
+  }
 
   @Override
   public void simulationPeriodic() {
