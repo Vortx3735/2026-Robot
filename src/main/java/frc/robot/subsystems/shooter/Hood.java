@@ -101,7 +101,9 @@ public class Hood extends SubsystemBase {
   }
 
   public double getHoodAngleDegrees() {
-    return hoodMotor.getRotorPosition().getValueAsDouble() * 360.0 / kGearRatio; // Convert to degrees
+    return hoodMotor.getRotorPosition().getValueAsDouble()
+        * 360.0
+        / kGearRatio; // Convert to degrees
   }
 
   private void stop() {
@@ -155,7 +157,6 @@ public class Hood extends SubsystemBase {
     hoodAngle = hoodMotor.getRotorPosition().getValue().in(Units.Degrees);
     Logger.recordOutput("Hood/currentAngle", hoodAngle);
     Logger.recordOutput("Hood/targetAngle", targetAngle);
-
   }
 
   @Override
