@@ -1,5 +1,6 @@
 package frc.robot.subsystems.intake;
 
+import com.ctre.phoenix6.configs.CurrentLimitsConfigs;
 import com.ctre.phoenix6.hardware.TalonFX;
 import edu.wpi.first.networktables.DoubleEntry;
 // NetworkTable imports
@@ -18,6 +19,14 @@ public class Hopper extends SubsystemBase {
 
   public Hopper(int hopperID) {
     hopperMotor = new TalonFX(hopperID);
+
+    // Limit current
+    var currentLimit = new CurrentLimitsConfigs();
+
+    currentLimit.StatorCurrentLimit = 30;
+    currentLimit.StatorCurrentLimitEnable = true;
+
+    hopperMotor.getConfigurator().apply(currentLimit);
 
     // Hopper Network Table
     NetworkTableInstance inst = NetworkTableInstance.getDefault();

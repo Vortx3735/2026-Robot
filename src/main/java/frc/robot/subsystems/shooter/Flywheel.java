@@ -148,7 +148,8 @@ public class Flywheel extends SubsystemBase {
     }
     Logger.recordOutput("Flywheel/currentRPS", currentRPS);
     Logger.recordOutput("Flywheel/targetRPS", targetRPS);
-    Logger.recordOutput("Flywheel/motorCurrent", flywheelMotor.getStatorCurrent().getValueAsDouble());
+    Logger.recordOutput(
+        "Flywheel/motorCurrent", flywheelMotor.getStatorCurrent().getValueAsDouble());
   }
 
   @Override

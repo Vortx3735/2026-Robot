@@ -78,8 +78,10 @@ public class Tunnel extends SubsystemBase {
 
   @Override
   public void periodic() {
-    Logger.recordOutput("Tunnel/topMotorCurrent", topTunnelMotor.getStatorCurrent().getValueAsDouble());
-    Logger.recordOutput("Tunnel/bottomMotorCurrent", bottomTunnelMotor.getStatorCurrent().getValueAsDouble());
+    Logger.recordOutput(
+        "Tunnel/topMotorCurrent", topTunnelMotor.getStatorCurrent().getValueAsDouble());
+    Logger.recordOutput(
+        "Tunnel/bottomMotorCurrent", bottomTunnelMotor.getStatorCurrent().getValueAsDouble());
   }
 
   @Override
