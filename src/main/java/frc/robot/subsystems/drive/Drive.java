@@ -142,6 +142,10 @@ public class Drive extends SubsystemBase implements Vision.VisionConsumer {
   private final SwerveDrivePoseEstimator poseEstimator =
       new SwerveDrivePoseEstimator(kinematics, rawGyroRotation, lastModulePositions, new Pose2d());
   private final Consumer<Pose2d> resetSimulationPoseCallBack;
+  // Guard to ensure AutoBuilder.configure is only invoked once per JVM. Some test
+  // environments may construct Drive multiple times, which previously caused
+  // PathPlanner's AutoBuilder.configure to log an error.
+  private static boolean autoBuilderConfigured = false;
 
   public Drive(
       GyroIO gyroIO,
@@ -174,17 +178,20 @@ public class Drive extends SubsystemBase implements Vision.VisionConsumer {
             new SysIdRoutine.Mechanism(
                 (voltage) -> runCharacterization(voltage.in(Volts)), null, this));
 
-    // Configure AutoBuilder for PathPlanner
-    AutoBuilder.configure(
-        this::getPose,
-        this::resetOdometry,
-        this::getChassisSpeeds,
-        this::runVelocity,
-        new PPHolonomicDriveController(
-            new PIDConstants(5.0, 0.0, 0.0), new PIDConstants(5.0, 0.0, 0.0)),
-        PP_CONFIG,
-        () -> DriverStation.getAlliance().orElse(Alliance.Blue) == Alliance.Red,
-        this);
+    // Configure AutoBuilder for PathPlanner (only once)
+    if (!autoBuilderConfigured) {
+      AutoBuilder.configure(
+          this::getPose,
+          this::resetOdometry,
+          this::getChassisSpeeds,
+          this::runVelocity,
+          new PPHolonomicDriveController(
+              new PIDConstants(5.0, 0.0, 0.0), new PIDConstants(5.0, 0.0, 0.0)),
+          PP_CONFIG,
+          () -> DriverStation.getAlliance().orElse(Alliance.Blue) == Alliance.Red,
+          this);
+      autoBuilderConfigured = true;
+    }
     Pathfinding.setPathfinder(new LocalADStarAK());
     PathPlannerLogging.setLogActivePathCallback(
         (activePath) -> {

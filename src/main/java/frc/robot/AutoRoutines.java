@@ -4,6 +4,7 @@ import choreo.auto.AutoFactory;
 import choreo.auto.AutoRoutine;
 import choreo.auto.AutoTrajectory;
 import edu.wpi.first.wpilibj2.command.Commands;
+import frc.robot.commands.CommandFactory;
 
 public class AutoRoutines {
   private final AutoFactory m_factory;
@@ -38,15 +39,12 @@ public class AutoRoutines {
                     .cmd(), // Schedule the trajectory (make the robot move on the trajectory)
                 // Run commands in parallel (at the same time)
                 m_container.drive.stopCommand(),
-                Commands.parallel(
-                    // Run intake and indexer
-                    m_container.intake.intakeCommand(), m_container.hopper.runHopperCommand(false)),
-                // Stop intake and indexer
-                m_container.intake.stopCommand(),
-                m_container.hopper.stopCommand(),
+                CommandFactory.intakeCommand(m_container.intake, m_container.hopper),
                 // Run flywheel then stop
-                m_container.flywheel.shootCommand(),
-                m_container.flywheel.stopCommand()));
+                CommandFactory.shootCommand(m_container.flywheel, m_container.tunnel, 40)));
+    // Stop intake and indexer
+    // m_container.intake.stopCommand(),
+    // m_container.hopper.stopCommand();
 
     return routine;
   }

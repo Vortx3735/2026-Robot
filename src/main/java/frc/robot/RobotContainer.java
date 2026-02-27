@@ -32,16 +32,15 @@ import edu.wpi.first.wpilibj.XboxController;
 import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
 import edu.wpi.first.wpilibj2.command.Command;
 import edu.wpi.first.wpilibj2.command.Commands;
-import edu.wpi.first.wpilibj2.command.InstantCommand;
 import edu.wpi.first.wpilibj2.command.sysid.SysIdRoutine;
 import frc.robot.commands.CommandFactory;
 import frc.robot.commands.DriveCommands;
+import frc.robot.commands.ShooterCommands;
 import frc.robot.generated.TunerConstants;
 import frc.robot.subsystems.*;
 import frc.robot.subsystems.drive.*;
-import frc.robot.subsystems.shooter.Flywheel;
-import frc.robot.subsystems.shooter.Hood;
-import frc.robot.subsystems.shooter.Turret;
+import frc.robot.subsystems.intake.*;
+import frc.robot.subsystems.shooter.*;
 import frc.robot.subsystems.vision.*;
 import frc.robot.util.*;
 import org.ironmaple.simulation.SimulatedArena;
@@ -69,11 +68,7 @@ public class RobotContainer {
   // new Turret(Constants.TurretConstants.TURRET_MOTOR_ID,
   // Constants.TurretConstants.TURRET_CANCODER_ID, Constants.currentMode);
 
-  public final Hood hood =
-      new Hood(
-          Constants.HoodConstants.HOOD_MOTOR_ID,
-          Constants.HoodConstants.HOOD_CANCODER_ID,
-          Constants.currentMode);
+  public final Hood hood = new Hood(Constants.HoodConstants.HOOD_MOTOR_ID, Constants.currentMode);
   public final Flywheel flywheel =
       new Flywheel(Constants.FlywheelConstants.FLYWHEEL_MOTOR_ID, Constants.currentMode);
   public final Intake intake = new Intake(Constants.IntakeConstants.INTAKE_MOTOR_ID);
@@ -137,7 +132,8 @@ public class RobotContainer {
               new VisionIOPhotonVisionSim(
                   camera0Name, robotToCamera0, driveSimulation::getSimulatedDriveTrainPose);
         } catch (UnsatisfiedLinkError e) {
-          // If the JNI library (like PhotonVision) fails to load (e.g. in CI environment),
+          // If the JNI library (like PhotonVision) fails to load (e.g. in CI
+          // environment),
           // fallback to a dummy implementation to allow the robot code to start up.
           visionIO = new VisionIO() {};
           System.err.println(
@@ -224,9 +220,11 @@ public class RobotContainer {
     climber.setDefaultCommand(climber.stopCommand().withName("stop climber"));
     hopper.setDefaultCommand(hopper.stopCommand().withName("stop hopper"));
     // hood.setDefaultCommand(hood.hold().withName("hold hood"));
-    // flywheel.setDefaultCommand(flywheel.stopCommand().withName("hold flywheel velocity"));
+    // flywheel.setDefaultCommand(flywheel.stopCommand().withName("hold flywheel
+    // velocity"));
     // turret.setDefaultCommand(
-    //     TurretCommands.AimToHub(turret, () -> drive.getPose()).withName("aim to hub"));
+    // TurretCommands.AimToHub(turret, () -> drive.getPose()).withName("aim to
+    // hub"));
     hood.setDefaultCommand(hood.stopCommand().withName("stop hood"));
     flywheel.setDefaultCommand(flywheel.stopCommand().withName("stop flywheel"));
     tunnel.setDefaultCommand(tunnel.stopCommand().withName("stop tunnel"));
@@ -235,10 +233,11 @@ public class RobotContainer {
     // Default command, normal field-relative drive
     drive.setDefaultCommand(
         DriveCommands.joystickDrive(
-            drive,
-            () -> -controller.getLeftY(),
-            () -> -controller.getLeftX(),
-            () -> -controller.getRightX()));
+                drive,
+                () -> -controller.getLeftY(),
+                () -> -controller.getLeftX(),
+                () -> -controller.getRightX())
+            .withName("joystick drive"));
 
     // Reset gyro / odometry
     final Runnable resetOdometry =
@@ -249,33 +248,64 @@ public class RobotContainer {
     controller.start().onTrue(Commands.runOnce(resetOdometry).ignoringDisable(true));
 
     // Set bindings
-    // controller.povUp.whileTrue(flywheel.setVelocityPIDCommand(100));
-    // controller.povDown.whileTrue(flywheel.setVelocityPIDCommand(0));
-    // controller.povRight.whileTrue(turret.moveCommand(0.5));
-    // controller.povLeft.whileTrue(turret.moveCommand(-0.5));
-    // controller.yButton.whileTrue(hood.setPositionPIDCommand(-45));
-    // controller.bButton.whileTrue(hood.setPositionPIDCommand(0));
-    // controller.rt.whileTrue(hopper.runHopperCommand(true));
-    controller.lt.whileTrue(intake.intakeCommand());
-    // controller.aButton.whileTrue(hopper.runHopperCommand(true));
-    // controller.xButton.whileTrue(TurretCommands.AimToSide(turret, () -> drive.getPose()));
 
+    /*
+     * // Test Binds
+     *
+     * // controller.povUp.whileTrue(flywheel.setVelocityPIDCommand(100));
+     * // controller.povDown.whileTrue(flywheel.setVelocityPIDCommand(0));
+     * // controller.povRight.whileTrue(turret.moveCommand(0.5));
+     * // controller.povLeft.whileTrue(turret.moveCommand(-0.5));
+     * // controller.yButton.whileTrue(hood.setPositionPIDCommand(-45));
+     * // controller.bButton.whileTrue(hood.setPositionPIDCommand(0));
+     * // controller.rt.whileTrue(hopper.runHopperCommand(true));
+     * controller.lt.whileTrue(intake.intakeCommand());
+     * // controller.aButton.whileTrue(hopper.runHopperCommand(true));
+     * // controller.xButton.whileTrue(TurretCommands.AimToSide(turret, () ->
+     * drive.getPose()));
+     *
+     * controller.povUp.whileTrue(climber.upCommand());
+     * // controller.povRight.whileTrue(hopper.runHopperCommand(true));
+     * controller.povLeft.whileTrue(turret.setPositionPIDCommandManualSetpoint());
+     * // controller.povRight.whileTrue(TurretCommands.AimToSide(turret, () ->
+     * drive.getPose()));
+     * controller.povDown.whileTrue(climber.downCommand());
+     * controller.lb.whileTrue(hopper.runHopperCommand(true));
+     * // controller.rt.whileTrue(flywheel.setVelocityPIDCommand());
+     * controller.rt.whileTrue(CommandFactory.shootCommand(flywheel, tunnel));
+     * controller.rb.whileTrue(hopper.runHopperCommand(false));
+     *
+     * controller.yButton.whileTrue(hood.moveCommand(true));
+     * controller.xButton.whileTrue(turret.moveCommand(true));
+     * controller.bButton.whileTrue(turret.moveCommand(false));
+     * controller.aButton.whileTrue(hood.moveCommand(false));
+     *
+     * controller.menu.onTrue(new InstantCommand(() -> turret.zero()));
+     */
+
+    /*
+     * // Actual Binds
+     */
+    // Shooter Binds
+    // controller.lt.onTrue(TurretCommands.AimToSide(turret, () ->
+    // drive.getPose())); does AimToSide
+    // aim to a side of the field?
+    controller.lb.whileTrue(turret.moveCommand(true));
+    // controller.rb.whileTrue(turret.moveCommand(false));
+    controller.rb.whileTrue(CommandFactory.manualShootCommand(flywheel, tunnel));
+    controller.povLeft.whileTrue(hood.moveCommand(true));
+    controller.povRight.whileTrue(hood.moveCommand(false));
+    controller.yButton.whileTrue(ShooterCommands.AimToHub(turret, () -> drive.getPose()));
+    controller.aButton.whileTrue(
+        ShooterCommands.AimToHub(turret, flywheel, hood, () -> drive.getPose(), 65));
+
+    // Climber Binds
     controller.povUp.whileTrue(climber.upCommand());
-    // controller.povRight.whileTrue(hopper.runHopperCommand(true));
-    controller.povLeft.whileTrue(turret.setPositionPIDCommandManualSetpoint());
-    // controller.povRight.whileTrue(TurretCommands.AimToSide(turret, () -> drive.getPose()));
     controller.povDown.whileTrue(climber.downCommand());
-    controller.lb.whileTrue(hopper.runHopperCommand(true));
-    // controller.rt.whileTrue(flywheel.setVelocityPIDCommand());
-    controller.rt.whileTrue(CommandFactory.shootCommand(flywheel, tunnel));
-    controller.rb.whileTrue(hopper.runHopperCommand(false));
 
-    controller.yButton.whileTrue(hood.moveCommand(true));
-    controller.xButton.whileTrue(turret.moveCommand(true));
-    controller.bButton.whileTrue(turret.moveCommand(false));
-    controller.aButton.whileTrue(hood.moveCommand(false));
-
-    controller.menu.onTrue(new InstantCommand(() -> turret.zero()));
+    // Intake Binds
+    controller.xButton.whileTrue(CommandFactory.intakeCommand(intake, hopper));
+    controller.bButton.whileTrue(CommandFactory.outtakeCommand(intake, hopper));
   }
 
   /**
