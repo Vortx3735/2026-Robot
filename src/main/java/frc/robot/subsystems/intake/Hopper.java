@@ -46,11 +46,11 @@ public class Hopper extends SubsystemBase {
   }
 
   public Command intakeCommand() {
-    return new RunCommand(() -> run(false)).withName("intake hopper");
+    return new RunCommand(() -> run(false), this).withName("intake hopper");
   }
 
   public Command outtakeCommand() {
-    return new RunCommand(() -> run(true)).withName("outtake hopper");
+    return new RunCommand(() -> run(true), this).withName("outtake hopper");
   }
 
   public Command stopCommand() {
