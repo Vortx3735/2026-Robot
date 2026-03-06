@@ -32,8 +32,6 @@ public class Hood extends SubsystemBase {
 
   private final TalonFX hoodMotor;
 
-  final DoubleEntry hoodSpeedEntry;
-
   private final DCMotorSim m_motorSimModel =
       new DCMotorSim(
           LinearSystemId.createDCMotorSystem(DCMotor.getKrakenX44(1), kMOI, kGearRatio),
@@ -88,10 +86,6 @@ public class Hood extends SubsystemBase {
     talonFXConfigs.MotorOutput.Inverted = InvertedValue.Clockwise_Positive;
 
     hoodMotor.getConfigurator().apply(talonFXConfigs);
-    NetworkTableInstance inst = NetworkTableInstance.getDefault();
-    NetworkTable intakeTable = inst.getTable("Subsystems/Hood");
-    hoodSpeedEntry = intakeTable.getDoubleTopic("hoodSpeed").getEntry(0);
-    hoodSpeedEntry.set(0.1);
 
     if (state == Mode.SIM) {
       var talonFXSim = hoodMotor.getSimState();

@@ -34,11 +34,6 @@ public class Tunnel extends SubsystemBase {
     // Configure followers: roller follows tunnel (opposed), belt follows tunnel (same)
     // Tunnel Network Table
     NetworkTableInstance inst = NetworkTableInstance.getDefault();
-    NetworkTable tunnelTable = inst.getTable("Subsystems/Tunnel");
-    bottomTunnelSpeedEntry = tunnelTable.getDoubleTopic("bottomTunnelSpeed").getEntry(1);
-    topTunnelSpeedEntry = tunnelTable.getDoubleTopic("topTunnelSpeed").getEntry(1);
-    bottomTunnelSpeedEntry.set(0.4);
-    topTunnelSpeedEntry.set(0.4);
   }
 
   public double getTopTunnelSpeed() {

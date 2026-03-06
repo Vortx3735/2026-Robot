@@ -13,17 +13,8 @@ import org.littletonrobotics.junction.Logger;
 public class Hopper extends SubsystemBase {
   private final TalonFX hopperMotor;
 
-  // Network Table Entry
-  final DoubleEntry hopperSpeedEntry;
-
   public Hopper(int hopperID) {
     hopperMotor = new TalonFX(hopperID);
-
-    // Hopper Network Table
-    NetworkTableInstance inst = NetworkTableInstance.getDefault();
-    NetworkTable hopperTable = inst.getTable("Subsystems/Hopper");
-    hopperSpeedEntry = hopperTable.getDoubleTopic("hopperSpeed").getEntry(0);
-    hopperSpeedEntry.set(0.3);
   }
 
   public double getHopperSpeed() {

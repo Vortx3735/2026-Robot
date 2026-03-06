@@ -16,17 +16,12 @@ public class Climber extends SubsystemBase {
 
   private final TalonFX climberMotor1;
   private final TalonFX climberMotor2;
-  // final DoubleEntry flywheelMotorSpeedEntry;
   private double speed = 0.25;
 
   public Climber(int motorIdLeft, int motorIdRight) {
     climberMotor1 = new TalonFX(motorIdLeft);
     climberMotor2 = new TalonFX(motorIdRight);
     climberMotor2.setControl(new Follower(motorIdLeft, MotorAlignmentValue.Opposed));
-    NetworkTableInstance inst = NetworkTableInstance.getDefault();
-    // NetworkTable intakeTable = inst.getTable("Intake");
-    // flywheelMotorSpeedEntry = intakeTable.getDoubleTopic("flywheelMotorSpeed").getEntry(0);
-    // flywheelMotorSpeedEntry.set(1);
   }
 
   public double getSpeed() {

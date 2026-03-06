@@ -29,7 +29,6 @@ public class Flywheel extends SubsystemBase {
 
   private TalonFX flywheelMotor;
 
-  public final DoubleEntry flywheelSpeedEntry;
   private final BangBangController bbcontroller = new BangBangController();
   private final DCMotorSim m_motorSimModel =
       new DCMotorSim(
@@ -70,10 +69,6 @@ public class Flywheel extends SubsystemBase {
 
     flywheelMotor.getConfigurator().apply(talonFXConfigs);
     flywheelMotor.setNeutralMode(NeutralModeValue.Coast);
-    NetworkTableInstance inst = NetworkTableInstance.getDefault();
-    NetworkTable flywheelTable = inst.getTable("Subsystems/Flywheel");
-    flywheelSpeedEntry = flywheelTable.getDoubleTopic("flywheelSpeed").getEntry(1);
-    flywheelSpeedEntry.set(0.75);
     if (state == Mode.SIM) {
       var talonFXSim = flywheelMotor.getSimState();
       talonFXSim.Orientation = ChassisReference.CounterClockwise_Positive;

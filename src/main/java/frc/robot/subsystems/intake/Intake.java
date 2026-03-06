@@ -25,12 +25,6 @@ public class Intake extends SubsystemBase {
   public Intake(int motorId) {
     intakeMotor = new TalonFX(motorId);
 
-    // Intake Network Table
-    NetworkTableInstance inst = NetworkTableInstance.getDefault();
-    NetworkTable intakeTable = inst.getTable("Subsystems/Intake");
-    intakeSpeedEntry = intakeTable.getDoubleTopic("intakeSpeed").getEntry(0);
-    intakeSpeedEntry.set(0.5);
-
     TalonFXConfiguration intakeConfig = new TalonFXConfiguration();
     intakeConfig.MotorOutput.Inverted = InvertedValue.Clockwise_Positive;
     intakeMotor.getConfigurator().apply(intakeConfig);
