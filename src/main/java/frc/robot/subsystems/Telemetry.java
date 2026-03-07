@@ -96,6 +96,41 @@ public class Telemetry extends SubsystemBase {
     climberSpeedEntry.set(0.25);
   }
 
+  public double getFlywheelEntrySpeed() {
+    return flywheelSpeedEntry.getAsDouble();
+  }
+  
+  public double getHoodEntrySpeed() {
+    return hoodSpeedEntry.getAsDouble();
+  }
+
+  public double getTurretEntrySpeed() {
+    return turretSpeedEntry.getAsDouble();
+  }
+
+  public double getTurretEntryPosition() {
+    return turretPositionEntry.getAsDouble();
+  }
+
+  public double getHopperEntrySpeed() {
+    return hopperSpeedEntry.getAsDouble();
+  }
+
+  public double getIntakeEntrySpeed() {
+    return intakeSpeedEntry.getAsDouble();
+  }
+  
+  public double getBottomTunnelEntrySpeed() {
+    return bottomTunnelSpeedEntry.getAsDouble();
+  }
+
+  public double getTopTunnelEntrySpeed() {
+    return topTunnelSpeedEntry.getAsDouble();
+  }
+
+  public double getClimberEntrySpeed() {
+    return climberSpeedEntry.getAsDouble();
+  }
 
   @Override
   public void periodic() {

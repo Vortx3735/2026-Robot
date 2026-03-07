@@ -329,7 +329,7 @@ public class RobotContainer {
                     .getSimulatedDriveTrainPose()
                     .plus(
                         new Transform2d(
-                            0.13, -0.2, new Rotation2d(turret.currentPosition * 2 * Math.PI))))
+                            0.13, -0.2, new Rotation2d(turret.getTurretCurrentPosition() * 2 * Math.PI))))
             .plus(new Transform3d(0, 0, 0.3, new Rotation3d())));
     Logger.recordOutput(
         "Hood/simulatedPose",
@@ -338,9 +338,9 @@ public class RobotContainer {
                     .getSimulatedDriveTrainPose()
                     .plus(
                         new Transform2d(
-                            0.13, -0.2, new Rotation2d(turret.currentPosition * 2 * Math.PI))))
+                            0.13, -0.2, new Rotation2d(turret.getTurretCurrentPosition() * 2 * Math.PI))))
             .plus(
-                new Transform3d(0, 0, 0.3, new Rotation3d(0, hood.hoodAngle * Math.PI / 180, 0))));
+                new Transform3d(0, 0, 0.3, new Rotation3d(0, hood.getHoodAngle() * Math.PI / 180, 0))));
     Logger.recordOutput(
         "Turret/targetPose",
         new Pose3d(
@@ -348,7 +348,7 @@ public class RobotContainer {
                     .getSimulatedDriveTrainPose()
                     .plus(
                         new Transform2d(
-                            0.13, -0.2, new Rotation2d(turret.targetPosition * 2 * Math.PI))))
+                            0.13, -0.2, new Rotation2d(turret.getTurretTargetPosition() * 2 * Math.PI))))
             .plus(new Transform3d(0, 0, 0.3, new Rotation3d())));
   }
 }

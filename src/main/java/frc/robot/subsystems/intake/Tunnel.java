@@ -10,17 +10,17 @@ import edu.wpi.first.networktables.NetworkTableInstance;
 import edu.wpi.first.wpilibj2.command.Command;
 import edu.wpi.first.wpilibj2.command.RunCommand;
 import edu.wpi.first.wpilibj2.command.SubsystemBase;
+import frc.robot.subsystems.Telemetry;
+
 import org.littletonrobotics.junction.Logger;
 
 public class Tunnel extends SubsystemBase {
   private final TalonFX bottomTunnelMotor;
   private final TalonFX topTunnelMotor;
 
-  // Network Table Entry
-  final DoubleEntry topTunnelSpeedEntry;
-  final DoubleEntry bottomTunnelSpeedEntry;
+  private final Telemetry telemetry;
 
-  public Tunnel(int bottomTunnelId, int topTunnelId) {
+  public Tunnel(int bottomTunnelId, int topTunnelId, Telemetry telemetry) {
     bottomTunnelMotor = new TalonFX(bottomTunnelId);
     topTunnelMotor = new TalonFX(topTunnelId);
 
@@ -34,6 +34,8 @@ public class Tunnel extends SubsystemBase {
     // Configure followers: roller follows tunnel (opposed), belt follows tunnel (same)
     // Tunnel Network Table
     NetworkTableInstance inst = NetworkTableInstance.getDefault();
+
+    this.telemetry = telemetry;
   }
 
   public double getTopTunnelSpeed() {
