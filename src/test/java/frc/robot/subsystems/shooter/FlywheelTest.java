@@ -1,5 +1,6 @@
 package frc.robot.subsystems.shooter;
 
+import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 
@@ -31,8 +32,12 @@ public class FlywheelTest {
   @Test
   public void testIsAtSpeedInitially() {
     Flywheel flywheel = new Flywheel(Constants.FlywheelConstants.FLYWHEEL_MOTOR_ID, Mode.SIM);
-    // Both currentrps and targetrps start at 0, so isAtSpeed should return true
-    assertTrue(flywheel.isAtSpeed(), "Flywheel should be at speed when both velocities are 0");
+    // When targetRPS is 0 the flywheel has not been commanded to spin, so isAtSpeed
+    // must return false — otherwise WaitUntilCommand would fire immediately and feed
+    // balls into a stopped shooter.
+    assertFalse(
+        flywheel.isAtSpeed(),
+        "Flywheel should NOT report at-speed when targetRPS is 0 (not yet commanded)");
   }
 
   @Test

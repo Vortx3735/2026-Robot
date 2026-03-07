@@ -103,7 +103,7 @@ public class Flywheel extends SubsystemBase {
 
   public BooleanSupplier isAtSpeed() {
     double tolerance = 3;
-    return () -> Math.abs(targetRPS - currentRPS) < tolerance;
+    return () -> targetRPS > 0 && Math.abs(targetRPS - currentRPS) < tolerance;
   }
 
   public void shoot(double speed) {

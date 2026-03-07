@@ -24,10 +24,10 @@ public class CommandFactory {
   public static Command shootCommand(
       Flywheel flywheel, Tunnel tunnel, Hopper hopper, Supplier<Double> targetRPS) {
     return Commands.parallel(
-            flywheel.shootCommand(targetRPS), tunnel.intakeCommand(), hopper.intakeCommand())
-        // Commands.either(tunnel.intakeCommand(), tunnel.stopCommand(), flywheel.isAtSpeed()))
-        // Commands.sequence(
-        //     new WaitUntilCommand(() -> flywheel.isAtSpeed()), tunnel.intakeCommand()))
+            flywheel.shootCommand(targetRPS),
+            Commands.sequence(
+                new WaitUntilCommand(flywheel.isAtSpeed()),
+                Commands.parallel(tunnel.intakeCommand(), hopper.intakeCommand())))
         .withName("shoot command group");
   }
 
