@@ -35,8 +35,8 @@ public class Flywheel extends SubsystemBase {
           LinearSystemId.createDCMotorSystem(DCMotor.getKrakenX60(1), kMOI, 1),
           DCMotor.getKrakenX60(1));
 
-  public double currentRPS;
-  public double targetRPS = 0;
+  private double currentRPS;
+  private double targetRPS = 0;
   public double dashboardSpeed = 0;
   // NOTE: removed deprecated lowercase `targetrps` alias. Use `targetRPS`.
 
@@ -78,6 +78,14 @@ public class Flywheel extends SubsystemBase {
 
   public double getDashboardSpeed() {
     return flywheelSpeedEntry.get();
+  }
+  
+  public double getFlywheelCurrentRPS() {
+    return currentRPS;
+  }
+
+  public double getFlywheelTargetRPS() {
+    return currentRPS;
   }
 
   public void stop() {
@@ -154,8 +162,6 @@ public class Flywheel extends SubsystemBase {
     } else {
       currentRPS = flywheelMotor.getRotorVelocity().getValueAsDouble();
     }
-    Logger.recordOutput("Flywheel/currentRPS", currentRPS);
-    Logger.recordOutput("Flywheel/targetRPS", targetRPS);
   }
 
   @Override

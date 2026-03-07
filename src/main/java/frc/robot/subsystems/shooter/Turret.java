@@ -38,8 +38,8 @@ public class Turret extends SubsystemBase {
           LinearSystemId.createDCMotorSystem(DCMotor.getKrakenX44(1), kMOI, 1 / kGearRatio),
           DCMotor.getKrakenX44(1));
 
-  public double currentPosition; // rotations
-  public double targetPosition = 0;
+  private double currentPosition; // rotations
+  private double targetPosition = 0;
   public double turretVelocity = 0.0; // rotations per second (mechanism)
   private static final double kTurretPositionTolerance = 0.05; // rotations
   private static final double kTurretVelocityToleranceRps = 0.5; // rps
@@ -109,17 +109,17 @@ public class Turret extends SubsystemBase {
     }
   }
 
+  public double getTurretCurrentPosition() {
+    return currentPosition;
+  }
+
+  public double getTurretTargetPosition() {
+    return targetPosition;
+  }
+
   public void setVoltage(double voltage) {
     VoltageOut request = new VoltageOut(voltage);
     turretMotor.setControl(request);
-  }
-
-  public double getCurrentPosition() {
-    // Prefer simulated field in simulation; otherwise read from motor sensor
-    if (isSim) {
-      return currentPosition;
-    }
-    return turretMotor.getRotorPosition().getValueAsDouble() * kGearRatio;
   }
 
   public void setPositionPID(double rotations) {
@@ -260,7 +260,5 @@ public class Turret extends SubsystemBase {
         // ignore
       }
     }
-    Logger.recordOutput("Turret/currentPostion(rotations)", currentPosition);
-    Logger.recordOutput("Turret/targetPostion(rotations)", targetPosition);
   }
 }
