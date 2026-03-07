@@ -23,13 +23,43 @@ public class Telemetry extends SubsystemBase {
   Tunnel tunnel;
   Climber climber;
 
-  // Network Tables
-  static final NetworkTableInstance inst = NetworkTableInstance.getDefault();
+  final DoubleEntry flywheelSpeedEntry;
+  final DoubleEntry hoodSpeedEntry;
+  final DoubleEntry turretSpeedEntry;
+  final DoubleEntry turretPositionEntry;
+  final DoubleEntry hopperSpeedEntry;
+  final DoubleEntry intakeSpeedEntry;
+  final DoubleEntry bottomTunnelSpeedEntry;
+  final DoubleEntry topTunnelSpeedEntry;
+  final DoubleEntry climberSpeedEntry;
 
-  // Flywheel Network Table
-  static final NetworkTable flywheelTable = inst.getTable("Subsystems/Flywheel");
-  static final DoubleEntry flywheelSpeedEntry = flywheelTable.getDoubleTopic("flywheelSpeed").getEntry(1);
-  flywheelSpeedEntry.set(0.75);
+  public Telemetry(
+      Drive drive,
+      Vision vision,
+      Flywheel flywheel,
+      Hood hood,
+      Turret turret,
+      Hopper hopper,
+      Intake intake,
+      Tunnel tunnel,
+      Climber climber) {
+    this.drive = drive;
+    this.vision = vision;
+    this.flywheel = flywheel;
+    this.hood = hood;
+    this.turret = turret;
+    this.hopper = hopper;
+    this.intake = intake;
+    this.tunnel = tunnel;
+    this.climber = climber;
+
+    // Network Tables
+    NetworkTableInstance inst = NetworkTableInstance.getDefault();
+
+    // Flywheel Network Table
+    NetworkTable flywheelTable = inst.getTable("Subsystems/Flywheel");
+    flywheelSpeedEntry = flywheelTable.getDoubleTopic("flywheelSpeed").getEntry(1);
+    flywheelSpeedEntry.set(0.75);
 
     // Hood Network Table
     NetworkTable hoodTable = inst.getTable("Subsystems/Hood");
@@ -53,11 +83,6 @@ public class Telemetry extends SubsystemBase {
     intakeSpeedEntry = intakeTable.getDoubleTopic("intakeSpeed").getEntry(0);
     intakeSpeedEntry.set(0.5);
 
-    // Climber Network Table
-    NetworkTable climberTable = inst.getTable("Subsystems/Climber");
-    climberSpeedEntry = climberTable.getDoubleTopic("flywheelMotorSpeed").getEntry(0);
-    climberSpeedEntry.set(0.25);
-
     // Tunnel Network Table
     NetworkTable tunnelTable = inst.getTable("Subsystems/Tunnel");
     bottomTunnelSpeedEntry = tunnelTable.getDoubleTopic("bottomTunnelSpeed").getEntry(1);
@@ -65,26 +90,10 @@ public class Telemetry extends SubsystemBase {
     bottomTunnelSpeedEntry.set(0.4);
     topTunnelSpeedEntry.set(0.4);
 
-
-  public Telemetry(
-      Drive drive,
-      Vision vision,
-      Flywheel flywheel,
-      Hood hood,
-      Turret turret,
-      Hopper hopper,
-      Intake intake,
-      Tunnel tunnel,
-      Climber climber) {
-    this.drive = drive;
-    this.vision = vision;
-    this.flywheel = flywheel;
-    this.hood = hood;
-    this.turret = turret;
-    this.hopper = hopper;
-    this.intake = intake;
-    this.tunnel = tunnel;
-    this.climber = climber;
+    // Climber Network Table
+    NetworkTable climberTable = inst.getTable("Subsystems/Climber");
+    climberSpeedEntry = climberTable.getDoubleTopic("flywheelMotorSpeed").getEntry(0);
+    climberSpeedEntry.set(0.25);
   }
 
 
