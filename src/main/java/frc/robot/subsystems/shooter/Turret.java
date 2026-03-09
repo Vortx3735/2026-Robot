@@ -15,9 +15,9 @@ import edu.wpi.first.networktables.DoubleEntry;
 import edu.wpi.first.networktables.NetworkTable;
 import edu.wpi.first.networktables.NetworkTableInstance;
 import edu.wpi.first.units.Units;
+import edu.wpi.first.wpilibj.DriverStation;
 import edu.wpi.first.wpilibj.simulation.DCMotorSim;
 import edu.wpi.first.wpilibj2.command.Command;
-import edu.wpi.first.wpilibj.DriverStation;
 import edu.wpi.first.wpilibj2.command.Commands;
 import edu.wpi.first.wpilibj2.command.SubsystemBase;
 import frc.robot.Constants.Mode;
@@ -55,7 +55,7 @@ public class Turret extends SubsystemBase {
     var talonFXConfigs = new TalonFXConfiguration();
 
     var slot0Configs = talonFXConfigs.Slot0;
-    slot0Configs.kS = 0.36;
+    // slot0Configs.kS = 0.78;
     // slot0Configs.kV = 0.11931;
     // slot0Configs.kS = 0.0060924;
     // slot0Configs.kA =
@@ -72,9 +72,9 @@ public class Turret extends SubsystemBase {
     //                 * DCMotor.getKrakenX44(1).rOhms
     //                 * kMOI))
     //         * slot0Configs.kA; // A velocity target of 1 rps results in 0.12 V output
-    slot0Configs.kP = 9; // A position error of 2.5 rotations results in 12 V output
+    slot0Configs.kP = 2; // A position error of 2.5 rotations results in 12 V output
     slot0Configs.kI = 0; // no output for integrated error
-    slot0Configs.kD = 0.01; // A velocity error of 1 rps results in 0.1 V output
+    slot0Configs.kD = 0; // A velocity error of 1 rps results in 0.1 V output
 
     // Slow values for testing
     // slot0Configs.kP = 1.15;
@@ -88,9 +88,9 @@ public class Turret extends SubsystemBase {
     talonFXConfigs.MotorOutput.Inverted = InvertedValue.Clockwise_Positive;
 
     talonFXConfigs.SoftwareLimitSwitch.ForwardSoftLimitEnable = true;
-    talonFXConfigs.SoftwareLimitSwitch.ForwardSoftLimitThreshold = (90.0 / 360.0) / kGearRatio;
+    talonFXConfigs.SoftwareLimitSwitch.ForwardSoftLimitThreshold = 0.5 / kGearRatio;
     talonFXConfigs.SoftwareLimitSwitch.ReverseSoftLimitEnable = true;
-    talonFXConfigs.SoftwareLimitSwitch.ReverseSoftLimitThreshold = -(90.0 / 360.0) / kGearRatio;
+    talonFXConfigs.SoftwareLimitSwitch.ReverseSoftLimitThreshold = 0.06 / kGearRatio;
 
     turretMotor.getConfigurator().apply(talonFXConfigs);
     turretMotor.setNeutralMode(NeutralModeValue.Coast);
@@ -109,17 +109,22 @@ public class Turret extends SubsystemBase {
     }
   }
 
+  public double getTurretCurrentPosition() {
+    return currentPosition;
+  }
+
+  public double getTurretTargetPosition() {
+    return targetPosition;
+  }
+
   public void setVoltage(double voltage) {
     VoltageOut request = new VoltageOut(voltage);
     turretMotor.setControl(request);
   }
 
-  public double getCurrentPosition() {
-    // Prefer simulated field in simulation; otherwise read from motor sensor
-    if (isSim) {
-      return currentPosition;
-    }
-    return turretMotor.getRotorPosition().getValueAsDouble() * kGearRatio;
+  public void setVoltageNetworkTable() {
+    VoltageOut request = new VoltageOut(turretPositionEntry.getAsDouble());
+    turretMotor.setControl(request);
   }
 
   public void setPositionPID(double rotations) {
@@ -131,8 +136,8 @@ public class Turret extends SubsystemBase {
     // }
     targetPosition = rotations;
     // Precompute a conservative simulated input to drive the DCMotorSim when running tests.
-    double sign = Math.signum(rotations - currentPosition);
-    simulatedInputVoltage = Math.max(-12.0, Math.min(12.0, sign * 6.0));
+    // double sign = Math.signum(rotations - currentPosition);
+    // simulatedInputVoltage = Math.max(-12.0, Math.min(12.0, sign * 6.0));
   }
 
   public boolean isFinished() {
@@ -155,7 +160,7 @@ public class Turret extends SubsystemBase {
   }
 
   public void zero() {
-    turretMotor.setPosition(0);
+    turretMotor.setPosition(0.25 / kGearRatio);
   }
 
   // command factories / command helpers
@@ -253,14 +258,12 @@ public class Turret extends SubsystemBase {
   public void periodic() {
     // When not sim, read from the motor; otherwise simulationPeriodic handles currentPosition
     if (!isSim) {
-      currentPosition = turretMotor.getRotorPosition().getValueAsDouble() * kGearRatio;
+      currentPosition = (turretMotor.getRotorPosition().getValueAsDouble()) * kGearRatio;
       try {
         turretVelocity = turretMotor.getRotorVelocity().getValueAsDouble() * kGearRatio;
       } catch (Exception e) {
         // ignore
       }
     }
-    Logger.recordOutput("Turret/currentPostion(rotations)", currentPosition);
-    Logger.recordOutput("Turret/targetPostion(rotations)", targetPosition);
   }
 }

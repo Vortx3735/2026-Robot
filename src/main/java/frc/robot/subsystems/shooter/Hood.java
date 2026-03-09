@@ -29,6 +29,7 @@ import org.littletonrobotics.junction.Logger;
 public class Hood extends SubsystemBase {
   private static final double kGearRatio = (9.0 * 15.0 * 10.0) / (48.0 * 30.0 * 15.0);
   private static final double kMOI = 0.001; // kg*m^2
+  // bottom hood angle: 27.8 deg
 
   private final TalonFX hoodMotor;
 
@@ -100,14 +101,12 @@ public class Hood extends SubsystemBase {
     }
   }
 
-  public double getHoodAngleDegrees() {
-    // Prefer simulated field in simulation; otherwise read from motor sensor
-    if (isSim) {
-      return hoodAngle;
-    }
-    return hoodMotor.getRotorPosition().getValueAsDouble()
-        * 360.0
-        * kGearRatio; // Convert to mechanism degrees using gear ratio
+  public double getHoodAngle() {
+    return hoodAngle;
+  }
+
+  public double getHoodTargetAngle() {
+    return targetAngle;
   }
 
   private void stop() {
@@ -178,6 +177,24 @@ public class Hood extends SubsystemBase {
 
   public Command hold() {
     return run(() -> setPositionPID(targetAngle));
+  }
+
+  @Override
+  public void periodic() {
+    // existing periodic sets hoodAngle when not sim; ensure hoodVelocity is set from sensor when
+    // not sim
+    if (!isSim) {
+      // Convert motor (rotor) position to hood (mechanism) angle using kGearRatio (mechanism/rotor)
+      hoodAngle = hoodMotor.getRotorPosition().getValue().in(Units.Degrees) * kGearRatio;
+      try {
+        // Convert motor (rotor) velocity (rotations per second) to hood angular velocity in deg/s
+        hoodVelocity = hoodMotor.getRotorVelocity().getValueAsDouble() * 360.0 * kGearRatio;
+      } catch (Exception e) {
+        // ignore if not available
+      }
+    }
+    Logger.recordOutput("Hood/currentAngle", hoodAngle);
+    Logger.recordOutput("Hood/targetAngle", targetAngle);
   }
 
   @Override
@@ -274,23 +291,5 @@ public class Hood extends SubsystemBase {
     Logger.recordOutput("Hood/TargetPosition", targetAngle);
     Logger.recordOutput("Hood/SimulatedHoodPosition(degrees)", hoodAngle);
     Logger.recordOutput("Hood/SimulatedHoodVelocity(deg/s)", hoodVelocity);
-  }
-
-  @Override
-  public void periodic() {
-    // existing periodic sets hoodAngle when not sim; ensure hoodVelocity is set from sensor when
-    // not sim
-    if (!isSim) {
-      // Convert motor (rotor) position to hood (mechanism) angle using kGearRatio (mechanism/rotor)
-      hoodAngle = hoodMotor.getRotorPosition().getValue().in(Units.Degrees) * kGearRatio;
-      try {
-        // Convert motor (rotor) velocity (rotations per second) to hood angular velocity in deg/s
-        hoodVelocity = hoodMotor.getRotorVelocity().getValueAsDouble() * 360.0 * kGearRatio;
-      } catch (Exception e) {
-        // ignore if not available
-      }
-    }
-    Logger.recordOutput("Hood/currentAngle", hoodAngle);
-    Logger.recordOutput("Hood/targetAngle", targetAngle);
   }
 }

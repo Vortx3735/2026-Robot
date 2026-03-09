@@ -16,7 +16,7 @@ public class Climber extends SubsystemBase {
 
   private final TalonFX climberMotor1;
   private final TalonFX climberMotor2;
-  // final DoubleEntry flywheelMotorSpeedEntry;
+  // final DoubleEntry climberMotorSpeedEntry;
   private double speed = 0.25;
 
   public Climber(int motorIdLeft, int motorIdRight) {
@@ -24,9 +24,9 @@ public class Climber extends SubsystemBase {
     climberMotor2 = new TalonFX(motorIdRight);
     climberMotor2.setControl(new Follower(motorIdLeft, MotorAlignmentValue.Opposed));
     NetworkTableInstance inst = NetworkTableInstance.getDefault();
-    // NetworkTable intakeTable = inst.getTable("Intake");
-    // flywheelMotorSpeedEntry = intakeTable.getDoubleTopic("flywheelMotorSpeed").getEntry(0);
-    // flywheelMotorSpeedEntry.set(1);
+    // NetworkTable climberTable = inst.getTable("Subsystems/Climber");
+    // climberMotorSpeedEntry = climberTable.getDoubleTopic("climberMotorSpeed").getEntry(0);
+    // climberMotorSpeedEntry.set(0.25);
   }
 
   public double getSpeed() {
@@ -39,14 +39,17 @@ public class Climber extends SubsystemBase {
 
   public void up() {
     climberMotor1.set(speed);
+    climberMotor2.set(speed);
   }
 
   public void down() {
     climberMotor1.set(-speed);
+    climberMotor2.set(-speed);
   }
 
   public void stop() {
     climberMotor1.set(0);
+    climberMotor2.set(0);
   }
 
   public Command upCommand() {
@@ -69,7 +72,7 @@ public class Climber extends SubsystemBase {
     return this.run(
             () -> {
               // setSpeed(flywheelMotorSpeedEntry.getAsDouble());
-              this.down();
+              this.stop();
             })
         .withName("run intake");
   }

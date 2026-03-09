@@ -10,6 +10,7 @@ import com.ctre.phoenix6.signals.InvertedValue;
 import com.ctre.phoenix6.signals.NeutralModeValue;
 import com.ctre.phoenix6.sim.ChassisReference;
 import com.ctre.phoenix6.sim.TalonFXSimState;
+import edu.wpi.first.math.controller.BangBangController;
 import edu.wpi.first.math.system.plant.DCMotor;
 import edu.wpi.first.math.system.plant.LinearSystemId;
 import edu.wpi.first.networktables.DoubleEntry;
@@ -20,6 +21,7 @@ import edu.wpi.first.wpilibj2.command.Command;
 import edu.wpi.first.wpilibj2.command.Commands;
 import edu.wpi.first.wpilibj2.command.SubsystemBase;
 import frc.robot.Constants.Mode;
+import java.util.function.BooleanSupplier;
 import java.util.function.Supplier;
 import org.littletonrobotics.junction.Logger;
 
@@ -30,7 +32,7 @@ public class Flywheel extends SubsystemBase {
   private TalonFX flywheelMotor;
 
   public final DoubleEntry flywheelSpeedEntry;
-
+  private final BangBangController bbcontroller = new BangBangController();
   private final DCMotorSim m_motorSimModel =
       new DCMotorSim(
           LinearSystemId.createDCMotorSystem(DCMotor.getKrakenX60(1), kMOI, 1),
@@ -38,6 +40,7 @@ public class Flywheel extends SubsystemBase {
 
   public double currentRPS;
   public double targetRPS = 0;
+  public double dashboardSpeed = 0;
   // NOTE: removed deprecated lowercase `targetrps` alias. Use `targetRPS`.
 
   public double simulatedVelocity;
@@ -56,7 +59,7 @@ public class Flywheel extends SubsystemBase {
     var slot0Configs = talonFXConfigs.Slot0;
     slot0Configs.kS = 0.31;
     slot0Configs.kV = 0.125;
-    slot0Configs.kP = 0; // An error of 1 rps results in 0.11 V output
+    slot0Configs.kP = 0.25; // An error of 1 rps results in 0.11 V output
     slot0Configs.kI = 0; // no output for integrated error
     slot0Configs.kD = 0; // no output for error derivative
 
@@ -72,12 +75,24 @@ public class Flywheel extends SubsystemBase {
     NetworkTableInstance inst = NetworkTableInstance.getDefault();
     NetworkTable flywheelTable = inst.getTable("Subsystems/Flywheel");
     flywheelSpeedEntry = flywheelTable.getDoubleTopic("flywheelSpeed").getEntry(1);
-    flywheelSpeedEntry.set(0.9);
+    flywheelSpeedEntry.set(0.75);
     if (state == Mode.SIM) {
       var talonFXSim = flywheelMotor.getSimState();
       talonFXSim.Orientation = ChassisReference.CounterClockwise_Positive;
       talonFXSim.setMotorType(TalonFXSimState.MotorType.KrakenX60);
     }
+  }
+
+  public double getDashboardSpeed() {
+    return flywheelSpeedEntry.get();
+  }
+
+  public double getFlywheelCurrentRPS() {
+    return currentRPS;
+  }
+
+  public double getFlywheelTargetRPS() {
+    return targetRPS;
   }
 
   public void stop() {
@@ -86,16 +101,18 @@ public class Flywheel extends SubsystemBase {
     simulatedInputVoltage = 0.0;
   }
 
-  public boolean isAtSpeed() {
+  public BooleanSupplier isAtSpeed() {
     double tolerance = 3;
-    return Math.abs(targetRPS - currentRPS) < tolerance;
+    return () -> Math.abs(targetRPS - currentRPS) < tolerance;
   }
 
-  public void shoot(double targetRPS) {
-    this.targetRPS = targetRPS;
-    final VelocityVoltage m_request = new VelocityVoltage(targetRPS);
+  public void shoot(double speed) {
+    this.targetRPS = speed;
+
+    final VelocityVoltage m_request = new VelocityVoltage(speed);
     flywheelMotor.setControl(m_request);
-    // In simulation, pre-compute a feedforward voltage so the DCMotorSim receives a
+    // flywheelMotor.set(bbcontroller.calculate(currentRPS, targetRPS));
+    // In simulation, pre-compute a feedforwar .d voltage so the DCMotorSim receives a
     // deterministic input even if the Talon sim doesn't propagate motorVoltage.
     if (isSim) {
       final double kS = 0.31; // static volts (matches slot0 kS)
@@ -109,10 +126,15 @@ public class Flywheel extends SubsystemBase {
   // For testing purposes, allows setting flywheel speed directly from Network
   // Tables
   public Command shootCommand() {
-    double speedRps = flywheelSpeedEntry.get() * kMaxSpeed;
-    Logger.recordOutput("Flywheel/ShootCommandSpeedRPS", speedRps);
 
-    return this.shootCommand(speedRps);
+    return Commands.run(
+            () -> {
+              double speedRps = getDashboardSpeed() * kMaxSpeed;
+              Logger.recordOutput("Flywheel/ShootCommandSpeedRPS", speedRps);
+              shoot(speedRps);
+            },
+            this)
+        .withName("shoot flywheel manual");
   }
 
   public Command shootCommand(double speed) {
@@ -128,7 +150,7 @@ public class Flywheel extends SubsystemBase {
     // the command is scheduled to avoid a race where simulationPeriodic runs
     // before the first execute() call.
     return Commands.sequence(
-            Commands.runOnce(() -> this.shoot(speedSupplier.get())),
+            Commands.runOnce(() -> this.shoot(speedSupplier.get()), this),
             Commands.run(() -> this.shoot(speedSupplier.get()), this))
         .withName("dynamic shoot flywheel");
   }
@@ -141,13 +163,12 @@ public class Flywheel extends SubsystemBase {
   public void periodic() {
     // This method will be called once per scheduler run
     // Prefer simulated value in simulation; fall back to Talon getter in hardware
+
     if (isSim) {
       currentRPS = simulatedVelocity;
     } else {
       currentRPS = flywheelMotor.getRotorVelocity().getValueAsDouble();
     }
-    Logger.recordOutput("Flywheel/currentRPS", currentRPS);
-    Logger.recordOutput("Flywheel/targetRPS", targetRPS);
     Logger.recordOutput(
         "Flywheel/motorCurrent", flywheelMotor.getStatorCurrent().getValueAsDouble());
   }

@@ -37,8 +37,8 @@ public class Tunnel extends SubsystemBase {
     NetworkTable tunnelTable = inst.getTable("Subsystems/Tunnel");
     bottomTunnelSpeedEntry = tunnelTable.getDoubleTopic("bottomTunnelSpeed").getEntry(1);
     topTunnelSpeedEntry = tunnelTable.getDoubleTopic("topTunnelSpeed").getEntry(1);
-    bottomTunnelSpeedEntry.set(1);
-    topTunnelSpeedEntry.set(1);
+    bottomTunnelSpeedEntry.set(0.4);
+    topTunnelSpeedEntry.set(0.4);
   }
 
   public double getTopTunnelSpeed() {
@@ -47,6 +47,14 @@ public class Tunnel extends SubsystemBase {
 
   public double getBottomTunnelSpeed() {
     return bottomTunnelSpeedEntry.get();
+  }
+
+  public double getTopTunnelCurrentRPS() {
+    return topTunnelMotor.getRotorVelocity().getValueAsDouble();
+  }
+
+  public double getBottomTunnelCurrentRPS() {
+    return bottomTunnelMotor.getRotorVelocity().getValueAsDouble();
   }
 
   public void run(Boolean inverted) {
@@ -65,11 +73,11 @@ public class Tunnel extends SubsystemBase {
   }
 
   public Command intakeCommand() {
-    return new RunCommand(() -> run(false)).withName("intake tunnel");
+    return new RunCommand(() -> run(false), this).withName("intake tunnel");
   }
 
   public Command outtakeCommand() {
-    return new RunCommand(() -> run(true)).withName("outtake tunnel");
+    return new RunCommand(() -> run(true), this).withName("outtake tunnel");
   }
 
   public Command stopCommand() {

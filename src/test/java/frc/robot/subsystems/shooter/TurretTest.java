@@ -32,7 +32,8 @@ public class TurretTest {
   @Test
   public void testInitialTurretPosition() {
     Turret turret = new Turret(Constants.TurretConstants.TURRET_MOTOR_ID, Mode.SIM);
-    assertEquals(0.0, turret.getCurrentPosition(), 1e-6, "Initial turret position should be 0");
+    assertEquals(
+        0.0, turret.getTurretCurrentPosition(), 1e-6, "Initial turret position should be 0");
   }
 
   @Test

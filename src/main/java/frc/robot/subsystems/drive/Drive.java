@@ -258,6 +258,7 @@ public class Drive extends SubsystemBase implements Vision.VisionConsumer {
 
       // Apply update
       poseEstimator.updateWithTime(sampleTimestamps[i], rawGyroRotation, modulePositions);
+      Logger.recordOutput("pose", getPose());
     }
 
     // Update gyro alert
@@ -387,6 +388,11 @@ public class Drive extends SubsystemBase implements Vision.VisionConsumer {
   public void resetOdometry(Pose2d pose) {
     resetSimulationPoseCallBack.accept(pose);
     poseEstimator.resetPosition(rawGyroRotation, getModulePositions(), pose);
+  }
+
+  public void zeroDriveTrain() {
+    Pose2d zeroedPose = new Pose2d(getPose().getTranslation(), Rotation2d.fromDegrees(0));
+    resetOdometry(zeroedPose);
   }
 
   public void followPath(SwerveSample sample) {

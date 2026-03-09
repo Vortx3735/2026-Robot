@@ -5,22 +5,29 @@ import edu.wpi.first.wpilibj2.command.Commands;
 import edu.wpi.first.wpilibj2.command.WaitUntilCommand;
 import frc.robot.subsystems.intake.*;
 import frc.robot.subsystems.shooter.*;
+import java.util.function.Supplier;
 
 public class CommandFactory {
+  public static Command runTunnelAndHopperCommand(Tunnel tunnel, Hopper hopper) {
+    return Commands.parallel(tunnel.intakeCommand(), hopper.intakeCommand());
+  }
 
-  public static Command manualShootCommand(Flywheel flywheel, Tunnel tunnel) {
+  public static Command manualShootCommand(Flywheel flywheel, Hopper hopper, Tunnel tunnel) {
     return Commands.parallel(
             flywheel.shootCommand(),
             Commands.sequence(
-                new WaitUntilCommand(() -> flywheel.isAtSpeed()), tunnel.intakeCommand()))
+                new WaitUntilCommand(flywheel.isAtSpeed()),
+                Commands.parallel(hopper.intakeCommand(), tunnel.intakeCommand())))
         .withName("manual shoot command group");
   }
 
-  public static Command shootCommand(Flywheel flywheel, Tunnel tunnel, double targetRPS) {
+  public static Command shootCommand(
+      Flywheel flywheel, Tunnel tunnel, Hopper hopper, Supplier<Double> targetRPS) {
     return Commands.parallel(
             flywheel.shootCommand(targetRPS),
-            Commands.sequence(
-                new WaitUntilCommand(() -> flywheel.isAtSpeed()), tunnel.intakeCommand()))
+            hopper.intakeCommand(),
+            // Commands.either(tunnel.intakeCommand(), tunnel.stopCommand(), flywheel.isAtSpeed()))
+            Commands.sequence(new WaitUntilCommand(flywheel.isAtSpeed()), tunnel.intakeCommand()))
         .withName("shoot command group");
   }
 

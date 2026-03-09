@@ -4,7 +4,9 @@
 
 package frc.robot.subsystems.intake;
 
+import com.ctre.phoenix6.configs.TalonFXConfiguration;
 import com.ctre.phoenix6.hardware.TalonFX;
+import com.ctre.phoenix6.signals.InvertedValue;
 import edu.wpi.first.networktables.DoubleEntry;
 // NetworkTable imports
 import edu.wpi.first.networktables.NetworkTable;
@@ -28,12 +30,19 @@ public class Intake extends SubsystemBase {
     NetworkTable intakeTable = inst.getTable("Subsystems/Intake");
     intakeSpeedEntry = intakeTable.getDoubleTopic("intakeSpeed").getEntry(0);
     intakeSpeedEntry.set(0.5);
+
+    TalonFXConfiguration intakeConfig = new TalonFXConfiguration();
+    intakeConfig.MotorOutput.Inverted = InvertedValue.Clockwise_Positive;
+    intakeMotor.getConfigurator().apply(intakeConfig);
   }
 
   public double getIntakeSpeed() {
     return intakeSpeedEntry.get();
   }
 
+  public double getIntakeCurrentRPS() {
+    return intakeMotor.getRotorVelocity().getValueAsDouble();
+  }
   // Invert true is outtake. false is intake
   public void run(Boolean inverted) {
     if (inverted) {

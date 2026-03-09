@@ -41,7 +41,8 @@ public class AutoRoutines {
                 m_container.drive.stopCommand(),
                 CommandFactory.intakeCommand(m_container.intake, m_container.hopper),
                 // Run flywheel then stop
-                CommandFactory.shootCommand(m_container.flywheel, m_container.tunnel, 40)));
+                CommandFactory.shootCommand(
+                    m_container.flywheel, m_container.tunnel, m_container.hopper, () -> 40.0)));
     // Stop intake and indexer
     // m_container.intake.stopCommand(),
     // m_container.hopper.stopCommand();
