@@ -31,9 +31,17 @@ public class Intake extends SubsystemBase {
     intakeSpeedEntry = intakeTable.getDoubleTopic("intakeSpeed").getEntry(0);
     intakeSpeedEntry.set(0.5);
 
-    TalonFXConfiguration intakeConfig = new TalonFXConfiguration();
-    intakeConfig.MotorOutput.Inverted = InvertedValue.Clockwise_Positive;
-    intakeMotor.getConfigurator().apply(intakeConfig);
+    TalonFXConfiguration talonFXConfigs = new TalonFXConfiguration();
+    talonFXConfigs.MotorOutput.Inverted = InvertedValue.Clockwise_Positive;
+    
+    var currentLimit = talonFXConfigs.CurrentLimits;
+
+    currentLimit.StatorCurrentLimit = 300;
+    currentLimit.StatorCurrentLimitEnable = true;
+    currentLimit.SupplyCurrentLimit = 300;
+    currentLimit.SupplyCurrentLimitEnable = true;
+
+    intakeMotor.getConfigurator().apply(talonFXConfigs);
   }
 
   public double getIntakeSpeed() {
@@ -72,7 +80,8 @@ public class Intake extends SubsystemBase {
 
   @Override
   public void periodic() {
-    Logger.recordOutput("Intake/motorCurrent", intakeMotor.getStatorCurrent().getValueAsDouble());
+    Logger.recordOutput("Intake/motorStatorCurrent", intakeMotor.getStatorCurrent().getValueAsDouble());
+    Logger.recordOutput("Intake/motorSupplyCurrent", intakeMotor.getSupplyCurrent().getValueAsDouble());
   }
 
   @Override

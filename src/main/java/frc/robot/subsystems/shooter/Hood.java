@@ -88,6 +88,11 @@ public class Hood extends SubsystemBase {
 
     talonFXConfigs.MotorOutput.Inverted = InvertedValue.Clockwise_Positive;
 
+    var currentLimit = talonFXConfigs.CurrentLimits;
+
+    currentLimit.SupplyCurrentLimit = 300;
+    currentLimit.SupplyCurrentLimitEnable = true;
+
     hoodMotor.getConfigurator().apply(talonFXConfigs);
     NetworkTableInstance inst = NetworkTableInstance.getDefault();
     NetworkTable intakeTable = inst.getTable("Subsystems/Hood");
@@ -195,6 +200,8 @@ public class Hood extends SubsystemBase {
     }
     Logger.recordOutput("Hood/currentAngle", hoodAngle);
     Logger.recordOutput("Hood/targetAngle", targetAngle);
+
+    Logger.recordOutput("Hood/motorSupplyCurrent", hoodMotor.getSupplyCurrent().getValueAsDouble());
   }
 
   @Override

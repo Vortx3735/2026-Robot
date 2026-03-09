@@ -4,6 +4,7 @@
 
 package frc.robot.subsystems;
 
+import com.ctre.phoenix6.configs.TalonFXConfiguration;
 import com.ctre.phoenix6.controls.Follower;
 import com.ctre.phoenix6.hardware.TalonFX;
 import com.ctre.phoenix6.signals.MotorAlignmentValue;
@@ -27,6 +28,16 @@ public class Climber extends SubsystemBase {
     // NetworkTable climberTable = inst.getTable("Subsystems/Climber");
     // climberMotorSpeedEntry = climberTable.getDoubleTopic("climberMotorSpeed").getEntry(0);
     // climberMotorSpeedEntry.set(0.25);
+
+    var talonFXConfigs = new TalonFXConfiguration();
+
+    var currentLimit = talonFXConfigs.CurrentLimits;
+
+    currentLimit.SupplyCurrentLimit = 300;
+    currentLimit.SupplyCurrentLimitEnable = true;
+
+    climberMotor1.getConfigurator().apply(talonFXConfigs);
+    climberMotor2.getConfigurator().apply(talonFXConfigs);
   }
 
   public double getSpeed() {
@@ -80,6 +91,7 @@ public class Climber extends SubsystemBase {
   @Override
   public void periodic() {
     // This method will be called once per scheduler run
+    Logger.recordOutput("Climber/motorSupplyCurrent", climberMotor1.getSupplyCurrent().getValueAsDouble());
   }
 
   @Override

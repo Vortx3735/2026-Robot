@@ -70,6 +70,13 @@ public class Flywheel extends SubsystemBase {
 
     talonFXConfigs.MotorOutput.Inverted = InvertedValue.Clockwise_Positive;
 
+    var currentLimit = talonFXConfigs.CurrentLimits;
+
+    currentLimit.StatorCurrentLimit = 300;
+    currentLimit.StatorCurrentLimitEnable = true;
+    currentLimit.SupplyCurrentLimit = 300;
+    currentLimit.SupplyCurrentLimitEnable = true;
+
     flywheelMotor.getConfigurator().apply(talonFXConfigs);
     flywheelMotor.setNeutralMode(NeutralModeValue.Coast);
     NetworkTableInstance inst = NetworkTableInstance.getDefault();
@@ -170,7 +177,9 @@ public class Flywheel extends SubsystemBase {
       currentRPS = flywheelMotor.getRotorVelocity().getValueAsDouble();
     }
     Logger.recordOutput(
-        "Flywheel/motorCurrent", flywheelMotor.getStatorCurrent().getValueAsDouble());
+        "Flywheel/motorStatorCurrent (TEST AT MAX SPEED)", flywheelMotor.getStatorCurrent().getValueAsDouble());
+    Logger.recordOutput(
+      "Flywheel/motorSupplyCurrent", flywheelMotor.getSupplyCurrent().getValueAsDouble());
   }
 
   @Override

@@ -92,6 +92,11 @@ public class Turret extends SubsystemBase {
     talonFXConfigs.SoftwareLimitSwitch.ReverseSoftLimitEnable = true;
     talonFXConfigs.SoftwareLimitSwitch.ReverseSoftLimitThreshold = 0.06 / kGearRatio;
 
+    var currentLimit = talonFXConfigs.CurrentLimits;
+
+    currentLimit.SupplyCurrentLimit = 300;
+    currentLimit.SupplyCurrentLimitEnable = true;
+
     turretMotor.getConfigurator().apply(talonFXConfigs);
     turretMotor.setNeutralMode(NeutralModeValue.Coast);
     // turretMotor.setPosition(0);
@@ -265,5 +270,7 @@ public class Turret extends SubsystemBase {
         // ignore
       }
     }
+
+    Logger.recordOutput("Turret/motorSupplyCurrent", turretMotor.getSupplyCurrent().getValueAsDouble());
   }
 }

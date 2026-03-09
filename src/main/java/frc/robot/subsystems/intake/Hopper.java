@@ -1,6 +1,7 @@
 package frc.robot.subsystems.intake;
 
 import com.ctre.phoenix6.configs.CurrentLimitsConfigs;
+import com.ctre.phoenix6.configs.TalonFXConfiguration;
 import com.ctre.phoenix6.hardware.TalonFX;
 import edu.wpi.first.networktables.DoubleEntry;
 // NetworkTable imports
@@ -20,11 +21,13 @@ public class Hopper extends SubsystemBase {
   public Hopper(int hopperID) {
     hopperMotor = new TalonFX(hopperID);
 
-    // Limit current
-    var currentLimit = new CurrentLimitsConfigs();
+    TalonFXConfiguration talonFXConfigs = new TalonFXConfiguration();
+    var currentLimit = talonFXConfigs.CurrentLimits;
 
-    currentLimit.StatorCurrentLimit = 30;
+    currentLimit.StatorCurrentLimit = 300;
     currentLimit.StatorCurrentLimitEnable = true;
+    currentLimit.SupplyCurrentLimit = 300;
+    currentLimit.SupplyCurrentLimitEnable = true;
 
     hopperMotor.getConfigurator().apply(currentLimit);
 
@@ -72,7 +75,8 @@ public class Hopper extends SubsystemBase {
 
   @Override
   public void periodic() {
-    Logger.recordOutput("Hopper/motorCurrent", hopperMotor.getStatorCurrent().getValueAsDouble());
+    Logger.recordOutput("Hopper/motorStatorCurrent", hopperMotor.getStatorCurrent().getValueAsDouble());
+    Logger.recordOutput("Hopper/motorSupplyCurrent", hopperMotor.getSupplyCurrent().getValueAsDouble());
   }
 
   @Override
