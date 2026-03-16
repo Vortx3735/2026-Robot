@@ -63,5 +63,7 @@ public class Telemetry extends SubsystemBase {
     Logger.recordOutput("Shooter/Flywheel/currentRPS", flywheel.getFlywheelCurrentRPS());
     Logger.recordOutput("Shooter/Flywheel/targetRPS", flywheel.getFlywheelTargetRPS());
     Logger.recordOutput("Shooter/isAtSpeed", flywheel.isAtSpeed());
+    drive.updateFlywheelPose(turret.getTurretCurrentPosition());
+
   }
 }

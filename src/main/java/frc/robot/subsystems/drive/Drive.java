@@ -41,6 +41,7 @@ import edu.wpi.first.math.geometry.Pose3d;
 import edu.wpi.first.math.geometry.Rotation2d;
 import edu.wpi.first.math.geometry.Rotation3d;
 import edu.wpi.first.math.geometry.Transform3d;
+import edu.wpi.first.math.geometry.Translation3d;
 import edu.wpi.first.math.geometry.Translation2d;
 import edu.wpi.first.math.geometry.Twist2d;
 import edu.wpi.first.math.kinematics.ChassisSpeeds;
@@ -50,6 +51,7 @@ import edu.wpi.first.math.kinematics.SwerveModuleState;
 import edu.wpi.first.math.numbers.N1;
 import edu.wpi.first.math.numbers.N3;
 import edu.wpi.first.math.system.plant.DCMotor;
+import edu.wpi.first.math.util.Units;
 import edu.wpi.first.wpilibj.Alert;
 import edu.wpi.first.wpilibj.Alert.AlertType;
 import edu.wpi.first.wpilibj.DriverStation;
@@ -101,12 +103,12 @@ public class Drive extends SubsystemBase implements Vision.VisionConsumer {
               TunerConstants.FrontLeft.WheelRadius,
               TunerConstants.kSpeedAt12Volts.in(MetersPerSecond),
               WHEEL_COF,
-              DCMotor.getKrakenX60Foc(1)
-                  .withReduction(TunerConstants.FrontLeft.DriveMotorGearRatio),
+              DCMotor.getKrakenX60Foc(1).withReduction(TunerConstants.FrontLeft.DriveMotorGearRatio),
               TunerConstants.FrontLeft.SlipCurrent,
               1),
           getModuleTranslations());
 
+  // Maple-Sim config
   public static final DriveTrainSimulationConfig mapleSimConfig =
       DriveTrainSimulationConfig.Default()
           .withRobotMass(Kilograms.of(ROBOT_MASS_KG))
@@ -114,14 +116,14 @@ public class Drive extends SubsystemBase implements Vision.VisionConsumer {
           .withGyro(COTS.ofPigeon2())
           .withSwerveModule(
               new SwerveModuleSimulationConfig(
-                  DCMotor.getKrakenX60(1),
-                  DCMotor.getFalcon500(1),
+                  DCMotor.getKrakenX60Foc(1),
+                  DCMotor.getFalcon500Foc(1),
                   TunerConstants.FrontLeft.DriveMotorGearRatio,
                   TunerConstants.FrontLeft.SteerMotorGearRatio,
-                  Volts.of(TunerConstants.FrontLeft.DriveFrictionVoltage),
-                  Volts.of(TunerConstants.FrontLeft.SteerFrictionVoltage),
-                  Inches.of(2),
-                  KilogramSquareMeters.of(TunerConstants.FrontLeft.SteerInertia),
+                  Volts.of(0.1),
+                  Volts.of(0.1),
+                  edu.wpi.first.units.Units.Meters.of(TunerConstants.FrontLeft.WheelRadius),
+                  KilogramSquareMeters.of(0.03),
                   WHEEL_COF));
 
   static final Lock odometryLock = new ReentrantLock();
@@ -376,13 +378,145 @@ public class Drive extends SubsystemBase implements Vision.VisionConsumer {
     return output;
   }
 
+  // ---------------------------------------------------------------------------
+  // POSE GETTERS
+  // ---------------------------------------------------------------------------
+
   /** Returns the current odometry pose. */
   @AutoLogOutput(key = "Odometry/Robot")
   public Pose2d getPose() {
     return poseEstimator.getEstimatedPosition();
   }
 
-  @AutoLogOutput(key = "Shooter/turretPose")
+  /** Returns the current odometry rotation. */
+  public Rotation2d getRotation() {
+    return getPose().getRotation();
+  }
+
+  // ---------------------------------------------------------------------------
+  // SHOOTER MECHANISM POSES
+  //
+  // Chain: Robot (Pose2d) → Turret Pivot (Pose3d) → Flywheel Exit (Pose3d)
+  //
+  // All offsets are in the WPILib robot coordinate system:
+  //   +X = forward, +Y = left, +Z = up
+  //   Angles follow right-hand rule (CCW positive looking down Z)
+  //
+  // Turret pivot offset is FIXED relative to the robot frame — it never changes.
+  // Flywheel offset is relative to the turret pivot and ROTATES with the turret,
+  // so when the turret yaws, the flywheel tip orbits around the pivot point.
+  // ---------------------------------------------------------------------------
+
+  /**
+   * Returns the field-relative 3D pose of the turret pivot point.
+   *
+   * <p>This is a fixed mechanical offset from the robot center — the turret pivot
+   * location bolted to the robot. It does NOT change with turret rotation.
+   *
+   * <p>Offset values (arbitrary, tune to match your robot CAD):
+   *   x = +2 in forward of robot center
+   *   y =  0 in (centered left-right)
+   *   z = +18 in above the floor
+   */
+  @AutoLogOutput(key = "Shooter/TurretPivotPose")
+  public Pose3d getTurretPivotPose() {
+    // Step 1: Lift the 2D robot pose into 3D (z=0, no pitch/roll)
+    Pose3d robotPose3d = new Pose3d(getPose());
+
+    // Step 2: Apply the fixed robot-to-turret-pivot transform
+    // Rotation3d() = identity — the pivot platform doesn't tilt relative to the robot
+    Transform3d robotToTurretPivot =
+        new Transform3d(
+            new Translation3d(
+                Units.inchesToMeters(2.0),  // +X: 2 inches forward of robot center
+                Units.inchesToMeters(0.0),  // +Y: centered
+                Units.inchesToMeters(18.0)  // +Z: 18 inches above floor
+            ),
+            new Rotation3d() // no rotation — pivot base is level with robot
+        );
+
+    return robotPose3d.plus(robotToTurretPivot);
+  }
+
+  /**
+   * Returns the field-relative 3D pose of the flywheel exit point.
+   *
+   * <p>Chains two transforms: robot → turret pivot → flywheel tip.
+   * The flywheel tip orbits the pivot as the turret rotates around Z (yaw).
+   *
+   * <p>Flywheel offset from turret pivot (arbitrary, tune to match CAD):
+   *   x = +8 in in the turret's forward direction (before rotation applied)
+   *   y =  0 in
+   *   z = +4 in above the pivot
+   *
+   * @param turretRotations current turret position in rotations
+   *     (from Turret.getTurretCurrentPosition())
+   */
+  public Pose3d getFlywheelPose(double turretRotations) {
+    // Step 1: Get the turret pivot pose in field space
+    Pose3d turretPivotPose = getTurretPivotPose();
+
+    // Step 2: Convert turret rotations → radians for Rotation3d
+    // Positive rotations = CCW when viewed from above (standard WPILib convention)
+    double turretAngleRadians = turretRotations * 2.0 * Math.PI;
+
+    // Step 3: Build turret-pivot → flywheel-tip transform
+    // The Rotation3d here is what makes the flywheel orbit the pivot:
+    //   when turretAngleRadians = 0   → flywheel is directly in front of pivot (+X)
+    //   when turretAngleRadians = π/2 → flywheel is to the LEFT of pivot (+Y)
+    //   when turretAngleRadians = π   → flywheel is behind pivot (-X)
+    Transform3d turretToFlywheel =
+        new Transform3d(
+            new Translation3d(
+                Units.inchesToMeters(8.0), // +X: 8 inches in turret's local forward
+                Units.inchesToMeters(0.0), // +Y: centered
+                Units.inchesToMeters(4.0)  // +Z: 4 inches above pivot
+            ),
+            new Rotation3d(0.0, 0.0, turretAngleRadians) // yaw rotation of the turret
+        );
+
+    // Step 4: Apply the turret-relative transform to get field-space flywheel pose
+    return turretPivotPose.plus(turretToFlywheel);
+  }
+
+  /**
+   * Convenience overload — logs the flywheel pose with @AutoLogOutput by caching
+   * the last turret angle set via {@link #updateFlywheelPose(double)}.
+   *
+   * <p>Call updateFlywheelPose(turret.getTurretCurrentPosition()) in RobotContainer
+   * or Telemetry each loop, then this auto-logged getter will publish it.
+   */
+  private double cachedTurretRotations = 0.0;
+
+  /**
+   * Call this every loop (from RobotContainer or Telemetry) to feed the current
+   * turret angle into Drive so the @AutoLogOutput getter can publish it.
+   *
+   * <p>Example in RobotContainer periodic:
+   * <pre>
+   *   drive.updateFlywheelPose(turret.getTurretCurrentPosition());
+   * </pre>
+   */
+  public void updateFlywheelPose(double turretRotations) {
+    cachedTurretRotations = turretRotations;
+  }
+
+  /**
+   * Auto-logged flywheel pose — published every loop to AdvantageScope.
+   * Requires {@link #updateFlywheelPose(double)} to be called each loop.
+   * View this in AdvantageScope under key "Shooter/FlywheelPose" as a Pose3d.
+   */
+  @AutoLogOutput(key = "Shooter/FlywheelPose")
+  public Pose3d getFlywheelPoseLogged() {
+    return getFlywheelPose(cachedTurretRotations);
+  }
+
+  // ---------------------------------------------------------------------------
+  // LEGACY HOOD POSE (kept for compatibility)
+  // ---------------------------------------------------------------------------
+
+  /** Returns the hood pose (old method — kept for backward compat). */
+  @AutoLogOutput(key = "Shooter/HoodPose")
   public Pose3d getHoodPose() {
     Pose2d drivePose = poseEstimator.getEstimatedPosition();
     // robot to hood transform  x:-10.135-0.51 y:13.866-2.885 z:18.126 (inches)
@@ -395,10 +529,9 @@ public class Drive extends SubsystemBase implements Vision.VisionConsumer {
                 new Rotation3d()));
   }
 
-  /** Returns the current odometry rotation. */
-  public Rotation2d getRotation() {
-    return getPose().getRotation();
-  }
+  // ---------------------------------------------------------------------------
+  // ODOMETRY RESET / FOLLOW PATH / VISION
+  // ---------------------------------------------------------------------------
 
   /** Resets the current odometry pose. */
   public void resetOdometry(Pose2d pose) {
@@ -433,6 +566,10 @@ public class Drive extends SubsystemBase implements Vision.VisionConsumer {
         visionRobotPoseMeters, timestampSeconds, visionMeasurementStdDevs);
   }
 
+  // ---------------------------------------------------------------------------
+  // AUTO FACTORIES
+  // ---------------------------------------------------------------------------
+
   public AutoFactory createAutoFactory() {
     return createAutoFactory((sample, isStart) -> {});
   }
@@ -441,6 +578,10 @@ public class Drive extends SubsystemBase implements Vision.VisionConsumer {
     return new AutoFactory(
         () -> getPose(), this::resetOdometry, this::followPath, true, this, trajLogger);
   }
+
+  // ---------------------------------------------------------------------------
+  // SPEED / GEOMETRY HELPERS
+  // ---------------------------------------------------------------------------
 
   /** Returns the maximum linear speed in meters per sec. */
   public double getMaxLinearSpeedMetersPerSec() {
