@@ -41,8 +41,8 @@ import edu.wpi.first.math.geometry.Pose3d;
 import edu.wpi.first.math.geometry.Rotation2d;
 import edu.wpi.first.math.geometry.Rotation3d;
 import edu.wpi.first.math.geometry.Transform3d;
-import edu.wpi.first.math.geometry.Translation3d;
 import edu.wpi.first.math.geometry.Translation2d;
+import edu.wpi.first.math.geometry.Translation3d;
 import edu.wpi.first.math.geometry.Twist2d;
 import edu.wpi.first.math.kinematics.ChassisSpeeds;
 import edu.wpi.first.math.kinematics.SwerveDriveKinematics;
@@ -103,7 +103,8 @@ public class Drive extends SubsystemBase implements Vision.VisionConsumer {
               TunerConstants.FrontLeft.WheelRadius,
               TunerConstants.kSpeedAt12Volts.in(MetersPerSecond),
               WHEEL_COF,
-              DCMotor.getKrakenX60Foc(1).withReduction(TunerConstants.FrontLeft.DriveMotorGearRatio),
+              DCMotor.getKrakenX60Foc(1)
+                  .withReduction(TunerConstants.FrontLeft.DriveMotorGearRatio),
               TunerConstants.FrontLeft.SlipCurrent,
               1),
           getModuleTranslations());
@@ -410,13 +411,11 @@ public class Drive extends SubsystemBase implements Vision.VisionConsumer {
   /**
    * Returns the field-relative 3D pose of the turret pivot point.
    *
-   * <p>This is a fixed mechanical offset from the robot center — the turret pivot
-   * location bolted to the robot. It does NOT change with turret rotation.
+   * <p>This is a fixed mechanical offset from the robot center — the turret pivot location bolted
+   * to the robot. It does NOT change with turret rotation.
    *
-   * <p>Offset values (arbitrary, tune to match your robot CAD):
-   *   x = +2 in forward of robot center
-   *   y =  0 in (centered left-right)
-   *   z = +18 in above the floor
+   * <p>Offset values (arbitrary, tune to match your robot CAD): x = +2 in forward of robot center y
+   * = 0 in (centered left-right) z = +18 in above the floor
    */
   @AutoLogOutput(key = "Shooter/TurretPivotPose")
   public Pose3d getTurretPivotPose() {
@@ -428,12 +427,12 @@ public class Drive extends SubsystemBase implements Vision.VisionConsumer {
     Transform3d robotToTurretPivot =
         new Transform3d(
             new Translation3d(
-                Units.inchesToMeters(2.0),  // +X: 2 inches forward of robot center
-                Units.inchesToMeters(0.0),  // +Y: centered
-                Units.inchesToMeters(18.0)  // +Z: 18 inches above floor
-            ),
+                Units.inchesToMeters(2.0), // +X: 2 inches forward of robot center
+                Units.inchesToMeters(0.0), // +Y: centered
+                Units.inchesToMeters(18.0) // +Z: 18 inches above floor
+                ),
             new Rotation3d() // no rotation — pivot base is level with robot
-        );
+            );
 
     return robotPose3d.plus(robotToTurretPivot);
   }
@@ -441,16 +440,14 @@ public class Drive extends SubsystemBase implements Vision.VisionConsumer {
   /**
    * Returns the field-relative 3D pose of the flywheel exit point.
    *
-   * <p>Chains two transforms: robot → turret pivot → flywheel tip.
-   * The flywheel tip orbits the pivot as the turret rotates around Z (yaw).
+   * <p>Chains two transforms: robot → turret pivot → flywheel tip. The flywheel tip orbits the
+   * pivot as the turret rotates around Z (yaw).
    *
-   * <p>Flywheel offset from turret pivot (arbitrary, tune to match CAD):
-   *   x = +8 in in the turret's forward direction (before rotation applied)
-   *   y =  0 in
-   *   z = +4 in above the pivot
+   * <p>Flywheel offset from turret pivot (arbitrary, tune to match CAD): x = +8 in in the turret's
+   * forward direction (before rotation applied) y = 0 in z = +4 in above the pivot
    *
-   * @param turretRotations current turret position in rotations
-   *     (from Turret.getTurretCurrentPosition())
+   * @param turretRotations current turret position in rotations (from
+   *     Turret.getTurretCurrentPosition())
    */
   public Pose3d getFlywheelPose(double turretRotations) {
     // Step 1: Get the turret pivot pose in field space
@@ -468,31 +465,33 @@ public class Drive extends SubsystemBase implements Vision.VisionConsumer {
     Transform3d turretToFlywheel =
         new Transform3d(
             new Translation3d(
-                Units.inchesToMeters(8.0), // +X: 8 inches in turret's local forward
-                Units.inchesToMeters(0.0), // +Y: centered
-                Units.inchesToMeters(4.0)  // +Z: 4 inches above pivot
-            ),
+                Units.inchesToMeters(
+                    8 * Math.cos(turretAngleRadians)), // +X: 8 inches in turret's local forward
+                Units.inchesToMeters(8 * Math.sin(turretAngleRadians)), // +Y: centered
+                Units.inchesToMeters(4.0) // +Z: 4 inches above pivot
+                ),
             new Rotation3d(0.0, 0.0, turretAngleRadians) // yaw rotation of the turret
-        );
+            );
 
     // Step 4: Apply the turret-relative transform to get field-space flywheel pose
     return turretPivotPose.plus(turretToFlywheel);
   }
 
   /**
-   * Convenience overload — logs the flywheel pose with @AutoLogOutput by caching
-   * the last turret angle set via {@link #updateFlywheelPose(double)}.
+   * Convenience overload — logs the flywheel pose with @AutoLogOutput by caching the last turret
+   * angle set via {@link #updateFlywheelPose(double)}.
    *
-   * <p>Call updateFlywheelPose(turret.getTurretCurrentPosition()) in RobotContainer
-   * or Telemetry each loop, then this auto-logged getter will publish it.
+   * <p>Call updateFlywheelPose(turret.getTurretCurrentPosition()) in RobotContainer or Telemetry
+   * each loop, then this auto-logged getter will publish it.
    */
   private double cachedTurretRotations = 0.0;
 
   /**
-   * Call this every loop (from RobotContainer or Telemetry) to feed the current
-   * turret angle into Drive so the @AutoLogOutput getter can publish it.
+   * Call this every loop (from RobotContainer or Telemetry) to feed the current turret angle into
+   * Drive so the @AutoLogOutput getter can publish it.
    *
    * <p>Example in RobotContainer periodic:
+   *
    * <pre>
    *   drive.updateFlywheelPose(turret.getTurretCurrentPosition());
    * </pre>
@@ -502,9 +501,9 @@ public class Drive extends SubsystemBase implements Vision.VisionConsumer {
   }
 
   /**
-   * Auto-logged flywheel pose — published every loop to AdvantageScope.
-   * Requires {@link #updateFlywheelPose(double)} to be called each loop.
-   * View this in AdvantageScope under key "Shooter/FlywheelPose" as a Pose3d.
+   * Auto-logged flywheel pose — published every loop to AdvantageScope. Requires {@link
+   * #updateFlywheelPose(double)} to be called each loop. View this in AdvantageScope under key
+   * "Shooter/FlywheelPose" as a Pose3d.
    */
   @AutoLogOutput(key = "Shooter/FlywheelPose")
   public Pose3d getFlywheelPoseLogged() {
