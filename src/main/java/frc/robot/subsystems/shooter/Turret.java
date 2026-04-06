@@ -73,7 +73,7 @@ public class Turret extends SubsystemBase {
     //                 * DCMotor.getKrakenX44(1).rOhms
     //                 * kMOI))
     //         * slot0Configs.kA; // A velocity target of 1 rps results in 0.12 V output
-    slot0Configs.kP = 3; // A position error of 2.5 rotations results in 12 V output
+    slot0Configs.kP = 2; // A position error of 2.5 rotations results in 12 V output
     slot0Configs.kI = 0; // no output for integrated error
     slot0Configs.kD = 0; // A velocity error of 1 rps results in 0.1 V output
 
@@ -88,9 +88,9 @@ public class Turret extends SubsystemBase {
     talonFXConfigs.MotorOutput.Inverted = InvertedValue.Clockwise_Positive;
 
     talonFXConfigs.SoftwareLimitSwitch.ForwardSoftLimitEnable = true;
-    talonFXConfigs.SoftwareLimitSwitch.ForwardSoftLimitThreshold = 0.4 / kGearRatio;
+    talonFXConfigs.SoftwareLimitSwitch.ForwardSoftLimitThreshold = 0.5 / kGearRatio;
     talonFXConfigs.SoftwareLimitSwitch.ReverseSoftLimitEnable = true;
-    talonFXConfigs.SoftwareLimitSwitch.ReverseSoftLimitThreshold = -0.25 / kGearRatio;
+    talonFXConfigs.SoftwareLimitSwitch.ReverseSoftLimitThreshold = 0.0 / kGearRatio;
 
     turretMotor.getConfigurator().apply(talonFXConfigs);
     turretMotor.setNeutralMode(NeutralModeValue.Coast);
@@ -98,13 +98,9 @@ public class Turret extends SubsystemBase {
     NetworkTableInstance inst = NetworkTableInstance.getDefault();
     NetworkTable table = inst.getTable("Subsystems/Turret");
     turretSpeedEntry = table.getDoubleTopic("turretSpeed").getEntry(0);
-    turretSpeedEntry.set(0.08);
+    turretSpeedEntry.set(0.1);
     turretPositionEntry = table.getDoubleTopic("turretPosition(rotations)").getEntry(0);
     turretPositionEntry.set(0);
-
-    // zero turret
-    turretMotor.setPosition(0.26 / kGearRatio);
-
     // configure talonfx sim state if the mode is sim
     if (state == Mode.SIM) {
       var talonFXSim = turretMotor.getSimState();
@@ -148,13 +144,6 @@ public class Turret extends SubsystemBase {
 
   public BooleanSupplier isFinished() {
     return () -> Math.abs(targetPosition - currentPosition) < kTurretPositionTolerance;
-  }
-
-  public BooleanSupplier hitLimit() {
-    return () ->
-        !(targetPosition < 0.5 && targetPosition > 0.0)
-            && (Math.abs(0.5 - currentPosition) < kTurretPositionTolerance
-                || Math.abs(0.0 - currentPosition) < kTurretPositionTolerance);
   }
 
   public void set(double s) {
@@ -208,6 +197,10 @@ public class Turret extends SubsystemBase {
 
   public Command stopCommand() {
     return run(() -> stop()).withName("Stop Turret");
+  }
+
+  public Command bringTozero() {
+    return run(() -> setPositionPID(0.26)).withName("Bring Turret to Zero");
   }
 
   @Override

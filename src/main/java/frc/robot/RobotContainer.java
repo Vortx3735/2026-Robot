@@ -34,6 +34,7 @@ import edu.wpi.first.wpilibj2.command.Command;
 import edu.wpi.first.wpilibj2.command.Commands;
 import edu.wpi.first.wpilibj2.command.InstantCommand;
 import edu.wpi.first.wpilibj2.command.button.RobotModeTriggers;
+import edu.wpi.first.wpilibj2.command.button.Trigger;
 import edu.wpi.first.wpilibj2.command.sysid.SysIdRoutine;
 import frc.robot.commands.CommandFactory;
 import frc.robot.commands.DriveCommands;
@@ -352,6 +353,7 @@ public class RobotContainer {
     //             hood.setPositionPIDCommand(targetHoodAngleEntry.getAsDouble() - 5)))
     //     .onFalse(hood.setPositionPIDCommand(targetHoodAngleEntry.getAsDouble()));
     // Operator Shooter Binds
+
     operatorController.bButton.onTrue(new InstantCommand(() -> ShooterCommands.offset += 0.01));
     operatorController.xButton.onTrue(new InstantCommand(() -> ShooterCommands.offset -= 0.01));
     operatorController.aButton.toggleOnTrue(
