@@ -373,6 +373,10 @@ public class Drive extends SubsystemBase implements Vision.VisionConsumer {
     return values;
   }
 
+  public double getPitchDegrees() 
+  {
+    return gyroInputs.pitchDegrees;
+  }
   /** Returns the average velocity of the modules in rotations/sec (Phoenix native units). */
   public double getFFCharacterizationVelocity() {
     double output = 0.0;
