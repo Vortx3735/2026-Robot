@@ -7,6 +7,8 @@ import edu.wpi.first.math.geometry.Pose3d;
 import edu.wpi.first.math.geometry.Rotation2d;
 import edu.wpi.first.math.geometry.Rotation3d;
 import edu.wpi.first.math.geometry.Transform3d;
+import edu.wpi.first.math.geometry.Translation2d;
+import edu.wpi.first.math.interpolation.InterpolatingTreeMap;
 import edu.wpi.first.wpilibj.DriverStation;
 import edu.wpi.first.wpilibj.DriverStation.Alliance;
 import edu.wpi.first.wpilibj2.command.Command;
@@ -18,10 +20,20 @@ import frc.robot.subsystems.intake.Tunnel;
 import frc.robot.subsystems.shooter.Flywheel;
 import frc.robot.subsystems.shooter.Hood;
 import frc.robot.subsystems.shooter.Turret;
+
+import java.util.Map;
 import java.util.function.Supplier;
 import org.littletonrobotics.junction.Logger;
 
 public class ShooterCommands {
+  public record ShooterParams(double rpm, double timeOfFlight) {}
+  private static final InterpolatingTreeMap<Double, ShooterParams> SHOOTER_MAP = new InterpolatingTreeMap<>(null, null);
+  static {
+    // format: (distance (meters) -> {RPM, timeOfFlight})
+    // SHOOTER_MAP.put();
+  }
+
+  public static double latencyConstant = 0.15; // time in s of latency (pose updating, rio delay, etc) 
   // if only running right camera
   public static double offset = 0.09;
   public static double efficiencyFactor = 1.005;
@@ -59,6 +71,51 @@ public class ShooterCommands {
           Constants.FieldConstants.BLUE_RIGHT.getX(),
           Constants.FieldConstants.BLUE_RIGHT.getY(),
           new Rotation2d());
+
+  // Iterates through the LUT (distance -> velocity) to find an appropriate distance.
+  public static double velocityToEffectiveDistance(double velocity) {
+    for (Map.Entry<Double, ShooterParams> entry : SHOOTER_MAP.entrySet()) {
+      double dist = entry.getKey();
+      double vel = dist / entry.getValue().timeOfFlight;
+      if (vel >= velocity) {
+        return dist;
+      }
+    }
+
+    return SHOOTER_MAP.lastKey(); // default/clamp distance is max distance measured/interpolated
+  }
+
+  public static double SOTMcalculateShooterRps(Translation2d robotPosition, Translation2d robotVelocity, Translation2d goalPosition) {
+    // predict future robot postion
+    Translation2d futurePos = robotPosition.plus(robotVelocity.times(latencyConstant));
+
+    // get the target vector (translation from robot to hub)
+    Translation2d toHub = getAllianceHubPose().getTranslation().minus(futurePos);
+    double distance = toHub.getNorm();
+    Translation2d targetDirection = toHub.div(distance);
+
+    // calculate baseline required horizontal velocity
+    ShooterParams params = SHOOTER_MAP.get(distance);
+    double baselineVelocity = distance / params.timeOfFlight;
+
+    // build target velocity vector
+    Translation2d targetVelocity = targetDirection.times(baselineVelocity);
+
+    // subtract robot velocity vectoramabob
+    Translation2d shotVelocity = targetVelocity.minus(robotVelocity);
+
+    // get our nice little results
+    double turretRotation = shotVelocity.getAngle().getRotations();
+    double requiredVelocity = shotVelocity.getNorm();
+
+    // look up the required distance for that velocity
+    double effectiveDistance  = velocityToEffectiveDistance(requiredVelocity);
+
+    // look up the required rpm for that distance
+    return SHOOTER_MAP.get(effectiveDistance).rpm;
+  }
+
+  
 
   /**
    * Calculates required flywheel RPS for a given hood angle.
@@ -101,6 +158,7 @@ public class ShooterCommands {
     Logger.recordOutput("Shooter/calculatedShooterRPS", rps * ef);
     return rps * ef;
   }
+
 
   /** Conversion factor from meters to feet. */
   private static final double METERS_TO_FEET = 3.28084;
