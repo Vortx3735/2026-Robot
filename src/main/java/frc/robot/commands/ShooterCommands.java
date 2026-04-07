@@ -9,6 +9,7 @@ import edu.wpi.first.math.geometry.Rotation3d;
 import edu.wpi.first.math.geometry.Transform2d;
 import edu.wpi.first.math.geometry.Transform3d;
 import edu.wpi.first.math.geometry.Translation2d;
+import edu.wpi.first.math.interpolation.InterpolatingTreeMap;
 import edu.wpi.first.wpilibj.DriverStation;
 import edu.wpi.first.wpilibj.DriverStation.Alliance;
 import edu.wpi.first.wpilibj2.command.Command;
@@ -261,6 +262,7 @@ public class ShooterCommands {
     Logger.recordOutput("Shooter/calculatedShooterRPS", rps * ef);
     return rps * ef;
   }
+
 
   /** Conversion factor from meters to feet. */
   private static final double METERS_TO_FEET = 3.28084;
