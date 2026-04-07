@@ -131,6 +131,10 @@ public class Turret extends SubsystemBase {
     turretMotor.setControl(request);
   }
 
+  public void zeroTurretPosition(){
+    setPositionPID(0);
+  }
+
   public boolean setPositionPID(double rotations) {
     // create a Motion Magic request, voltage output
     // if (Math.abs(turretPosition - rotations) > error) {
