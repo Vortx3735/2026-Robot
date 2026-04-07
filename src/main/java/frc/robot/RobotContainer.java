@@ -50,7 +50,6 @@ import org.ironmaple.simulation.SimulatedArena;
 import org.ironmaple.simulation.drivesims.SwerveDriveSimulation;
 import org.littletonrobotics.junction.Logger;
 import org.littletonrobotics.junction.networktables.LoggedDashboardChooser;
-import edu.wpi.first.wpilibj2.command.button.Trigger;
 
 /**
  * This class is where the bulk of the robot should be declared. Since Command-based is a
@@ -77,7 +76,10 @@ public class RobotContainer {
   public final Hood hood = new Hood(Constants.HoodConstants.HOOD_MOTOR_ID, Constants.currentMode);
   public final Flywheel flywheel =
       new Flywheel(Constants.FlywheelConstants.FLYWHEEL_MOTOR_ID, Constants.currentMode);
-  public final Intake intake = new Intake(Constants.IntakeConstants.INTAKE_MOTOR_ID, Constants.IntakeConstants.INTAKE_DEPLOY_MOTOR_ID);
+  public final Intake intake =
+      new Intake(
+          Constants.IntakeConstants.INTAKE_MOTOR_ID,
+          Constants.IntakeConstants.INTAKE_DEPLOY_MOTOR_ID);
   public final Hopper hopper = new Hopper(Constants.HopperConstants.HOPPER_MOTOR_ID);
   public final Tunnel tunnel =
       new Tunnel(
@@ -320,7 +322,7 @@ public class RobotContainer {
             : () ->
                 drive.resetOdometry(new Pose2d(drive.getPose().getTranslation(), new Rotation2d()));
     driverController.start().onTrue(Commands.runOnce(resetOdometry).ignoringDisable(true));
-    new Trigger(intake.intakeIsOut()).whileTrue(intake.stopCommand()); // placeholder
+    new Trigger(intake.intakeIsOut()).whileTrue(turret.zeroTurretPositionCommand());
     // Set bindings
 
     // Shooter Binds

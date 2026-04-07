@@ -131,7 +131,7 @@ public class Turret extends SubsystemBase {
     turretMotor.setControl(request);
   }
 
-  public void zeroTurretPosition(){
+  public void zeroTurretPosition() {
     setPositionPID(0);
   }
 
@@ -203,6 +203,10 @@ public class Turret extends SubsystemBase {
             runOnce(() -> setPositionPID(rotations)), Commands.waitUntil(isFinished()))
         .raceWith(timeoutNotifier)
         .withName("Set Turret Position PID");
+  }
+
+  public Command zeroTurretPositionCommand() {
+    return run(() -> zeroTurretPosition());
   }
 
   public Command setPositionPIDCommandManualSetpoint() {
