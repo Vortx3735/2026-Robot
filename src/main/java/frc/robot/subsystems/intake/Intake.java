@@ -54,8 +54,19 @@ public class Intake extends SubsystemBase {
     intakeMotor.getConfigurator().apply(intakeConfig);
   }
 
+  // Boolean supplier for if intake is out at all
   public BooleanSupplier intakeIsOut() {
     return () -> intakeDeployMotor.getPosition().getValueAsDouble() > 0;
+  }
+
+  // Boolean supplier for if intake is FULLY deployed
+  public BooleanSupplier intakeIsDeployed() {
+    return () -> intakeDeployMotor.getFault_ForwardSoftLimit().getValue();
+  }
+
+  // Boolean supplier for if intake is FULLY in/stored
+  public BooleanSupplier intakeIsStored() {
+    return () -> intakeDeployMotor.getFault_ReverseSoftLimit().getValue();
   }
 
   public double getIntakeSpeed() {
