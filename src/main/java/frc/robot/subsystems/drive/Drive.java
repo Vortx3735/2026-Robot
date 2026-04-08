@@ -382,6 +382,15 @@ public class Drive extends SubsystemBase implements Vision.VisionConsumer {
     return output;
   }
 
+  // Gets robot velocity from encoders as a Translation2d
+  public Translation2d getVelocity() {
+    // velocity with x, y, and rotation
+    ChassisSpeeds fullVelocity = kinematics.toChassisSpeeds(getModuleStates());
+
+    // convert to translation (just x and y)
+    return new Translation2d(fullVelocity.vxMetersPerSecond, fullVelocity.vxMetersPerSecond);
+  }
+
   /** Returns the current odometry pose. */
   @AutoLogOutput(key = "Odometry/Robot")
   public Pose2d getPose() {
