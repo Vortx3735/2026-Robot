@@ -50,6 +50,18 @@ public class AutoRoutines {
             .withTimeout(4));
   }
 
+  private Command deployIntake() {
+    return m_container.intake.deployCommand().until(m_container.intake.intakeIsDeployed());
+  }
+
+  private Command intake() {
+    return CommandFactory.intakeCommand(m_container.intake, m_container.hopper);
+  }
+
+  private Command storeIntake() {
+    return m_container.intake.storeCommand().until(m_container.intake.intakeIsStored());
+  }
+
   //   public AutoRoutine exampleRoutine() {
   //     // Creates a routine called "example" and loads a trajectory. The trajectory is essentially
   // the
@@ -124,6 +136,33 @@ public class AutoRoutines {
   //     return routine;
   //   }
 
+  public AutoRoutine behindHub() {
+    final AutoRoutine routine = m_factory.newRoutine("behindHub");
+    final AutoTrajectory behindHubMid = routine.trajectory("BehindHubMid");
+    final AutoTrajectory moveThroughDepot = routine.trajectory("MoveThroughDepotMid");
+    final AutoTrajectory shootAfterDepot = routine.trajectory("ShootAfterDepotMid");
+
+    routine.active().onTrue(
+        Commands.sequence(
+            shoot().withTimeout(3),
+            behindHubMid.resetOdometry(),
+            behindHubMid.cmd()
+        )
+    );
+
+    behindHubMid.done().onTrue(moveThroughDepot.cmd());
+
+    moveThroughDepot.active().onTrue(deployIntake());
+    moveThroughDepot.active().whileTrue(intake());
+    moveThroughDepot.done().onTrue(storeIntake());
+    moveThroughDepot.done().onTrue(shootAfterDepot.cmd());
+
+    // change movement to ust rotate if possible
+    shootAfterDepot.done().whileTrue(shoot());
+
+    return routine;
+  }
+
   // Contests half of neutral zone then shoots, then does it again
   public AutoRoutine leftDblShortCenterContest() {
     final AutoRoutine routine = m_factory.newRoutine("leftDblShortCenterContest");
@@ -141,9 +180,9 @@ public class AutoRoutines {
     // short
     driveToMiddle.done().onTrue(driveThroughMiddle.cmd());
 
-    driveThroughMiddle
-        .active()
-        .whileTrue(CommandFactory.intakeCommand(m_container.intake, m_container.hopper));
+    driveThroughMiddle.active().onTrue(deployIntake());
+    driveThroughMiddle.active().whileTrue(intake());
+    driveThroughMiddle.done().onTrue(storeIntake());
     driveThroughMiddle.done().onTrue(driveBack.cmd());
 
     // i hope this works! supposed to shoot 5 seconds after robot drives back
@@ -208,9 +247,9 @@ public class AutoRoutines {
     // long
     driveToMiddleLong.done().onTrue(driveThroughMiddleLong.cmd());
 
-    driveThroughMiddleLong
-        .active()
-        .whileTrue(CommandFactory.intakeCommand(m_container.intake, m_container.hopper));
+    driveThroughMiddleLong.active().onTrue(deployIntake());
+    driveThroughMiddleLong.active().whileTrue(intake());
+    driveThroughMiddleLong.done().onTrue(storeIntake());
     driveThroughMiddleLong.done().onTrue(driveBackLong.cmd());
 
     // i hope this works! supposed to shoot 5 seconds after robot drives back
@@ -240,9 +279,9 @@ public class AutoRoutines {
     // short;
     driveToMiddle.done().onTrue(driveThroughMiddle.cmd());
 
-    driveThroughMiddle
-        .active()
-        .whileTrue(CommandFactory.intakeCommand(m_container.intake, m_container.hopper));
+    driveThroughMiddle.active().onTrue(deployIntake());
+    driveThroughMiddle.active().whileTrue(intake());
+    driveThroughMiddle.done().onTrue(storeIntake());
     driveThroughMiddle.done().onTrue(driveBack.cmd());
 
     // i hope this works! supposed to shoot 5 seconds after robot drives back
@@ -256,9 +295,9 @@ public class AutoRoutines {
 
     moveToDepot.done().onTrue(moveThroughDepot.cmd());
 
-    moveThroughDepot
-        .active()
-        .whileTrue(CommandFactory.intakeCommand(m_container.intake, m_container.hopper));
+    moveThroughDepot.active().onTrue(deployIntake());
+    moveThroughDepot.active().whileTrue(intake());
+    moveThroughDepot.done().onTrue(storeIntake());
     moveThroughDepot.done().onTrue(shootAfterDepot.cmd());
 
     shootAfterDepot.done().whileTrue(shoot());
@@ -278,9 +317,9 @@ public class AutoRoutines {
     ;
     driveToMiddle.done().onTrue(driveThroughMiddle.cmd());
 
-    driveThroughMiddle
-        .active()
-        .whileTrue(CommandFactory.intakeCommand(m_container.intake, m_container.hopper));
+    driveThroughMiddle.active().onTrue(deployIntake());
+    driveThroughMiddle.active().whileTrue(intake());
+    driveThroughMiddle.done().onTrue(storeIntake());
     driveThroughMiddle.done().onTrue(driveBack.cmd());
 
     // i hope this works! supposed to shoot 4 seconds after robot drives back
@@ -316,9 +355,9 @@ public class AutoRoutines {
     // short;
     driveToMiddle.done().onTrue(driveThroughMiddle.cmd());
 
-    driveThroughMiddle
-        .active()
-        .whileTrue(CommandFactory.intakeCommand(m_container.intake, m_container.hopper));
+    driveThroughMiddle.active().onTrue(deployIntake());
+    driveThroughMiddle.active().whileTrue(intake());
+    driveThroughMiddle.done().onTrue(storeIntake());
     driveThroughMiddle.done().onTrue(driveBack.cmd());
 
     // i hope this works! supposed to shoot 5 seconds after robot drives back
@@ -332,9 +371,9 @@ public class AutoRoutines {
 
     moveToDepot.done().onTrue(moveThroughDepot.cmd());
 
-    moveThroughDepot
-        .active()
-        .whileTrue(CommandFactory.intakeCommand(m_container.intake, m_container.hopper));
+    moveThroughDepot.active().onTrue(deployIntake());
+    moveThroughDepot.active().whileTrue(intake());
+    moveThroughDepot.done().onTrue(storeIntake());
     moveThroughDepot.done().onTrue(shootAfterDepot.cmd());
 
     shootAfterDepot.doneFor(4).whileTrue(shoot());
@@ -358,9 +397,9 @@ public class AutoRoutines {
     ;
     driveToMiddle.done().onTrue(driveThroughMiddle.cmd());
 
-    driveThroughMiddle
-        .active()
-        .whileTrue(CommandFactory.intakeCommand(m_container.intake, m_container.hopper));
+    driveThroughMiddle.active().onTrue(deployIntake());
+    driveThroughMiddle.active().whileTrue(intake());
+    driveThroughMiddle.done().onTrue(storeIntake());
     driveThroughMiddle.done().onTrue(driveBack.cmd());
 
     // i hope this works! upposed to shoot 5 seconds after robot drives back then go to climb pos
@@ -388,9 +427,9 @@ public class AutoRoutines {
     ;
     driveToMiddle.done().onTrue(driveThroughMiddle.cmd());
 
-    driveThroughMiddle
-        .active()
-        .whileTrue(CommandFactory.intakeCommand(m_container.intake, m_container.hopper));
+    driveThroughMiddle.active().onTrue(deployIntake());
+    driveThroughMiddle.active().whileTrue(intake());
+    driveThroughMiddle.done().onTrue(storeIntake());
     driveThroughMiddle.done().onTrue(driveBack.cmd());
 
     // i hope this works! upposed to shoot 5 seconds after robot drives back then go to climb pos
@@ -419,9 +458,9 @@ public class AutoRoutines {
     // short;
     driveToMiddle.done().onTrue(driveThroughMiddle.cmd());
 
-    driveThroughMiddle
-        .active()
-        .whileTrue(CommandFactory.intakeCommand(m_container.intake, m_container.hopper));
+    driveThroughMiddle.active().onTrue(deployIntake());
+    driveThroughMiddle.active().whileTrue(intake());
+    driveThroughMiddle.done().onTrue(storeIntake());
     driveThroughMiddle.done().onTrue(driveBack.cmd());
 
     // i hope this works! supposed to shoot 5 seconds after robot drives back
@@ -477,9 +516,9 @@ public class AutoRoutines {
     // long
     driveToMiddleLong.done().onTrue(driveThroughMiddleLong.cmd());
 
-    driveThroughMiddleLong
-        .active()
-        .whileTrue(CommandFactory.intakeCommand(m_container.intake, m_container.hopper));
+    driveThroughMiddleLong.active().onTrue(deployIntake());
+    driveThroughMiddleLong.active().whileTrue(intake());
+    driveThroughMiddleLong.done().onTrue(storeIntake());
     driveThroughMiddleLong.done().onTrue(driveBackLong.cmd());
 
     // i hope this works! supposed to shoot 5 seconds after robot drives back
@@ -508,9 +547,9 @@ public class AutoRoutines {
     // short;
     driveToMiddle.done().onTrue(driveThroughMiddle.cmd());
 
-    driveThroughMiddle
-        .active()
-        .whileTrue(CommandFactory.intakeCommand(m_container.intake, m_container.hopper));
+    driveThroughMiddle.active().onTrue(deployIntake());
+    driveThroughMiddle.active().whileTrue(intake());
+    driveThroughMiddle.done().onTrue(storeIntake());
     driveThroughMiddle.done().onTrue(driveBack.cmd());
 
     // i hope this works! supposed to shoot 5 seconds after robot drives back
@@ -545,9 +584,9 @@ public class AutoRoutines {
     ;
     driveToMiddle.done().onTrue(driveThroughMiddle.cmd());
 
-    driveThroughMiddle
-        .active()
-        .whileTrue(CommandFactory.intakeCommand(m_container.intake, m_container.hopper));
+    driveThroughMiddle.active().onTrue(deployIntake());
+    driveThroughMiddle.active().whileTrue(intake());
+    driveThroughMiddle.done().onTrue(storeIntake());
     driveThroughMiddle.done().onTrue(driveBack.cmd());
 
     // i hope this works! supposed to shoot 5 seconds after robot drives back
@@ -582,9 +621,9 @@ public class AutoRoutines {
     // short;
     driveToMiddle.done().onTrue(driveThroughMiddle.cmd());
 
-    driveThroughMiddle
-        .active()
-        .whileTrue(CommandFactory.intakeCommand(m_container.intake, m_container.hopper));
+    driveThroughMiddle.active().onTrue(deployIntake());
+    driveThroughMiddle.active().whileTrue(intake());
+    driveThroughMiddle.done().onTrue(storeIntake());
     driveThroughMiddle.done().onTrue(driveBack.cmd());
 
     // i hope this works! supposed to shoot 4 seconds after robot drives back
@@ -619,9 +658,9 @@ public class AutoRoutines {
     ;
     driveToMiddle.done().onTrue(driveThroughMiddle.cmd());
 
-    driveThroughMiddle
-        .active()
-        .whileTrue(CommandFactory.intakeCommand(m_container.intake, m_container.hopper));
+    driveThroughMiddle.active().onTrue(deployIntake());
+    driveThroughMiddle.active().whileTrue(intake());
+    driveThroughMiddle.done().onTrue(storeIntake());
     driveThroughMiddle.done().onTrue(driveBack.cmd());
 
     // i hope this works! upposed to shoot 5 seconds after robot drives back then go to climb pos
@@ -649,9 +688,9 @@ public class AutoRoutines {
     ;
     driveToMiddle.done().onTrue(driveThroughMiddle.cmd());
 
-    driveThroughMiddle
-        .active()
-        .whileTrue(CommandFactory.intakeCommand(m_container.intake, m_container.hopper));
+    driveThroughMiddle.active().onTrue(deployIntake());
+    driveThroughMiddle.active().whileTrue(intake());
+    driveThroughMiddle.done().onTrue(storeIntake());
     driveThroughMiddle.done().onTrue(driveBack.cmd());
 
     // i hope this works! upposed to shoot 5 seconds after robot drives back then go to climb pos
@@ -678,9 +717,9 @@ public class AutoRoutines {
     // hi if ur reading this
     moveToDepot.done().onTrue(moveThroughDepot.cmd());
 
-    moveThroughDepot
-        .active()
-        .whileTrue(CommandFactory.intakeCommand(m_container.intake, m_container.hopper));
+    moveThroughDepot.active().onTrue(deployIntake());
+    moveThroughDepot.active().whileTrue(intake());
+    moveThroughDepot.done().onTrue(storeIntake());
     moveThroughDepot.done().onTrue(shootAfterDepot.cmd());
 
     shootAfterDepot.doneFor(4).whileTrue(shoot());
@@ -704,9 +743,9 @@ public class AutoRoutines {
     // hi if ur reading this
     moveToDepot.done().onTrue(moveThroughDepot.cmd());
 
-    moveThroughDepot
-        .active()
-        .whileTrue(CommandFactory.intakeCommand(m_container.intake, m_container.hopper));
+    moveThroughDepot.active().onTrue(deployIntake());
+    moveThroughDepot.active().whileTrue(intake());
+    moveThroughDepot.done().onTrue(storeIntake());
     moveThroughDepot.done().onTrue(shootAfterDepot.cmd());
 
     shootAfterDepot.done().onTrue(aim());

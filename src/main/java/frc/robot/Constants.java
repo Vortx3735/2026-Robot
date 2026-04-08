@@ -55,6 +55,7 @@ public class Constants {
 
   public static class IntakeConstants {
     public static final int INTAKE_MOTOR_ID = 13;
+    public static final int INTAKE_DEPLOY_MOTOR_ID = 121;
   }
 
   public static class ClimberConstants {
