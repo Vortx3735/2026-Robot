@@ -8,6 +8,10 @@
 package frc.robot;
 
 import edu.wpi.first.wpilibj.RobotBase;
+import frc.robot.util.ProjectileSimulator;
+import frc.robot.util.ProjectileSimulator.GeneratedLUT;
+import frc.robot.util.ProjectileSimulator.LUTEntry;
+import frc.robot.util.ProjectileSimulator.SimParameters;
 
 /**
  * Do NOT add any static variables to this class, or any initialization at all. Unless you know what
