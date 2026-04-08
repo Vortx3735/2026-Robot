@@ -8,7 +8,6 @@ import edu.wpi.first.math.geometry.Rotation2d;
 import edu.wpi.first.math.geometry.Rotation3d;
 import edu.wpi.first.math.geometry.Transform3d;
 import edu.wpi.first.math.geometry.Translation2d;
-import edu.wpi.first.math.interpolation.InterpolatingTreeMap;
 import edu.wpi.first.wpilibj.DriverStation;
 import edu.wpi.first.wpilibj.DriverStation.Alliance;
 import edu.wpi.first.wpilibj2.command.Command;
@@ -20,14 +19,17 @@ import frc.robot.subsystems.intake.Tunnel;
 import frc.robot.subsystems.shooter.Flywheel;
 import frc.robot.subsystems.shooter.Hood;
 import frc.robot.subsystems.shooter.Turret;
+import frc.robot.util.ShotLUT;
+import frc.robot.util.ShotParameters;
 
+import java.util.HashMap;
 import java.util.Map;
+import java.util.TreeMap;
 import java.util.function.Supplier;
 import org.littletonrobotics.junction.Logger;
 
 public class ShooterCommands {
-  public record ShooterParams(double rpm, double timeOfFlight) {}
-  private static final InterpolatingTreeMap<Double, ShooterParams> SHOOTER_MAP = new InterpolatingTreeMap<>(null, null);
+  private static final ShotLUT shotLUT = new ShotLUT();
   static {
     // format: (distance (meters) -> {RPM, timeOfFlight})
     // SHOOTER_MAP.put();
@@ -74,18 +76,18 @@ public class ShooterCommands {
 
   // Iterates through the LUT (distance -> velocity) to find an appropriate distance.
   public static double velocityToEffectiveDistance(double velocity) {
-    for (Map.Entry<Double, ShooterParams> entry : SHOOTER_MAP.entrySet()) {
+    for (Map.Entry<Double, ShotParameters> entry : shotLUT.entrySet()) {
       double dist = entry.getKey();
-      double vel = dist / entry.getValue().timeOfFlight;
+      double vel = dist / entry.getValue().tofSec();
       if (vel >= velocity) {
         return dist;
       }
     }
 
-    return SHOOTER_MAP.lastKey(); // default/clamp distance is max distance measured/interpolated
+    return shotLUT.lastKey(); // default/clamp distance is max distance measured/interpolated
   }
 
-  public static double SOTMcalculateShooterRps(Translation2d robotPosition, Translation2d robotVelocity, Translation2d goalPosition) {
+  public static double SOTMcalculateShooterRps(Translation2d robotPosition, Translation2d robotVelocity, Translation2d goalPosition, Turret turret, Flywheel flywheel) {
     // predict future robot postion
     Translation2d futurePos = robotPosition.plus(robotVelocity.times(latencyConstant));
 
@@ -95,11 +97,11 @@ public class ShooterCommands {
     Translation2d targetDirection = toHub.div(distance);
 
     // calculate baseline required horizontal velocity
-    ShooterParams params = SHOOTER_MAP.get(distance);
-    double baselineVelocity = distance / params.timeOfFlight;
+    ShotParameters params = shotLUT.get(distance);
+    double horiVelocity = distance / params.tofSec();
 
     // build target velocity vector
-    Translation2d targetVelocity = targetDirection.times(baselineVelocity);
+    Translation2d targetVelocity = targetDirection.times(horiVelocity);
 
     // subtract robot velocity vectoramabob
     Translation2d shotVelocity = targetVelocity.minus(robotVelocity);
@@ -112,9 +114,8 @@ public class ShooterCommands {
     double effectiveDistance  = velocityToEffectiveDistance(requiredVelocity);
 
     // look up the required rpm for that distance
-    return SHOOTER_MAP.get(effectiveDistance).rpm;
+    return shotLUT.get(effectiveDistance).rpm();
   }
-
   
 
   /**
