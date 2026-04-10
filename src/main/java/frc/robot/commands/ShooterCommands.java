@@ -23,7 +23,6 @@ import frc.robot.subsystems.shooter.Turret;
 import frc.robot.util.ShotLUT;
 import frc.robot.util.ShotParameters;
 import java.util.Map;
-import java.util.TreeMap;
 import java.util.function.Supplier;
 import org.littletonrobotics.junction.Logger;
 
@@ -262,7 +261,6 @@ public class ShooterCommands {
     Logger.recordOutput("Shooter/calculatedShooterRPS", rps * ef);
     return rps * ef;
   }
-
 
   /** Conversion factor from meters to feet. */
   private static final double METERS_TO_FEET = 3.28084;
