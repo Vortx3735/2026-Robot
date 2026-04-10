@@ -4,13 +4,12 @@
 
 package frc.robot.util;
 
+import edu.wpi.first.math.interpolation.Interpolator;
+import edu.wpi.first.math.interpolation.InverseInterpolator;
 import java.util.Comparator;
 import java.util.Map;
 import java.util.Set;
 import java.util.TreeMap;
-
-import edu.wpi.first.math.interpolation.Interpolator;
-import edu.wpi.first.math.interpolation.InverseInterpolator;
 
 /**
  * Interpolating Tree Maps are used to get values at points that are not defined by making a guess
@@ -103,7 +102,7 @@ public class InterpolatingTreeMap<K, V> {
   }
 
   // I HATE YOU WPILIB DEVS.
-  public Set<Map.Entry<K,V>> entrySet() {
+  public Set<Map.Entry<K, V>> entrySet() {
     return m_map.entrySet();
   }
 
@@ -112,4 +111,3 @@ public class InterpolatingTreeMap<K, V> {
     m_map.clear();
   }
 }
-

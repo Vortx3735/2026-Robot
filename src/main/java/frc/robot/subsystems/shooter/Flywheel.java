@@ -159,6 +159,10 @@ public class Flywheel extends SubsystemBase {
     return Commands.run(() -> stop(), this).withName("stop flywheel");
   }
 
+  public double getLaunchVelocitySim() {
+    return m_motorSimModel.getAngularVelocity().in(RotationsPerSecond);
+  }
+
   @Override
   public void periodic() {
     // This method will be called once per scheduler run

@@ -24,11 +24,11 @@ import edu.wpi.first.math.MathUtil;
 import edu.wpi.first.math.interpolation.Interpolator;
 
 /**
- * Ballistic parameters at a single distance: RPM, hood angle, and time-of-flight.
- * All three interpolate linearly so the LUT gives smooth values between data points.
+ * Ballistic parameters at a single distance: RPM, hood angle, and time-of-flight. All three
+ * interpolate linearly so the LUT gives smooth values between data points.
  *
- * <p>For fixed-angle shooters, every entry shares the same angleDeg. Once you've got
- * an adjustable hood, the angle varies per-distance and interpolation covers the gaps.
+ * <p>For fixed-angle shooters, every entry shares the same angleDeg. Once you've got an adjustable
+ * hood, the angle varies per-distance and interpolation covers the gaps.
  */
 public record ShotParameters(double rpm, double tofSec) {
 
@@ -36,8 +36,8 @@ public record ShotParameters(double rpm, double tofSec) {
   public static final ShotParameters ZERO = new ShotParameters(0, 0);
 
   /**
-   * Linear interpolator for use with WPILib's InterpolatingTreeMap. Plug this into
-   * the constructor alongside InverseInterpolator.forDouble().
+   * Linear interpolator for use with WPILib's InterpolatingTreeMap. Plug this into the constructor
+   * alongside InverseInterpolator.forDouble().
    */
   public static Interpolator<ShotParameters> interpolator() {
     return (start, end, t) ->
