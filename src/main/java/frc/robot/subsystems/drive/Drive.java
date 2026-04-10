@@ -420,7 +420,7 @@ public class Drive extends SubsystemBase implements Vision.VisionConsumer {
     targetSpeeds.omegaRadiansPerSecond +=
         m_pathThetaController.calculate(pose.getRotation().getRadians(), sample.heading);
 
-    runVelocity(targetSpeeds);
+    runVelocity(ChassisSpeeds.fromFieldRelativeSpeeds(targetSpeeds, pose.getRotation()));
   }
 
   /** Adds a new timestamped vision measurement. */
