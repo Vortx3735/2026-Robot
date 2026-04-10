@@ -264,6 +264,8 @@ public class Drive extends SubsystemBase implements Vision.VisionConsumer {
       poseEstimator.updateWithTime(sampleTimestamps[i], rawGyroRotation, modulePositions);
       Logger.recordOutput("pose", getPose());
       Logger.recordOutput("gyroRotation", rawGyroRotation.getDegrees());
+      Logger.recordOutput("Xvelocity", getVelocity().getX());
+      Logger.recordOutput("Yvelocity", getVelocity().getY());
     }
 
     // Update gyro alert
@@ -360,7 +362,7 @@ public class Drive extends SubsystemBase implements Vision.VisionConsumer {
 
   /** Returns the measured chassis speeds of the robot. */
   @AutoLogOutput(key = "SwerveChassisSpeeds/Measured")
-  private ChassisSpeeds getChassisSpeeds() {
+  public ChassisSpeeds getChassisSpeeds() {
     return kinematics.toChassisSpeeds(getModuleStates());
   }
 
@@ -383,12 +385,15 @@ public class Drive extends SubsystemBase implements Vision.VisionConsumer {
   }
 
   // Gets robot velocity from encoders as a Translation2d
-  public Translation2d getVelocity() {
+  public Transform2d getVelocity() {
     // velocity with x, y, and rotation
-    ChassisSpeeds fullVelocity = kinematics.toChassisSpeeds(getModuleStates());
+    ChassisSpeeds fullVelocity = getChassisSpeeds();
 
     // convert to translation (just x and y)
-    return new Translation2d(fullVelocity.vxMetersPerSecond, fullVelocity.vxMetersPerSecond);
+    return new Transform2d(
+        fullVelocity.vxMetersPerSecond,
+        fullVelocity.vyMetersPerSecond,
+        Rotation2d.fromRadians(fullVelocity.omegaRadiansPerSecond));
   }
 
   /** Returns the current odometry pose. */

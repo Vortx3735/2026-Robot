@@ -6,6 +6,7 @@ import edu.wpi.first.math.geometry.Pose2d;
 import edu.wpi.first.math.geometry.Pose3d;
 import edu.wpi.first.math.geometry.Rotation2d;
 import edu.wpi.first.math.geometry.Rotation3d;
+import edu.wpi.first.math.geometry.Transform2d;
 import edu.wpi.first.math.geometry.Transform3d;
 import edu.wpi.first.math.geometry.Translation2d;
 import edu.wpi.first.wpilibj.DriverStation;
@@ -21,21 +22,89 @@ import frc.robot.subsystems.shooter.Hood;
 import frc.robot.subsystems.shooter.Turret;
 import frc.robot.util.ShotLUT;
 import frc.robot.util.ShotParameters;
-
-import java.util.HashMap;
 import java.util.Map;
-import java.util.TreeMap;
 import java.util.function.Supplier;
 import org.littletonrobotics.junction.Logger;
 
 public class ShooterCommands {
   private static final ShotLUT shotLUT = new ShotLUT();
+
   static {
     // format: (distance (meters) -> {RPM, timeOfFlight})
     // SHOOTER_MAP.put();
+
+    // hood angle 65 deg
+    shotLUT.put(0.60, new ShotParameters(4875, 0.070));
+    shotLUT.put(0.65, new ShotParameters(2344, 0.157));
+    shotLUT.put(0.70, new ShotParameters(1781, 0.222));
+    shotLUT.put(0.75, new ShotParameters(1641, 0.259));
+    shotLUT.put(0.80, new ShotParameters(1535, 0.295));
+    shotLUT.put(0.85, new ShotParameters(1500, 0.322));
+    shotLUT.put(0.90, new ShotParameters(1500, 0.341));
+    shotLUT.put(2.05, new ShotParameters(1500, 0.791));
+    shotLUT.put(2.10, new ShotParameters(1500, 0.811));
+    shotLUT.put(2.15, new ShotParameters(1509, 0.826));
+    shotLUT.put(2.20, new ShotParameters(1518, 0.841));
+    shotLUT.put(2.25, new ShotParameters(1526, 0.856));
+    shotLUT.put(2.30, new ShotParameters(1544, 0.865));
+    shotLUT.put(2.35, new ShotParameters(1553, 0.880));
+    shotLUT.put(2.40, new ShotParameters(1566, 0.892));
+    shotLUT.put(2.45, new ShotParameters(1579, 0.904));
+    shotLUT.put(2.50, new ShotParameters(1588, 0.918));
+    shotLUT.put(2.55, new ShotParameters(1605, 0.927));
+    shotLUT.put(2.60, new ShotParameters(1614, 0.941));
+    shotLUT.put(2.65, new ShotParameters(1627, 0.952));
+    shotLUT.put(2.70, new ShotParameters(1641, 0.963));
+    shotLUT.put(2.75, new ShotParameters(1649, 0.976));
+    shotLUT.put(2.80, new ShotParameters(1667, 0.985));
+    shotLUT.put(2.85, new ShotParameters(1676, 0.998));
+    shotLUT.put(2.90, new ShotParameters(1689, 1.008));
+    shotLUT.put(2.95, new ShotParameters(1702, 1.019));
+    shotLUT.put(3.00, new ShotParameters(1711, 1.032));
+    shotLUT.put(3.05, new ShotParameters(1724, 1.042));
+    shotLUT.put(3.10, new ShotParameters(1737, 1.052));
+    shotLUT.put(3.15, new ShotParameters(1746, 1.064));
+    shotLUT.put(3.20, new ShotParameters(1764, 1.071));
+    shotLUT.put(3.25, new ShotParameters(1772, 1.084));
+    shotLUT.put(3.30, new ShotParameters(1786, 1.093));
+    shotLUT.put(3.35, new ShotParameters(1799, 1.103));
+    shotLUT.put(3.40, new ShotParameters(1808, 1.115));
+    shotLUT.put(3.45, new ShotParameters(1821, 1.124));
+    shotLUT.put(3.50, new ShotParameters(1834, 1.133));
+    shotLUT.put(3.55, new ShotParameters(1843, 1.145));
+    shotLUT.put(3.60, new ShotParameters(1860, 1.151));
+    shotLUT.put(3.65, new ShotParameters(1869, 1.163));
+    shotLUT.put(3.70, new ShotParameters(1882, 1.172));
+    shotLUT.put(3.75, new ShotParameters(1896, 1.180));
+    shotLUT.put(3.80, new ShotParameters(1904, 1.192));
+    shotLUT.put(3.85, new ShotParameters(1917, 1.200));
+    shotLUT.put(3.90, new ShotParameters(1931, 1.209));
+    shotLUT.put(3.95, new ShotParameters(1939, 1.220));
+    shotLUT.put(4.00, new ShotParameters(1953, 1.228));
+    shotLUT.put(4.05, new ShotParameters(1966, 1.236));
+    shotLUT.put(4.10, new ShotParameters(1975, 1.247));
+    shotLUT.put(4.15, new ShotParameters(1988, 1.255));
+    shotLUT.put(4.20, new ShotParameters(2001, 1.263));
+    shotLUT.put(4.25, new ShotParameters(2010, 1.273));
+    shotLUT.put(4.30, new ShotParameters(2023, 1.281));
+    shotLUT.put(4.35, new ShotParameters(2032, 1.292));
+    shotLUT.put(4.40, new ShotParameters(2045, 1.299));
+    shotLUT.put(4.45, new ShotParameters(2058, 1.307));
+    shotLUT.put(4.50, new ShotParameters(2067, 1.317));
+    shotLUT.put(4.55, new ShotParameters(2080, 1.325));
+    shotLUT.put(4.60, new ShotParameters(2089, 1.335));
+    shotLUT.put(4.65, new ShotParameters(2102, 1.342));
+    shotLUT.put(4.70, new ShotParameters(2115, 1.349));
+    shotLUT.put(4.75, new ShotParameters(2124, 1.359));
+    shotLUT.put(4.80, new ShotParameters(2137, 1.367));
+    shotLUT.put(4.85, new ShotParameters(2150, 1.374));
+    shotLUT.put(4.90, new ShotParameters(2159, 1.383));
+    shotLUT.put(4.95, new ShotParameters(2172, 1.390));
+    shotLUT.put(5.00, new ShotParameters(2181, 1.400));
   }
 
-  public static double latencyConstant = 0.15; // time in s of latency (pose updating, rio delay, etc) 
+  public static double latencyConstant =
+      0.15; // time in s of latency (pose updating, rio delay, etc)
   // if only running right camera
   public static double offset = 0.09;
   public static double efficiencyFactor = 1.005;
@@ -87,14 +156,18 @@ public class ShooterCommands {
     return shotLUT.lastKey(); // default/clamp distance is max distance measured/interpolated
   }
 
-  public static double SOTMcalculateShooterRps(Translation2d robotPosition, Translation2d robotVelocity, Translation2d goalPosition, Turret turret, Flywheel flywheel) {
+  public static Translation2d SOTMgetShotVelocity(Pose2d robotPosition, Transform2d robotVelocity) {
     // predict future robot postion
-    Translation2d futurePos = robotPosition.plus(robotVelocity.times(latencyConstant));
+    Pose2d futurePos = robotPosition.transformBy(robotVelocity.times(latencyConstant));
+    Logger.recordOutput("Shooter/futurePos", futurePos);
 
     // get the target vector (translation from robot to hub)
-    Translation2d toHub = getAllianceHubPose().getTranslation().minus(futurePos);
+    Translation2d toHub = getAllianceHubPose().getTranslation().minus(futurePos.getTranslation());
     double distance = toHub.getNorm();
+    // double distance = getDistanceToHub(futurePos, getAllianceHubPose()) / 3.281; this also works
     Translation2d targetDirection = toHub.div(distance);
+
+    Logger.recordOutput("Shooter/distanceSOTM", distance);
 
     // calculate baseline required horizontal velocity
     ShotParameters params = shotLUT.get(distance);
@@ -104,19 +177,41 @@ public class ShooterCommands {
     Translation2d targetVelocity = targetDirection.times(horiVelocity);
 
     // subtract robot velocity vectoramabob
-    Translation2d shotVelocity = targetVelocity.minus(robotVelocity);
+    Translation2d shotVelocity = targetVelocity.minus(robotVelocity.getTranslation());
+
+    return shotVelocity;
+  }
+
+  public static Command SOTMShoot(
+      Pose2d robotPosition,
+      Transform2d robotVelocity,
+      Tunnel tunnel,
+      Hopper hopper,
+      Flywheel flywheel,
+      Intake intake) {
+    Translation2d shotVelocity = SOTMgetShotVelocity(robotPosition, robotVelocity);
 
     // get our nice little results
-    double turretRotation = shotVelocity.getAngle().getRotations();
     double requiredVelocity = shotVelocity.getNorm();
 
     // look up the required distance for that velocity
-    double effectiveDistance  = velocityToEffectiveDistance(requiredVelocity);
+    double effectiveDistance = velocityToEffectiveDistance(requiredVelocity);
 
     // look up the required rpm for that distance
-    return shotLUT.get(effectiveDistance).rpm();
+    return CommandFactory.shootCommand(
+            flywheel, tunnel, hopper, intake, () -> shotLUT.get(effectiveDistance).rpm() / 60.0)
+        .withName("SOTMShoot");
   }
-  
+
+  public static Command SOTMAim(
+      Pose2d robotPosition, Transform2d robotVelocity, Turret turret, Hood hood) {
+    Translation2d shotVelocity = SOTMgetShotVelocity(robotPosition, robotVelocity);
+
+    // get our nice little results
+    double turretRotation = shotVelocity.getAngle().getRotations();
+    return Commands.parallel(
+        hood.setPositionPIDCommand(65), turret.setPositionPIDCommand(turretRotation));
+  }
 
   /**
    * Calculates required flywheel RPS for a given hood angle.
@@ -159,7 +254,6 @@ public class ShooterCommands {
     Logger.recordOutput("Shooter/calculatedShooterRPS", rps * ef);
     return rps * ef;
   }
-
 
   /** Conversion factor from meters to feet. */
   private static final double METERS_TO_FEET = 3.28084;
@@ -312,6 +406,7 @@ public class ShooterCommands {
           Pose2d hp = getAllianceHubPose();
           double liveXs = getDistanceToHub(rp, hp);
           Logger.recordOutput("Shooter/Distance", liveXs);
+          Logger.recordOutput("Shooter/Pose", poseSupplier.get());
 
           if (liveXs > 15) {
             hood.setPositionPID(theta - 8);

@@ -20,19 +20,19 @@
 
 package frc.robot.util;
 
+import edu.wpi.first.math.interpolation.InverseInterpolator;
 import java.util.Map;
 import java.util.Set;
 
-import edu.wpi.first.math.interpolation.InverseInterpolator;
-
 /**
- * Distance-keyed lookup table for RPM, hood angle, and TOF. Wraps WPILib's
- * InterpolatingTreeMap so all three stay in sync at any queried distance.
+ * Distance-keyed lookup table for RPM, hood angle, and TOF. Wraps WPILib's InterpolatingTreeMap so
+ * all three stay in sync at any queried distance.
  *
- * <p>If you're using separate InterpolatingDoubleTreeMaps for RPM and TOF,
- * this keeps them from drifting apart.
+ * <p>If you're using separate InterpolatingDoubleTreeMaps for RPM and TOF, this keeps them from
+ * drifting apart.
  *
  * <p>Usage:
+ *
  * <pre>
  *   ShotLUT lut = new ShotLUT();
  *   lut.put(1.0, 2000, 45.0, 0.45);
@@ -51,8 +51,7 @@ public class ShotLUT {
 
   public ShotLUT() {
     map =
-        new InterpolatingTreeMap<>(
-            InverseInterpolator.forDouble(), ShotParameters.interpolator());
+        new InterpolatingTreeMap<>(InverseInterpolator.forDouble(), ShotParameters.interpolator());
   }
 
   /** Insert or overwrite the parameters at a given distance. */
@@ -67,8 +66,7 @@ public class ShotLUT {
   }
 
   /**
-   * Get the interpolated parameters at a distance. Returns ShotParameters.ZERO if the
-   * map is empty.
+   * Get the interpolated parameters at a distance. Returns ShotParameters.ZERO if the map is empty.
    */
   public ShotParameters get(double distanceM) {
     ShotParameters result = map.get(distanceM);
@@ -83,7 +81,7 @@ public class ShotLUT {
     return get(distanceM).tofSec();
   }
 
-  public Set<Map.Entry<Double,ShotParameters>> entrySet() {
+  public Set<Map.Entry<Double, ShotParameters>> entrySet() {
     return map.entrySet();
   }
 

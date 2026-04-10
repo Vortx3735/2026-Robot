@@ -22,6 +22,7 @@ import com.ctre.phoenix6.SignalLogger;
 import com.pathplanner.lib.auto.AutoBuilder;
 import edu.wpi.first.math.geometry.Pose2d;
 import edu.wpi.first.math.geometry.Rotation2d;
+import edu.wpi.first.math.geometry.Transform2d;
 import edu.wpi.first.networktables.DoubleEntry;
 import edu.wpi.first.networktables.NetworkTable;
 import edu.wpi.first.networktables.NetworkTableInstance;
@@ -304,7 +305,9 @@ public class RobotContainer {
     // turret.setDefaultCommand(ShooterCommands.AimToHubOrSide(turret, () ->
     // drive.getTurretPose()));
     // turret.setDefaultCommand(ShooterCommands.AimToHub(turret, () -> drive.getTurretPose()));
-    turret.setDefaultCommand(turret.stopCommand().withName("stop turret"));
+    // turret.setDefaultCommand(turret.stopCommand().withName("stop turret"));
+    turret.setDefaultCommand(
+        ShooterCommands.SOTMAim(drive.getPose(), drive.getVelocity(), turret, hood));
 
     // Default command, normal field-relative drive
     drive.setDefaultCommand(
@@ -328,6 +331,7 @@ public class RobotContainer {
     // Shooter Binds
     // driverController.lb.whileTrue(turret.moveCommand(true));
     // driverController.rb.whileTrue(turret.moveCommand(false));
+
     driverController.rt.whileTrue(
         ShooterCommands.ShootFromDistance(
             flywheel,
@@ -335,8 +339,15 @@ public class RobotContainer {
             tunnel,
             hopper,
             intake,
-            () -> drive.getTurretPose(),
-            softwareHoodAngleEntry.getAsDouble()));
+            () ->
+                drive
+                    .getTurretPose()
+                    .plus(new Transform2d(drive.getVelocity().getTranslation().times(0.5), new Rotation2d())),
+            65));
+
+    // driverController.rt.whileTrue(
+    //     ShooterCommands.SOTMShoot(
+    //         drive.getPose(), drive.getVelocity(), tunnel, hopper, flywheel, intake));
     // driverController.lt.whileTrue(
     // ShooterCommands.ShootFromDistanceBackwardsHopper(
     //     flywheel, tunnel, hopper, intake, () -> drive.getTurretPose(), 65));

@@ -7,12 +7,15 @@
 
 package frc.robot;
 
+import edu.wpi.first.math.geometry.Translation3d;
 import edu.wpi.first.wpilibj.DriverStation;
 import edu.wpi.first.wpilibj.livewindow.LiveWindow;
 import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
 import edu.wpi.first.wpilibj2.command.Command;
 import edu.wpi.first.wpilibj2.command.CommandScheduler;
 import edu.wpi.first.wpilibj2.command.InstantCommand;
+import frc.robot.commands.ShooterCommands;
+import frc.robot.util.FuelPhysicsSim;
 import org.littletonrobotics.junction.LogFileUtil;
 import org.littletonrobotics.junction.LoggedRobot;
 import org.littletonrobotics.junction.Logger;
@@ -29,6 +32,7 @@ import org.littletonrobotics.junction.wpilog.WPILOGWriter;
 public class Robot extends LoggedRobot {
   private Command autonomousCommand;
   private RobotContainer robotContainer;
+  private FuelPhysicsSim ballSim = new FuelPhysicsSim("Sim/Fuel");
 
   public Robot() {
     // Record metadata
@@ -176,6 +180,19 @@ public class Robot extends LoggedRobot {
     if (robotContainer != null) {
       robotContainer.resetSimulation();
     }
+    ballSim.enable();
+    ballSim.placeFieldBalls(); // spawns all the game pieces
+
+    // tell it about your robot
+    ballSim.configureRobot(
+        25,
+        30,
+        2.5,
+        () -> robotContainer.drive.getPose(),
+        () -> robotContainer.drive.getChassisSpeeds());
+
+    // in simulationPeriodic()
+    ballSim.tick(); // runs physics, publishes ball positions to NT
   }
 
   /** This function is called periodically whilst in simulation. */
@@ -185,5 +202,16 @@ public class Robot extends LoggedRobot {
     if (robotContainer != null) {
       robotContainer.updateSimulation();
     }
+
+    // in simulationPeriodic()
+    ballSim.tick(); // runs physics, publishes ball positions to NT
+
+    // when you shoot
+    ballSim.launchBall(
+        new Translation3d(robotContainer.drive.getTurretPose().getTranslation()),
+        new Translation3d(
+            ShooterCommands.SOTMgetShotVelocity(
+                robotContainer.drive.getPose(), robotContainer.drive.getVelocity())),
+        robotContainer.flywheel.getFlywheelCurrentRPS() * 60);
   }
 }
