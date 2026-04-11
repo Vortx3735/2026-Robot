@@ -14,16 +14,19 @@ import edu.wpi.first.networktables.NetworkTableInstance;
 import edu.wpi.first.wpilibj2.command.Command;
 import edu.wpi.first.wpilibj2.command.RunCommand;
 import edu.wpi.first.wpilibj2.command.SubsystemBase;
+import java.util.function.BooleanSupplier;
 import org.littletonrobotics.junction.Logger;
 
 public class Intake extends SubsystemBase {
-
+  private static final double intakeDeployGearRatio = 15.0 / 1;
   private final TalonFX intakeMotor;
+  private final TalonFX intakeDeployMotor;
   // Network Table Entry
   final DoubleEntry intakeSpeedEntry;
 
-  public Intake(int motorId) {
-    intakeMotor = new TalonFX(motorId);
+  public Intake(int intakeMotorId, int intakeDeployMotorId) {
+    intakeMotor = new TalonFX(intakeMotorId);
+    intakeDeployMotor = new TalonFX(intakeDeployMotorId);
 
     // Intake Network Table
     NetworkTableInstance inst = NetworkTableInstance.getDefault();
@@ -32,6 +35,8 @@ public class Intake extends SubsystemBase {
     intakeSpeedEntry.set(1);
 
     TalonFXConfiguration intakeConfig = new TalonFXConfiguration();
+    TalonFXConfiguration intakeDeployConfigs = new TalonFXConfiguration();
+
     intakeConfig.MotorOutput.Inverted = InvertedValue.Clockwise_Positive;
 
     // var currentLimits = intakeConfig.CurrentLimits;
@@ -41,7 +46,16 @@ public class Intake extends SubsystemBase {
     // currentLimits.StatorCurrentLimitEnable = true;
     // currentLimits.StatorCurrentLimit = 300;
 
+    intakeDeployConfigs.SoftwareLimitSwitch.ForwardSoftLimitEnable = true;
+    intakeDeployConfigs.SoftwareLimitSwitch.ForwardSoftLimitThreshold =
+        0.25 / intakeDeployGearRatio;
+    intakeDeployConfigs.SoftwareLimitSwitch.ReverseSoftLimitEnable = true;
+    intakeDeployConfigs.SoftwareLimitSwitch.ReverseSoftLimitThreshold = 0 / intakeDeployGearRatio;
     intakeMotor.getConfigurator().apply(intakeConfig);
+  }
+
+  public BooleanSupplier intakeIsOut() {
+    return () -> intakeDeployMotor.getPosition().getValueAsDouble() > 0;
   }
 
   public double getIntakeSpeed() {
@@ -66,8 +80,13 @@ public class Intake extends SubsystemBase {
     intakeMotor.set(speed);
   }
 
+  public void setDeploySpeed(double speed) {
+    intakeDeployMotor.set(speed);
+  }
+
   public void stop() {
     intakeMotor.set(0);
+    intakeDeployMotor.set(0);
   }
 
   public Command intakeCommand() {
@@ -76,6 +95,14 @@ public class Intake extends SubsystemBase {
 
   public Command outtakeCommand() {
     return new RunCommand(() -> run(true), this).withName("outtake intake");
+  }
+
+  public Command deployCommand() {
+    return new RunCommand(() -> setDeploySpeed(0.6), this).withName("deploy intake");
+  }
+
+  public Command storeCommand() {
+    return new RunCommand(() -> setDeploySpeed(-0.6), this).withName("store intake");
   }
 
   public Command stopCommand() {

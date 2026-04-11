@@ -35,6 +35,7 @@ import edu.wpi.first.wpilibj2.command.Command;
 import edu.wpi.first.wpilibj2.command.Commands;
 import edu.wpi.first.wpilibj2.command.InstantCommand;
 import edu.wpi.first.wpilibj2.command.button.RobotModeTriggers;
+import edu.wpi.first.wpilibj2.command.button.Trigger;
 import edu.wpi.first.wpilibj2.command.sysid.SysIdRoutine;
 import frc.robot.commands.CommandFactory;
 import frc.robot.commands.DriveCommands;
@@ -76,7 +77,10 @@ public class RobotContainer {
   public final Hood hood = new Hood(Constants.HoodConstants.HOOD_MOTOR_ID, Constants.currentMode);
   public final Flywheel flywheel =
       new Flywheel(Constants.FlywheelConstants.FLYWHEEL_MOTOR_ID, Constants.currentMode);
-  public final Intake intake = new Intake(Constants.IntakeConstants.INTAKE_MOTOR_ID);
+  public final Intake intake =
+      new Intake(
+          Constants.IntakeConstants.INTAKE_MOTOR_ID,
+          Constants.IntakeConstants.INTAKE_DEPLOY_MOTOR_ID);
   public final Hopper hopper = new Hopper(Constants.HopperConstants.HOPPER_MOTOR_ID);
   public final Tunnel tunnel =
       new Tunnel(
@@ -321,7 +325,7 @@ public class RobotContainer {
             : () ->
                 drive.resetOdometry(new Pose2d(drive.getPose().getTranslation(), new Rotation2d()));
     driverController.start().onTrue(Commands.runOnce(resetOdometry).ignoringDisable(true));
-
+    new Trigger(intake.intakeIsOut()).whileTrue(turret.zeroTurretPositionCommand());
     // Set bindings
 
     // Shooter Binds
@@ -397,6 +401,8 @@ public class RobotContainer {
     // Intake Binds
     driverController.xButton.whileTrue(CommandFactory.intakeCommand(intake, hopper));
     driverController.bButton.whileTrue(intake.outtakeCommand());
+    driverController.lb.whileTrue(intake.deployCommand());
+    driverController.rb.whileTrue(intake.storeCommand());
     driverController.aButton.whileTrue(CommandFactory.clearJamsCommand(tunnel, hopper));
 
     // Test/Misc Binds
