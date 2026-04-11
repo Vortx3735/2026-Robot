@@ -414,6 +414,7 @@ public class ShooterCommands {
           double liveXs = getDistanceToHub(rp, hp);
           Logger.recordOutput("Shooter/Distance", liveXs);
           Logger.recordOutput("Shooter/Pose", poseSupplier.get());
+          Logger.recordOutput("Shooter/Pose", poseSupplier.get());
 
           if (liveXs > 15) {
             hood.setPositionPID(theta - 8);
