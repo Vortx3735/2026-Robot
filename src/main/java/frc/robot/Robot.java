@@ -190,9 +190,6 @@ public class Robot extends LoggedRobot {
         2.5,
         () -> robotContainer.drive.getPose(),
         () -> robotContainer.drive.getChassisSpeeds());
-
-    // in simulationPeriodic()
-    ballSim.tick(); // runs physics, publishes ball positions to NT
   }
 
   /** This function is called periodically whilst in simulation. */

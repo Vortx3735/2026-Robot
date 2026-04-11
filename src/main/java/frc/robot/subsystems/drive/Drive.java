@@ -391,9 +391,11 @@ public class Drive extends SubsystemBase implements Vision.VisionConsumer {
 
     // convert to translation (just x and y)
     return new Transform2d(
-        fullVelocity.vxMetersPerSecond,
-        fullVelocity.vyMetersPerSecond,
-        Rotation2d.fromRadians(fullVelocity.omegaRadiansPerSecond));
+        fullVelocity.vxMetersPerSecond * rawGyroRotation.getCos()
+            - fullVelocity.vyMetersPerSecond * rawGyroRotation.getSin(),
+        fullVelocity.vyMetersPerSecond * rawGyroRotation.getCos()
+            + fullVelocity.vxMetersPerSecond * rawGyroRotation.getSin(),
+        new Rotation2d());
   }
 
   /** Returns the current odometry pose. */

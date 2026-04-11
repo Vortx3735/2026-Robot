@@ -118,6 +118,12 @@ public class DriveCommands {
         drive);
   }
 
+  public static Transform2d getVelocity(DoubleSupplier xSupplier, DoubleSupplier ySupplier) {
+    return new Transform2d(
+        getLinearVelocityFromJoysticks(xSupplier.getAsDouble(), ySupplier.getAsDouble()),
+        new Rotation2d());
+  }
+
   /**
    * Field relative drive command using joystick for linear control and PID for angular control.
    * Possible use cases include snapping to an angle, aiming at a vision target, or controlling

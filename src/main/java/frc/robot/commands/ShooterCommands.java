@@ -164,7 +164,8 @@ public class ShooterCommands {
     // get the target vector (translation from robot to hub)
     Translation2d toHub = getAllianceHubPose().getTranslation().minus(futurePos.getTranslation());
     double distance = toHub.getNorm();
-    // double distance = getDistanceToHub(futurePos, getAllianceHubPose()) / 3.281; this also works
+    // double distance = getDistanceToHub(futurePos, getAllianceHubPose()) / 3.281; // this also
+    // works
     Translation2d targetDirection = toHub.div(distance);
 
     Logger.recordOutput("Shooter/distanceSOTM", distance);
@@ -189,6 +190,9 @@ public class ShooterCommands {
       Hopper hopper,
       Flywheel flywheel,
       Intake intake) {
+
+    // Supplier<Double> targetRpsSupplier =
+    //   () -> {
     Translation2d shotVelocity = SOTMgetShotVelocity(robotPosition, robotVelocity);
 
     // get our nice little results
@@ -196,6 +200,9 @@ public class ShooterCommands {
 
     // look up the required distance for that velocity
     double effectiveDistance = velocityToEffectiveDistance(requiredVelocity);
+
+    // return shotLUT.get(effectiveDistance).rpm() / 60.0;
+    // };
 
     // look up the required rpm for that distance
     return CommandFactory.shootCommand(

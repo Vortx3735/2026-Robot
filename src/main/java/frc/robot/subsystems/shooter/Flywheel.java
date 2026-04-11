@@ -78,7 +78,7 @@ public class Flywheel extends SubsystemBase {
     flywheelSpeedEntry.set(0.5);
     if (state == Mode.SIM) {
       var talonFXSim = flywheelMotor.getSimState();
-      talonFXSim.Orientation = ChassisReference.CounterClockwise_Positive;
+      talonFXSim.Orientation = ChassisReference.Clockwise_Positive;
       talonFXSim.setMotorType(TalonFXSimState.MotorType.KrakenX60);
     }
   }

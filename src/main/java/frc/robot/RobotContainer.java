@@ -22,7 +22,6 @@ import com.ctre.phoenix6.SignalLogger;
 import com.pathplanner.lib.auto.AutoBuilder;
 import edu.wpi.first.math.geometry.Pose2d;
 import edu.wpi.first.math.geometry.Rotation2d;
-import edu.wpi.first.math.geometry.Transform2d;
 import edu.wpi.first.networktables.DoubleEntry;
 import edu.wpi.first.networktables.NetworkTable;
 import edu.wpi.first.networktables.NetworkTableInstance;
@@ -328,22 +327,31 @@ public class RobotContainer {
     // driverController.lb.whileTrue(turret.moveCommand(true));
     // driverController.rb.whileTrue(turret.moveCommand(false));
 
+    // driverController.rt.whileTrue(
+    //     ShooterCommands.ShootFromDistance(
+    //         flywheel,
+    //         hood,
+    //         tunnel,
+    //         hopper,
+    //         intake,
+    //         () ->
+    //             drive
+    //                 .getTurretPose()
+    //                 .plus(
+    //                     new Transform2d(
+    //                         drive.getVelocity().getTranslation().times(0.5), new Rotation2d())),
+    //         65));
+
     driverController.rt.whileTrue(
-        ShooterCommands.ShootFromDistance(
-            flywheel,
-            hood,
+        ShooterCommands.SOTMShoot(
+            drive.getPose(),
+            DriveCommands.getVelocity(
+                () -> driverController.getLeftY(), () -> driverController.getLeftX()),
             tunnel,
             hopper,
-            intake,
-            () ->
-                drive
-                    .getTurretPose()
-                    .plus(new Transform2d(drive.getVelocity().getTranslation().times(0.5), new Rotation2d())),
-            65));
+            flywheel,
+            intake));
 
-    // driverController.rt.whileTrue(
-    //     ShooterCommands.SOTMShoot(
-    //         drive.getPose(), drive.getVelocity(), tunnel, hopper, flywheel, intake));
     // driverController.lt.whileTrue(
     // ShooterCommands.ShootFromDistanceBackwardsHopper(
     //     flywheel, tunnel, hopper, intake, () -> drive.getTurretPose(), 65));
