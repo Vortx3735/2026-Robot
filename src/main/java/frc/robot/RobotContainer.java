@@ -35,7 +35,6 @@ import edu.wpi.first.wpilibj2.command.Command;
 import edu.wpi.first.wpilibj2.command.Commands;
 import edu.wpi.first.wpilibj2.command.InstantCommand;
 import edu.wpi.first.wpilibj2.command.button.RobotModeTriggers;
-import edu.wpi.first.wpilibj2.command.button.Trigger;
 import edu.wpi.first.wpilibj2.command.sysid.SysIdRoutine;
 import frc.robot.commands.CommandFactory;
 import frc.robot.commands.DriveCommands;
@@ -77,9 +76,7 @@ public class RobotContainer {
   public final Hood hood = new Hood(Constants.HoodConstants.HOOD_MOTOR_ID, Constants.currentMode);
   public final Flywheel flywheel =
       new Flywheel(Constants.FlywheelConstants.FLYWHEEL_MOTOR_ID, Constants.currentMode);
-  public final Intake intake =
-      new Intake(
-          Constants.IntakeConstants.INTAKE_MOTOR_ID);
+  public final Intake intake = new Intake(Constants.IntakeConstants.INTAKE_MOTOR_ID);
   public final Hopper hopper = new Hopper(Constants.HopperConstants.HOPPER_MOTOR_ID);
   public final Tunnel tunnel =
       new Tunnel(
@@ -306,7 +303,7 @@ public class RobotContainer {
     // turret.setDefaultCommand(ShooterCommands.AimToHub(turret, () -> drive.getTurretPose()));
     // turret.setDefaultCommand(turret.stopCommand().withName("stop turret"));
     turret.setDefaultCommand(
-        ShooterCommands.SOTMAim(drive.getPose(), drive.getVelocity(), turret, hood));
+        ShooterCommands.SOTMAim(drive.getPose(), drive.getFieldRelativeVelocity(), turret, hood));
 
     // Default command, normal field-relative drive
     drive.setDefaultCommand(
@@ -337,23 +334,12 @@ public class RobotContainer {
     //         tunnel,
     //         hopper,
     //         intake,
-    //         () ->
-    //             drive
-    //                 .getTurretPose()
-    //                 .plus(
-    //                     new Transform2d(
-    //                         drive.getVelocity().getTranslation().times(0.5), new Rotation2d())),
+    //         () -> drive.getTurretPose().transformBy(new Transform2d(drive.getFieldRelativeVelocity(), new Rotation2d())),
     //         65));
 
     driverController.rt.whileTrue(
         ShooterCommands.SOTMShoot(
-            drive.getPose(),
-            DriveCommands.getVelocity(
-                () -> driverController.getLeftY(), () -> driverController.getLeftX()),
-            tunnel,
-            hopper,
-            flywheel,
-            intake));
+            drive.getPose(), drive.getFieldRelativeVelocity(), tunnel, hopper, flywheel, intake));
 
     // driverController.lt.whileTrue(
     // ShooterCommands.ShootFromDistanceBackwardsHopper(

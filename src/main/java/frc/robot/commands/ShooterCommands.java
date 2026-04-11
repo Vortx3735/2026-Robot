@@ -34,11 +34,6 @@ public class ShooterCommands {
     // SHOOTER_MAP.put();
 
     // hood angle 65 deg
-    shotLUT.put(0.60, new ShotParameters(4875, 0.070));
-    shotLUT.put(0.65, new ShotParameters(2344, 0.157));
-    shotLUT.put(0.70, new ShotParameters(1781, 0.222));
-    shotLUT.put(0.75, new ShotParameters(1641, 0.259));
-    shotLUT.put(0.80, new ShotParameters(1535, 0.295));
     shotLUT.put(0.85, new ShotParameters(1500, 0.322));
     shotLUT.put(0.90, new ShotParameters(1500, 0.341));
     shotLUT.put(2.05, new ShotParameters(1500, 0.791));
@@ -148,7 +143,7 @@ public class ShooterCommands {
     for (Map.Entry<Double, ShotParameters> entry : shotLUT.entrySet()) {
       double dist = entry.getKey();
       double vel = dist / entry.getValue().tofSec();
-      if (vel >= velocity) {
+      if (vel == velocity) {
         return dist;
       }
     }
@@ -156,13 +151,18 @@ public class ShooterCommands {
     return shotLUT.lastKey(); // default/clamp distance is max distance measured/interpolated
   }
 
-  public static Translation2d SOTMgetShotVelocity(Pose2d robotPosition, Transform2d robotVelocity) {
+  public static Translation2d SOTMgetShotVelocity(
+      Pose2d robotPosition, Translation2d robotVelocity) {
     // predict future robot postion
-    Pose2d futurePos = robotPosition.transformBy(robotVelocity.times(latencyConstant));
+    Translation2d futurePos =
+        robotPosition.getTranslation().plus(
+            robotVelocity.times(latencyConstant));
     Logger.recordOutput("Shooter/futurePos", futurePos);
 
     // get the target vector (translation from robot to hub)
-    Translation2d toHub = getAllianceHubPose().getTranslation().minus(futurePos.getTranslation());
+    Translation2d toHub = getAllianceHubPose().getTranslation().minus(futurePos).minus(new Translation2d(8.325 - 0.5969, 0));
+    Logger.recordOutput("Shooter/xDisHub", toHub.getX());
+    Logger.recordOutput("Shooter/yDisHub", toHub.getY());
     double distance = toHub.getNorm();
     // double distance = getDistanceToHub(futurePos, getAllianceHubPose()) / 3.281; // this also
     // works
@@ -173,45 +173,48 @@ public class ShooterCommands {
     // calculate baseline required horizontal velocity
     ShotParameters params = shotLUT.get(distance);
     double horiVelocity = distance / params.tofSec();
+    Logger.recordOutput("Shooter/baselineVelo", horiVelocity);
 
     // build target velocity vector
     Translation2d targetVelocity = targetDirection.times(horiVelocity);
 
     // subtract robot velocity vectoramabob
-    Translation2d shotVelocity = targetVelocity.minus(robotVelocity.getTranslation());
+    Translation2d shotVelocity = targetVelocity.minus(robotVelocity);
 
     return shotVelocity;
   }
 
   public static Command SOTMShoot(
       Pose2d robotPosition,
-      Transform2d robotVelocity,
+      Translation2d robotVelocity,
       Tunnel tunnel,
       Hopper hopper,
       Flywheel flywheel,
       Intake intake) {
 
-    // Supplier<Double> targetRpsSupplier =
-    //   () -> {
-    Translation2d shotVelocity = SOTMgetShotVelocity(robotPosition, robotVelocity);
+    Supplier<Double> targetRpsSupplier =
+      () -> {
+        Translation2d shotVelocity = SOTMgetShotVelocity(robotPosition, robotVelocity);
 
-    // get our nice little results
-    double requiredVelocity = shotVelocity.getNorm();
+        // get our nice little results
+        double requiredVelocity = shotVelocity.getNorm();
+        Logger.recordOutput("Shooter/reqVelo", requiredVelocity);
 
-    // look up the required distance for that velocity
-    double effectiveDistance = velocityToEffectiveDistance(requiredVelocity);
+        // look up the required distance for that velocity
+        double effectiveDistance = velocityToEffectiveDistance(requiredVelocity);
+        Logger.recordOutput("Shooter/SOTMEffectiveDistance", effectiveDistance);
 
-    // return shotLUT.get(effectiveDistance).rpm() / 60.0;
-    // };
+        return shotLUT.get(effectiveDistance).rpm() / 60.0;
+    };
 
     // look up the required rpm for that distance
     return CommandFactory.shootCommand(
-            flywheel, tunnel, hopper, intake, () -> shotLUT.get(effectiveDistance).rpm() / 60.0)
+            flywheel, tunnel, hopper, intake, targetRpsSupplier)
         .withName("SOTMShoot");
   }
 
   public static Command SOTMAim(
-      Pose2d robotPosition, Transform2d robotVelocity, Turret turret, Hood hood) {
+      Pose2d robotPosition, Translation2d robotVelocity, Turret turret, Hood hood) {
     Translation2d shotVelocity = SOTMgetShotVelocity(robotPosition, robotVelocity);
 
     // get our nice little results

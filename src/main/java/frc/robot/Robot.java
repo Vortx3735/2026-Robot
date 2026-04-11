@@ -208,7 +208,7 @@ public class Robot extends LoggedRobot {
         new Translation3d(robotContainer.drive.getTurretPose().getTranslation()),
         new Translation3d(
             ShooterCommands.SOTMgetShotVelocity(
-                robotContainer.drive.getPose(), robotContainer.drive.getVelocity())),
+                robotContainer.drive.getPose(), robotContainer.drive.getFieldRelativeVelocity())),
         robotContainer.flywheel.getFlywheelCurrentRPS() * 60);
   }
 }

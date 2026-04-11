@@ -14,7 +14,6 @@ import edu.wpi.first.networktables.NetworkTableInstance;
 import edu.wpi.first.wpilibj2.command.Command;
 import edu.wpi.first.wpilibj2.command.RunCommand;
 import edu.wpi.first.wpilibj2.command.SubsystemBase;
-import java.util.function.BooleanSupplier;
 import org.littletonrobotics.junction.Logger;
 
 public class Intake extends SubsystemBase {
@@ -42,7 +41,6 @@ public class Intake extends SubsystemBase {
     // currentLimits.StatorCurrentLimitEnable = true;
     // currentLimits.StatorCurrentLimit = 300;
   }
-
 
   public double getIntakeSpeed() {
     return intakeSpeedEntry.get();

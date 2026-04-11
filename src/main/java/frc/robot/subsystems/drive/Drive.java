@@ -264,8 +264,6 @@ public class Drive extends SubsystemBase implements Vision.VisionConsumer {
       poseEstimator.updateWithTime(sampleTimestamps[i], rawGyroRotation, modulePositions);
       Logger.recordOutput("pose", getPose());
       Logger.recordOutput("gyroRotation", rawGyroRotation.getDegrees());
-      Logger.recordOutput("Xvelocity", getVelocity().getX());
-      Logger.recordOutput("Yvelocity", getVelocity().getY());
     }
 
     // Update gyro alert
@@ -384,18 +382,22 @@ public class Drive extends SubsystemBase implements Vision.VisionConsumer {
     return output;
   }
 
+  public ChassisSpeeds getFieldRelativeChassisSpeeds() {
+    return new ChassisSpeeds(
+        getChassisSpeeds().vxMetersPerSecond * getPose().getRotation().getCos()
+            - getChassisSpeeds().vyMetersPerSecond * getPose().getRotation().getSin(),
+        getChassisSpeeds().vyMetersPerSecond * getPose().getRotation().getCos()
+            + getChassisSpeeds().vxMetersPerSecond * getPose().getRotation().getSin(),
+        getChassisSpeeds().omegaRadiansPerSecond);
+  }
+
   // Gets robot velocity from encoders as a Translation2d
-  public Transform2d getVelocity() {
+  public Translation2d getFieldRelativeVelocity() {
     // velocity with x, y, and rotation
-    ChassisSpeeds fullVelocity = getChassisSpeeds();
+    ChassisSpeeds chassisSpeeds = getFieldRelativeChassisSpeeds();
 
     // convert to translation (just x and y)
-    return new Transform2d(
-        fullVelocity.vxMetersPerSecond * rawGyroRotation.getCos()
-            - fullVelocity.vyMetersPerSecond * rawGyroRotation.getSin(),
-        fullVelocity.vyMetersPerSecond * rawGyroRotation.getCos()
-            + fullVelocity.vxMetersPerSecond * rawGyroRotation.getSin(),
-        new Rotation2d());
+    return new Translation2d(chassisSpeeds.vxMetersPerSecond, chassisSpeeds.vyMetersPerSecond);
   }
 
   /** Returns the current odometry pose. */
