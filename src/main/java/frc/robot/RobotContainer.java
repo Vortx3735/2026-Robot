@@ -21,8 +21,9 @@ import choreo.auto.AutoFactory;
 import com.ctre.phoenix6.SignalLogger;
 import com.pathplanner.lib.auto.AutoBuilder;
 import edu.wpi.first.math.geometry.Pose2d;
+import edu.wpi.first.math.geometry.Pose3d;
 import edu.wpi.first.math.geometry.Rotation2d;
-import edu.wpi.first.math.geometry.Transform2d;
+import edu.wpi.first.math.geometry.Rotation3d;
 import edu.wpi.first.networktables.DoubleEntry;
 import edu.wpi.first.networktables.NetworkTable;
 import edu.wpi.first.networktables.NetworkTableInstance;
@@ -303,7 +304,8 @@ public class RobotContainer {
     // turret.setDefaultCommand(ShooterCommands.AimToHub(turret, () -> drive.getTurretPose()));
     // turret.setDefaultCommand(turret.stopCommand().withName("stop turret"));
     turret.setDefaultCommand(
-        ShooterCommands.SOTMAim(drive.getPose(), drive.getFieldRelativeVelocity(), turret, hood));
+        ShooterCommands.SOTMAim(
+            () -> drive.getPose(), () -> drive.getFieldRelativeVelocity(), turret, hood));
 
     // Default command, normal field-relative drive
     drive.setDefaultCommand(
@@ -334,12 +336,18 @@ public class RobotContainer {
     //         tunnel,
     //         hopper,
     //         intake,
-    //         () -> drive.getTurretPose().transformBy(new Transform2d(drive.getFieldRelativeVelocity(), new Rotation2d())),
+    //         () -> drive.getTurretPose().transformBy(new
+    // Transform2d(drive.getFieldRelativeVelocity(), new Rotation2d())),
     //         65));
 
     driverController.rt.whileTrue(
         ShooterCommands.SOTMShoot(
-            drive.getPose(), drive.getFieldRelativeVelocity(), tunnel, hopper, flywheel, intake));
+            () -> drive.getPose(),
+            () -> drive.getFieldRelativeVelocity(),
+            tunnel,
+            hopper,
+            flywheel,
+            intake));
 
     // driverController.lt.whileTrue(
     // ShooterCommands.ShootFromDistanceBackwardsHopper(
@@ -420,6 +428,8 @@ public class RobotContainer {
   public void updateSimulation() {
     if (Constants.currentMode != Constants.Mode.SIM) return;
 
+    Pose3d turretPose = ShooterCommands.getTurretPose(() -> drive.getPose());
+
     SimulatedArena.getInstance().simulationPeriodic();
     Logger.recordOutput(
         "FieldSimulation/RobotPosition", driveSimulation.getSimulatedDriveTrainPose());
@@ -429,7 +439,10 @@ public class RobotContainer {
             ? Constants.FieldConstants.RED_HUB_POSE3D
             : Constants.FieldConstants.BLUE_HUB_POSE3D);
     Logger.recordOutput(
-        "Turret/simulatedPose", ShooterCommands.getTurretPose(() -> drive.getPose()));
+        "Turret/simulatedPose",
+        turretPose.rotateAround(
+            turretPose.getTranslation(),
+            new Rotation3d(Rotation2d.fromRotations(turret.getTurretCurrentPosition()))));
 
     Logger.recordOutput(
         "Shooter/flywheelPose",

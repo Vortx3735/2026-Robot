@@ -6,7 +6,6 @@ import edu.wpi.first.math.geometry.Pose2d;
 import edu.wpi.first.math.geometry.Pose3d;
 import edu.wpi.first.math.geometry.Rotation2d;
 import edu.wpi.first.math.geometry.Rotation3d;
-import edu.wpi.first.math.geometry.Transform2d;
 import edu.wpi.first.math.geometry.Transform3d;
 import edu.wpi.first.math.geometry.Translation2d;
 import edu.wpi.first.wpilibj.DriverStation;
@@ -34,6 +33,11 @@ public class ShooterCommands {
     // SHOOTER_MAP.put();
 
     // hood angle 65 deg
+    
+    // shotLUT.put(0.65, new ShotParameters(2344, 0.157));
+    // shotLUT.put(0.70, new ShotParameters(1781, 0.222));
+    // shotLUT.put(0.75, new ShotParameters(1641, 0.259));
+    // shotLUT.put(0.80, new ShotParameters(1535, 0.295));
     shotLUT.put(0.85, new ShotParameters(1500, 0.322));
     shotLUT.put(0.90, new ShotParameters(1500, 0.341));
     shotLUT.put(2.05, new ShotParameters(1500, 0.791));
@@ -96,6 +100,7 @@ public class ShooterCommands {
     shotLUT.put(4.90, new ShotParameters(2159, 1.383));
     shotLUT.put(4.95, new ShotParameters(2172, 1.390));
     shotLUT.put(5.00, new ShotParameters(2181, 1.400));
+    // shotLUT.put(0.60, new ShotParameters(4875, 0.070));
   }
 
   public static double latencyConstant =
@@ -139,28 +144,31 @@ public class ShooterCommands {
           new Rotation2d());
 
   // Iterates through the LUT (distance -> velocity) to find an appropriate distance.
-  public static double velocityToEffectiveDistance(double velocity) {
+  public static Supplier<Double> velocityToEffectiveDistance(Supplier<Double> velocity) {
     for (Map.Entry<Double, ShotParameters> entry : shotLUT.entrySet()) {
       double dist = entry.getKey();
       double vel = dist / entry.getValue().tofSec();
-      if (vel == velocity) {
-        return dist;
+      if (vel >= velocity.get()) {
+        return () -> dist;
       }
     }
 
-    return shotLUT.lastKey(); // default/clamp distance is max distance measured/interpolated
+    return () -> shotLUT.lastKey(); // default/clamp distance is max distance measured/interpolated
   }
 
-  public static Translation2d SOTMgetShotVelocity(
+  public static Supplier<Translation2d> SOTMgetShotVelocity(
       Pose2d robotPosition, Translation2d robotVelocity) {
     // predict future robot postion
     Translation2d futurePos =
-        robotPosition.getTranslation().plus(
-            robotVelocity.times(latencyConstant));
-    Logger.recordOutput("Shooter/futurePos", futurePos);
+        robotPosition.getTranslation().plus(robotVelocity.times(latencyConstant));
+    Logger.recordOutput("Shooter/futurePos", new Pose2d(futurePos, new Rotation2d()));
 
     // get the target vector (translation from robot to hub)
-    Translation2d toHub = getAllianceHubPose().getTranslation().minus(futurePos).minus(new Translation2d(8.325 - 0.5969, 0));
+    Translation2d toHub =
+        getAllianceHubPose()
+            .getTranslation()
+            .minus(futurePos)
+            .minus(new Translation2d(8.325 - 0.5969, 0));
     Logger.recordOutput("Shooter/xDisHub", toHub.getX());
     Logger.recordOutput("Shooter/yDisHub", toHub.getY());
     double distance = toHub.getNorm();
@@ -180,47 +188,56 @@ public class ShooterCommands {
 
     // subtract robot velocity vectoramabob
     Translation2d shotVelocity = targetVelocity.minus(robotVelocity);
+    Logger.recordOutput("Shooter/reqMethVelo", shotVelocity.getNorm());
 
-    return shotVelocity;
+    return () -> shotVelocity;
   }
 
   public static Command SOTMShoot(
-      Pose2d robotPosition,
-      Translation2d robotVelocity,
+      Supplier<Pose2d> robotPosition,
+      Supplier<Translation2d> robotVelocity,
       Tunnel tunnel,
       Hopper hopper,
       Flywheel flywheel,
       Intake intake) {
 
     Supplier<Double> targetRpsSupplier =
-      () -> {
-        Translation2d shotVelocity = SOTMgetShotVelocity(robotPosition, robotVelocity);
+        () -> {
+          Translation2d shotVelocity =
+              SOTMgetShotVelocity(robotPosition.get(), robotVelocity.get()).get();
 
-        // get our nice little results
-        double requiredVelocity = shotVelocity.getNorm();
-        Logger.recordOutput("Shooter/reqVelo", requiredVelocity);
+          // get our nice little results
+          double requiredVelocity = shotVelocity.getNorm();
+          Logger.recordOutput("Shooter/reqVelo", requiredVelocity);
 
-        // look up the required distance for that velocity
-        double effectiveDistance = velocityToEffectiveDistance(requiredVelocity);
-        Logger.recordOutput("Shooter/SOTMEffectiveDistance", effectiveDistance);
+          // look up the required distance for that velocity
+          Supplier<Double> effectiveDistance = velocityToEffectiveDistance(() -> requiredVelocity);
+          Logger.recordOutput("Shooter/SOTMEffectiveDistance", effectiveDistance.get());
 
-        return shotLUT.get(effectiveDistance).rpm() / 60.0;
-    };
+          return shotLUT.get(effectiveDistance.get()).rpm() / 60.0;
+        };
 
     // look up the required rpm for that distance
-    return CommandFactory.shootCommand(
-            flywheel, tunnel, hopper, intake, targetRpsSupplier)
+    return CommandFactory.shootCommand(flywheel, tunnel, hopper, intake, targetRpsSupplier)
         .withName("SOTMShoot");
   }
 
   public static Command SOTMAim(
-      Pose2d robotPosition, Translation2d robotVelocity, Turret turret, Hood hood) {
-    Translation2d shotVelocity = SOTMgetShotVelocity(robotPosition, robotVelocity);
+      Supplier<Pose2d> robotPosition,
+      Supplier<Translation2d> robotVelocity,
+      Turret turret,
+      Hood hood) {
 
-    // get our nice little results
-    double turretRotation = shotVelocity.getAngle().getRotations();
-    return Commands.parallel(
-        hood.setPositionPIDCommand(65), turret.setPositionPIDCommand(turretRotation));
+    return Commands.run(
+        () -> {
+          Translation2d shotVelocity =
+              SOTMgetShotVelocity(robotPosition.get(), robotVelocity.get()).get();
+          double turretRotation = shotVelocity.getAngle().getRotations();
+          hood.setPositionPID(65);
+          turret.setPositionPID(turretRotation);
+        },
+        turret,
+        hood);
   }
 
   /**
