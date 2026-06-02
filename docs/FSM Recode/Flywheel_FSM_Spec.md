@@ -43,7 +43,7 @@ Verify faultReason = SPINUP_TIMEOUT.
 Requirement 3:
 Trigger IDLE → SPINNING_UP.
 Inspect log output.
-Verify log contains:
+Verify that the log has:
 - timestamp
 - previousState = IDLE
 - newState = SPINNING_UP
