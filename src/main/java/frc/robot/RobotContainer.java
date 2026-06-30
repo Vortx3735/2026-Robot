@@ -180,7 +180,7 @@ public class RobotContainer {
     }
     telemetry =
         new Telemetry(drive, vision, flywheel, hood, turret, hopper, intake, tunnel, climber);
-    led = new LEDSubsystem(() -> flywheel.getidling());
+    led = new LEDSubsystem(() -> ! flywheel.getidling());
     // Init auton objects
     autoFactory = drive.createAutoFactory();
     autoRoutines = new AutoRoutines(autoFactory, this);
@@ -282,7 +282,7 @@ public class RobotContainer {
     hopper.setDefaultCommand(hopper.stopCommand().withName("stop hopper"));
     hood.setDefaultCommand(hood.stopCommand().withName("stop hood"));
     flywheel.setDefaultCommand(
-        new RunCommand(() -> flywheel.setSpeedIdle(0.25), flywheel).withName("idle flywheel"));
+        flywheel.stopCommand());
     tunnel.setDefaultCommand(tunnel.stopCommand().withName("stop tunnel"));
     // turret.setDefaultCommand(ShooterCommands.AimToHubOrSide(turret, () ->
     // drive.getTurretPose()));
@@ -338,7 +338,7 @@ public class RobotContainer {
         ShooterCommands.AimToSide(turret, () -> drive.getPose(), led).withName("aim side"));
     // Operator Shooter Binds
     // operatorController.bButton.onTrue(new InstantCommand(() -> ShooterCommands.offset += 0.01));
-    operatorController.xButton.toggleOnTrue(flywheel.stopCommand());
+    operatorController.xButton.toggleOnTrue(new RunCommand(() -> flywheel.setSpeedIdle(0.25), flywheel).withName("idle flywheel"));
     operatorController.aButton.toggleOnTrue(
         ShooterCommands.AimToHub(turret, () -> drive.getTurretPose(), led).withName("aim hub"));
     operatorController.yButton.whileTrue(
@@ -379,8 +379,8 @@ public class RobotContainer {
     //         () -> ShooterCommands.getTurretPose(() -> drive.getPose()).toPose2d(),
     //         targetHoodAngleEntry.getAsDouble()));
     // Climber Binds
-    driverController.povUp.whileTrue(climber.upCommand());
-    driverController.povDown.whileTrue(climber.downCommand());
+    // driverController.povUp.whileTrue(climber.upCommand());
+    // driverController.povDown.whileTrue(climber.downCommand());
 
     // Intake Binds
     driverController.xButton.whileTrue(CommandFactory.intakeCommand(intake, hopper));
