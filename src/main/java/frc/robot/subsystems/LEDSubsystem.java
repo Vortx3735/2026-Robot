@@ -12,7 +12,7 @@ import org.littletonrobotics.junction.Logger;
 
 public class LEDSubsystem extends SubsystemBase {
   private BooleanSupplier idling;
-  private LEDState color;
+  private LEDState color = LEDState.OFF;
   private int id = 3;
 
   public LEDSubsystem(BooleanSupplier idling) {
