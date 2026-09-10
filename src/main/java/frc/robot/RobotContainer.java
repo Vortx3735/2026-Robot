@@ -325,9 +325,7 @@ public class RobotContainer {
     // driverController.lt.whileTrue(
     // ShooterCommands.ShootFromDistanceBackwardsHopper(
     //     flywheel, tunnel, hopper, intake, () -> drive.getTurretPose(), 65));
-    // controller.rt.whileTrue(
-    //     CommandFactory.shootCommand(
-    //         flywheel, tunnel, hopper, () -> flywheel.flywheelSpeedEntry.getAsDouble() * 90));
+    // driverController.rt.whileTrue(CommandFactory.manualShootCommand(flywheel, hopper, tunnel));
     driverController.povLeft.whileTrue(turret.moveCommand(true));
     driverController.povRight.whileTrue(turret.moveCommand(false));
     driverController.lt.whileTrue(

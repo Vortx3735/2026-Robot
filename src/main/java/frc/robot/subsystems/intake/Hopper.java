@@ -1,5 +1,7 @@
 package frc.robot.subsystems.intake;
 
+import com.ctre.phoenix6.configs.CurrentLimitsConfigs;
+import com.ctre.phoenix6.configs.TalonFXConfiguration;
 import com.ctre.phoenix6.hardware.TalonFX;
 import edu.wpi.first.networktables.DoubleEntry;
 // NetworkTable imports
@@ -10,10 +12,15 @@ import edu.wpi.first.wpilibj2.command.Commands;
 import edu.wpi.first.wpilibj2.command.RunCommand;
 import edu.wpi.first.wpilibj2.command.SubsystemBase;
 import org.littletonrobotics.junction.Logger;
+import org.littletonrobotics.junction.networktables.LoggedNetworkNumber;
 
 public class Hopper extends SubsystemBase {
-  private static final double maxCurrent = 65;
+  private static final double maxCurrent = 65; // for anti jam
   private final TalonFX hopperMotor;
+  private LoggedNetworkNumber supplyCurrentLimit =
+      new LoggedNetworkNumber("Subsystems/Hopper/supplyCurrentLimit", 10);
+  // Holds the supply current limit that's currently applied so we can compare it to a new one
+  private double curSupplyCurrentLimit = supplyCurrentLimit.get();
 
   // Network Table Entry
   final DoubleEntry hopperSpeedEntry;
@@ -27,16 +34,14 @@ public class Hopper extends SubsystemBase {
     hopperSpeedEntry = hopperTable.getDoubleTopic("hopperSpeed").getEntry(0);
     hopperSpeedEntry.set(0.3);
 
-    // var talonFXConfigs = new TalonFXConfiguration();
+    var talonFXConfigs = new TalonFXConfiguration();
 
-    // var currentLimits = talonFXConfigs.CurrentLimits;
+    var currentLimits = talonFXConfigs.CurrentLimits;
 
-    // currentLimits.SupplyCurrentLimitEnable = true;
-    // currentLimits.SupplyCurrentLimit = 300;
-    // currentLimits.StatorCurrentLimitEnable = true;
-    // currentLimits.StatorCurrentLimit = 300;
+    currentLimits.SupplyCurrentLimitEnable = true;
+    currentLimits.SupplyCurrentLimit = supplyCurrentLimit.get();
 
-    // hopperMotor.getConfigurator().apply(talonFXConfigs);
+    hopperMotor.getConfigurator().apply(talonFXConfigs);
   }
 
   public double getHopperSpeed() {
@@ -102,8 +107,22 @@ public class Hopper extends SubsystemBase {
 
   @Override
   public void periodic() {
+    // Log currents
     Logger.recordOutput("Hopper/statorCurrent", hopperMotor.getStatorCurrent().getValueAsDouble());
-    Logger.recordOutput("Hopper/supplyCurrent", hopperMotor.getStatorCurrent().getValueAsDouble());
+    Logger.recordOutput("Hopper/supplyCurrent", hopperMotor.getSupplyCurrent().getValueAsDouble());
+
+    // Read new current limit from AdvantageScope
+    double newSupplyCurrentLimit = supplyCurrentLimit.get();
+
+    // Update supply current if it was changed
+    if (newSupplyCurrentLimit != curSupplyCurrentLimit) {
+      CurrentLimitsConfigs config = new CurrentLimitsConfigs();
+      config.SupplyCurrentLimit = newSupplyCurrentLimit;
+      hopperMotor.getConfigurator().apply(config);
+
+      // Change the currently set supply current limit so that we know it was changed
+      curSupplyCurrentLimit = newSupplyCurrentLimit;
+    }
   }
 
   @Override

@@ -4,6 +4,7 @@ import static edu.wpi.first.units.Units.RotationsPerSecond;
 import static edu.wpi.first.units.Units.Volts;
 
 import com.ctre.phoenix6.SignalLogger;
+import com.ctre.phoenix6.configs.Slot0Configs;
 import com.ctre.phoenix6.configs.TalonFXConfiguration;
 import com.ctre.phoenix6.controls.VelocityTorqueCurrentFOC;
 import com.ctre.phoenix6.controls.VoltageOut;
@@ -28,10 +29,19 @@ import frc.robot.Constants.Mode;
 import java.util.function.BooleanSupplier;
 import java.util.function.Supplier;
 import org.littletonrobotics.junction.Logger;
+import org.littletonrobotics.junction.networktables.LoggedNetworkNumber;
 
 public class Flywheel extends SubsystemBase {
   private static final double kMOI = 0.001; // kg*m^2
   private static final double kMaxSpeed = 90; // Max speed in RPS
+
+  private LoggedNetworkNumber kP = new LoggedNetworkNumber("Subsystems/Flywheel/kP", 5000);
+  private LoggedNetworkNumber kI = new LoggedNetworkNumber("Subsystems/Flywheel/kI", 0);
+  private LoggedNetworkNumber kD = new LoggedNetworkNumber("Subsystems/Flywheel/kD", 0);
+
+  private double currentkP = kP.get();
+  private double currentkI = kI.get();
+  private double currentkD = kD.get();
 
   private TalonFX flywheelMotor;
 
@@ -76,14 +86,9 @@ public class Flywheel extends SubsystemBase {
     slot0Configs.kS = 0.6461; // tuned sysid
     slot0Configs.kV = 0.12334; // tuned sysid
     slot0Configs.kA = 0.020572; // tuned sysid
-    slot0Configs.kP = 5000; // An error of 1 rps results in 0.11 V output
-    slot0Configs.kI = 0; // no output for integrated error
-    slot0Configs.kD = 0; // no output for error derivative
-
-    // set Motion Magic Velocity settings
-    var motionMagicConfigs = talonFXConfigs.MotionMagic;
-    motionMagicConfigs.MotionMagicAcceleration = 100000000; // Target acceleration of 100 rps/s
-    motionMagicConfigs.MotionMagicJerk = 10000000; // Target jerk of 6000 rps/s/s (0.1 seconds)
+    slot0Configs.kP = kP.get(); // An error of 1 rps results in 0.11 V output
+    slot0Configs.kI = kI.get(); // no output for integrated error
+    slot0Configs.kD = kD.get(); // no output for error derivative
 
     talonFXConfigs.TorqueCurrent.PeakReverseTorqueCurrent = 0;
 
@@ -135,6 +140,7 @@ public class Flywheel extends SubsystemBase {
 
     // final VelocityVoltage m_request = new VelocityVoltage(speed);
     final VelocityTorqueCurrentFOC m_request = new VelocityTorqueCurrentFOC(speed);
+    m_request.LimitReverseMotion = true;
     flywheelMotor.setControl(m_request);
     // flywheelMotor.set(bbcontroller.calculate(currentRPS, targetRPS));
     // In simulation, pre-compute a feedforwar .d voltage so the DCMotorSim receives a
@@ -223,6 +229,37 @@ public class Flywheel extends SubsystemBase {
     SmartDashboard.putBoolean("idling", idling);
     Logger.recordOutput(
         "Shooter/Flywheel/statorCurrent", flywheelMotor.getStatorCurrent().getValueAsDouble());
+
+    // Read new PID values from AdvantageScope
+    double newkP = kP.get();
+    double newkI = kI.get();
+    double newkD = kD.get();
+
+    // Update PID if it was changed
+    if (newkP != currentkP) {
+      Slot0Configs config = new Slot0Configs();
+      config.kP = newkP;
+      flywheelMotor.getConfigurator().apply(config);
+
+      // Change the currently set PID so that we know it was changed
+      currentkP = newkP;
+    }
+    if (newkI != currentkI) {
+      Slot0Configs config = new Slot0Configs();
+      config.kI = newkI;
+      flywheelMotor.getConfigurator().apply(config);
+
+      // Change the currently set PID so that we know it was changed
+      currentkI = newkI;
+    }
+    if (newkD != currentkD) {
+      Slot0Configs config = new Slot0Configs();
+      config.kD = newkD;
+      flywheelMotor.getConfigurator().apply(config);
+
+      // Change the currently set PID so that we know it was changed
+      currentkD = newkD;
+    }
   }
 
   @Override
