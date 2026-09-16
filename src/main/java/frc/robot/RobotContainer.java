@@ -365,7 +365,7 @@ public class RobotContainer {
     operatorController.menu.whileTrue(
         Commands.parallel(tunnel.intakeCommand(), hopper.intakeCommand()));
     operatorController.bButton.whileTrue(new RunCommand(() -> drive.stopWithX(), drive));
-    driverController.yButton.whileTrue(
+    driverController.rightBumper().whileTrue(
         ShooterCommands.PassFromDistance(
             led, flywheel, hood, tunnel, hopper, () -> drive.getPose(), 75));
     // operatorController.lt.whileTrue(
@@ -377,12 +377,12 @@ public class RobotContainer {
     //         () -> ShooterCommands.getTurretPose(() -> drive.getPose()).toPose2d(),
     //         targetHoodAngleEntry.getAsDouble()));
     // Climber Binds
-    driverController.povRight.whileTrue(turret.moveCommand(false));
-    driverController.povLeft.whileTrue(turret.moveCommand(true));
+    driverController.rightStick().whileTrue(turret.moveCommand(false));
+    driverController.leftStick().whileTrue(turret.moveCommand(true));
 
     // Intake Binds
-    driverController.xButton.whileTrue(CommandFactory.intakeCommand(intake, hopper));
-    driverController.bButton.whileTrue(intake.outtakeCommand());
+    driverController.leftTrigger().whileTrue(CommandFactory.intakeCommand(intake, hopper));
+    driverController.leftBumper().whileTrue(intake.outtakeCommand());
     driverController.aButton.whileTrue(CommandFactory.clearJamsCommand(tunnel, hopper));
 
     // Test/Misc Binds
