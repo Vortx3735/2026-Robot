@@ -82,7 +82,8 @@ public class RobotContainer {
   public final Tunnel tunnel =
       new Tunnel(
           Constants.TunnelConstants.BOTTOM_TUNNEL_MOTOR_ID,
-          Constants.TunnelConstants.TOP_TUNNEL_MOTOR_ID);
+          Constants.TunnelConstants.TOP_TUNNEL_MOTOR_ID,
+          Constants.TunnelConstants.VERTICAL_ROLLER_ID);
   public final Telemetry telemetry;
   public final LEDSubsystem led;
 
