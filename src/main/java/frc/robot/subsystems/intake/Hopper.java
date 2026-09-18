@@ -18,7 +18,7 @@ public class Hopper extends SubsystemBase {
   private static final double maxCurrent = 65; // for anti jam
   private final TalonFX hopperMotor;
   private LoggedNetworkNumber supplyCurrentLimit =
-      new LoggedNetworkNumber("Subsystems/Hopper/supplyCurrentLimit", 10);
+      new LoggedNetworkNumber("Subsystems/Hopper/supplyCurrentLimit", 15);
   // Holds the supply current limit that's currently applied so we can compare it to a new one
   private double curSupplyCurrentLimit = supplyCurrentLimit.get();
 

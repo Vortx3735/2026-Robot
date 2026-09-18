@@ -12,6 +12,7 @@ import edu.wpi.first.wpilibj2.command.Commands;
 import edu.wpi.first.wpilibj2.command.RunCommand;
 import edu.wpi.first.wpilibj2.command.SubsystemBase;
 import org.littletonrobotics.junction.Logger;
+import org.littletonrobotics.junction.networktables.LoggedNetworkNumber;
 
 public class Tunnel extends SubsystemBase {
   private final TalonFX bottomTunnelMotor;
@@ -20,8 +21,11 @@ public class Tunnel extends SubsystemBase {
   // Network Table Entry
   final DoubleEntry topTunnelSpeedEntry;
   final DoubleEntry bottomTunnelSpeedEntry;
-
   private static final double maxCurrent = 1000;
+  private LoggedNetworkNumber supplyCurrentLimit =
+      new LoggedNetworkNumber("Subsystems/Tunnel/supplyCurrentLimit", 10);
+  // Holds the supply current limit that's currently applied so we can compare it to a new one
+  private double curSupplyCurrentLimit = supplyCurrentLimit.get();
 
   public Tunnel(int bottomTunnelId, int topTunnelId) {
     bottomTunnelMotor = new TalonFX(bottomTunnelId);
@@ -78,10 +82,10 @@ public class Tunnel extends SubsystemBase {
   public void run(Boolean inverted) {
     if (inverted) {
       bottomTunnelMotor.set(-getBottomTunnelSpeed());
-      topTunnelMotor.set(-getTopTunnelSpeed());
+      topTunnelMotor.set(-getTopTunnelSpeed() * 0.9);
     } else {
       bottomTunnelMotor.set(getBottomTunnelSpeed());
-      topTunnelMotor.set(getTopTunnelSpeed());
+      topTunnelMotor.set(getTopTunnelSpeed() * 0.9);
     }
   }
 

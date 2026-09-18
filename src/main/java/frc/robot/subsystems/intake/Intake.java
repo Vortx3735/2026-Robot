@@ -4,6 +4,7 @@
 
 package frc.robot.subsystems.intake;
 
+import com.ctre.phoenix6.configs.CurrentLimitsConfigs;
 import com.ctre.phoenix6.configs.TalonFXConfiguration;
 import com.ctre.phoenix6.hardware.TalonFX;
 import com.ctre.phoenix6.signals.InvertedValue;
@@ -15,10 +16,16 @@ import edu.wpi.first.wpilibj2.command.Command;
 import edu.wpi.first.wpilibj2.command.RunCommand;
 import edu.wpi.first.wpilibj2.command.SubsystemBase;
 import org.littletonrobotics.junction.Logger;
+import org.littletonrobotics.junction.networktables.LoggedNetworkNumber;
 
 public class Intake extends SubsystemBase {
 
   private final TalonFX intakeMotor;
+  private LoggedNetworkNumber supplyCurrentLimit =
+      new LoggedNetworkNumber("Subsystems/Intake/supplyCurrentLimit", 15);
+  // Holds the supply current limit that's currently applied so we can compare it to a new one
+  private double curSupplyCurrentLimit = supplyCurrentLimit.get();
+
   // Network Table Entry
   final DoubleEntry intakeSpeedEntry;
 
@@ -30,16 +37,13 @@ public class Intake extends SubsystemBase {
     NetworkTable intakeTable = inst.getTable("Subsystems/Intake");
     intakeSpeedEntry = intakeTable.getDoubleTopic("intakeSpeed").getEntry(0);
     intakeSpeedEntry.set(1);
-
     TalonFXConfiguration intakeConfig = new TalonFXConfiguration();
     intakeConfig.MotorOutput.Inverted = InvertedValue.Clockwise_Positive;
 
-    // var currentLimits = intakeConfig.CurrentLimits;
+    var currentLimits = intakeConfig.CurrentLimits;
 
-    // currentLimits.SupplyCurrentLimitEnable = true;
-    // currentLimits.SupplyCurrentLimit = 300;
-    // currentLimits.StatorCurrentLimitEnable = true;
-    // currentLimits.StatorCurrentLimit = 300;
+    currentLimits.SupplyCurrentLimitEnable = true;
+    currentLimits.SupplyCurrentLimit = supplyCurrentLimit.get();
 
     intakeMotor.getConfigurator().apply(intakeConfig);
   }
@@ -84,10 +88,22 @@ public class Intake extends SubsystemBase {
 
   @Override
   public void periodic() {
-    // Logger.recordOutput("Intake/statorCurrent",
-    // intakeMotor.getStatorCurrent().getValueAsDouble());
-    // Logger.recordOutput("Intake/supplyCurrent",
-    // intakeMotor.getStatorCurrent().getValueAsDouble());
+
+    Logger.recordOutput("Intake/statorCurrent", intakeMotor.getStatorCurrent().getValueAsDouble());
+    Logger.recordOutput("Intake/supplyCurrent", intakeMotor.getSupplyCurrent().getValueAsDouble());
+
+    // Read new current limit from AdvantageScope
+    double newSupplyCurrentLimit = supplyCurrentLimit.get();
+
+    // Update supply current if it was changed
+    if (newSupplyCurrentLimit != curSupplyCurrentLimit) {
+      CurrentLimitsConfigs config = new CurrentLimitsConfigs();
+      config.SupplyCurrentLimit = newSupplyCurrentLimit;
+      intakeMotor.getConfigurator().apply(config);
+
+      // Change the currently set supply current limit so that we know it was changed
+      curSupplyCurrentLimit = newSupplyCurrentLimit;
+    }
   }
 
   @Override
