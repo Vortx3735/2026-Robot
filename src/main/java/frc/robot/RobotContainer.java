@@ -330,13 +330,11 @@ public class RobotContainer {
     // controller.rt.whileTrue(
     //     CommandFactory.shootCommand(
     //         flywheel, tunnel, hopper, () -> flywheel.flywheelSpeedEntry.getAsDouble() * 90));
-    driverController.povLeft.whileTrue(hood.moveCommand(true));
-    driverController.povRight.whileTrue(hood.moveCommand(false));
-    driverController.lt.whileTrue(
-        ShooterCommands.AimEverythingToHub(
-            turret, hood, () -> drive.getTurretPose(), targetHoodAngleEntry.getAsDouble()));
-    driverController.yButton.toggleOnTrue(
-        ShooterCommands.AimToSide(turret, () -> drive.getPose(), led).withName("aim side"));
+    driverController.povDown.whileTrue(hood.moveCommand(true));
+    driverController.povUp.whileTrue(hood.moveCommand(false));
+    driverController.lt.whileTrue(CommandFactory.intakeCommand(intake, hopper));
+    // driverController.yButton.toggleOnTrue(
+    //     ShooterCommands.AimToSide(turret, () -> drive.getPose(), led).withName("aim side"));
     // Operator Shooter Binds
     // operatorController.bButton.onTrue(new InstantCommand(() -> ShooterCommands.offset += 0.01));
     operatorController.xButton.toggleOnTrue(flywheel.stopCommand());
@@ -344,10 +342,10 @@ public class RobotContainer {
         ShooterCommands.AimToHub(turret, () -> drive.getTurretPose(), led).withName("aim hub"));
     operatorController.yButton.whileTrue(
         ShooterCommands.AimToSide(turret, () -> drive.getPose(), led).withName("aim side"));
-    driverController.rb.toggleOnTrue(
-        ShooterCommands.AimToHub(turret, () -> drive.getTurretPose(), led).withName("aim hub"));
-    driverController.lb.toggleOnTrue(
-        ShooterCommands.AimToSide(turret, () -> drive.getPose(), led).withName("aim side"));
+    // driverController.rb.toggleOnTrue(
+    //     ShooterCommands.AimToHub(turret, () -> drive.getTurretPose(), led).withName("aim hub"));
+    // driverController.lb.toggleOnTrue(
+    //     ShooterCommands.AimToSide(turret, () -> drive.getPose(), led).withName("aim side"));
     operatorController.lb.whileTrue(turret.moveCommand(true));
     operatorController.rb.whileTrue(turret.moveCommand(false));
     operatorController.povDown.whileTrue(hood.moveCommand(false));
@@ -380,8 +378,8 @@ public class RobotContainer {
     //         () -> ShooterCommands.getTurretPose(() -> drive.getPose()).toPose2d(),
     //         targetHoodAngleEntry.getAsDouble()));
     // Climber Binds
-    driverController.povUp.whileTrue(climber.upCommand());
-    driverController.povDown.whileTrue(climber.downCommand());
+    driverController.povRight.whileTrue(turret.moveCommand(false));
+    driverController.povLeft.whileTrue(turret.moveCommand(true));
 
     // Intake Binds
     driverController.xButton.whileTrue(CommandFactory.intakeCommand(intake, hopper));
