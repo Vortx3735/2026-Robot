@@ -80,6 +80,7 @@ public class Constants {
   public static class TunnelConstants {
     public static final int BOTTOM_TUNNEL_MOTOR_ID = 19;
     public static final short TOP_TUNNEL_MOTOR_ID = 20;
+    public static final short VERTICAL_ROLLER_ID = 25;
   }
 
   public static class FieldConstants {
