@@ -342,10 +342,10 @@ public class RobotContainer {
         ShooterCommands.AimToHub(turret, () -> drive.getTurretPose(), led).withName("aim hub"));
     operatorController.yButton.whileTrue(
         ShooterCommands.AimToSide(turret, () -> drive.getPose(), led).withName("aim side"));
-    // driverController.rb.toggleOnTrue(
-    //     ShooterCommands.AimToHub(turret, () -> drive.getTurretPose(), led).withName("aim hub"));
-    // driverController.lb.toggleOnTrue(
-    //     ShooterCommands.AimToSide(turret, () -> drive.getPose(), led).withName("aim side"));
+    driverController.rb.toggleOnTrue(
+        ShooterCommands.AimToHub(turret, () -> drive.getTurretPose(), led).withName("aim hub"));
+    driverController.lb.toggleOnTrue(
+        ShooterCommands.AimToSide(turret, () -> drive.getPose(), led).withName("aim side"));
     operatorController.lb.whileTrue(turret.moveCommand(true));
     operatorController.rb.whileTrue(turret.moveCommand(false));
     operatorController.povDown.whileTrue(hood.moveCommand(false));
