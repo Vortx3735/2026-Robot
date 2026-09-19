@@ -294,9 +294,9 @@ public class RobotContainer {
     drive.setDefaultCommand(
         DriveCommands.joystickDrive(
                 drive,
-                () -> -driverController.getLeftY(),
-                () -> -driverController.getLeftX(),
-                () -> -driverController.getRightX())
+                () -> -driverController.getLeftY()*0.7,
+                () -> -driverController.getLeftX()*0.7,
+                () -> -driverController.getRightX()*0.7)
             .withName("joystick drive"));
 
     // Reset gyro / odometry
@@ -306,7 +306,12 @@ public class RobotContainer {
             : () ->
                 drive.resetOdometry(new Pose2d(drive.getPose().getTranslation(), new Rotation2d()));
     driverController.start().onTrue(Commands.runOnce(resetOdometry).ignoringDisable(true));
-
+    driverController.view.toggleOnTrue(DriveCommands.joystickDrive(
+                drive,
+                () -> -driverController.getLeftY(),
+                () -> -driverController.getLeftX(),
+                () -> -driverController.getRightX())
+            .withName("fast joystick drive"));
     // Trigger hasTag = new Trigger(() -> vision.hasTag());
     // Set bindings
 
